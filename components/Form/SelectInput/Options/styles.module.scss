@@ -1,0 +1,12 @@
+.option {
+  padding: 4px 8px;
+
+  &:hover {
+    background-color: var(--color-background-alt);
+  }
+
+  &.selected {
+    background-color: var(--color-primary);
+    color: var(--color-text-on-primary);
+  }
+}

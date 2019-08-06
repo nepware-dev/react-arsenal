@@ -1,0 +1,38 @@
+@import "~vendor-scss/utils";
+
+.dropdown {
+  position: relative;
+
+  &.open>.dropdown-menu {
+    display: block;
+  }
+
+  .dropdown-toggle {
+    display: inline-block;
+    cursor: pointer;    
+    color: var(--color-primary);
+
+    .caret {
+      display: inline-block;
+      margin-left: 4px;
+      vertical-align: middle;
+      border-top: 4px dashed;
+      border-right: 4px solid transparent;
+      border-left: 4px solid transparent;
+    }
+  }
+
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    min-width: 100%;
+    background-color: var(--color-background);
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+  }
+}

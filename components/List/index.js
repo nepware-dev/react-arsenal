@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
+import { throttle } from '../../utils';
 import styles from './styles.module.scss';
 
 const propTypes = {
@@ -11,16 +12,24 @@ const propTypes = {
     renderItem: PropTypes.func.isRequired,
     emptyComponent: PropTypes.elementType,
     loadingComponent: PropTypes.elementType,
+    onEndReachedThreshold: PropTypes.number,
+    onEndReached: PropTypes.func,
 };
 
 const defaultProps = {
     className: '',
     loading: false,
+    onEndReachedThreshold: 10,
 };
 
 export default class List extends PureComponent {
     static propTypes = propTypes;
     static defaultProps = defaultProps;
+
+    constructor(props) {
+        super(props);
+        this.ref = React.createRef();
+    }
 
     renderItem = ({item}) => {
         const { 
@@ -79,11 +88,26 @@ export default class List extends PureComponent {
         }
     }
 
+    onScroll = throttle((event) => {
+        const { 
+            onEndReached,
+            onEndReachedThreshold,
+        } = this.props;
+
+            const element = this.ref.current;
+            const distanceFromEnd = element.scrollHeight - element.scrollTop - element.offsetHeight;
+
+            if (onEndReachedThreshold > distanceFromEnd) {
+                onEndReached();
+            }
+    }, 200, { leading: false, trailing: true });
+
     render() {
         const { 
             data,
             className,
             loading,
+            onEndReached,
         } = this.props;
 
         const Item = this.renderItem;
@@ -103,8 +127,17 @@ export default class List extends PureComponent {
             });
         }
 
+        const props = {};
+        if(onEndReached) {
+            props.onScroll=this.onScroll
+        }
+
         return (
-            <div className={className}>
+            <div
+                ref={this.ref}
+                className={className}
+                {...props}
+            >
                 {children}
             </div>
         );

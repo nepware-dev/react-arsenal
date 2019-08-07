@@ -17,7 +17,7 @@ const propTypes = {
     loading: PropTypes.bool,
     value: PropTypes.bool,
     placeholder: PropTypes.string,
-    data: PropTypes.array,
+    options: PropTypes.array,
     onChange: noop,
 };
 
@@ -27,8 +27,8 @@ const defaultProps = {
     clearable: true,
     disabled: false,
     loading: false,
-    placeholder: 'Select an option...',
-    data: [],
+    placeholder: 'Select...',
+    options: [],
 };
 
 export default class Select extends PureComponent {
@@ -41,7 +41,7 @@ export default class Select extends PureComponent {
             expanded: false,
             searchValue: '',
             selectedItem: null,
-            data: props.data,
+            options: props.options,
         };
         this.wrapperRef = React.createRef();
         this.inputRef = React.createRef();
@@ -55,10 +55,12 @@ export default class Select extends PureComponent {
         document.removeEventListener('mousedown', this.handleClickOutside);
     }
 
-    componentDidUpdate(prevProps) {
-        if (this.props.data !== prevProps.data) {
+    componentDidUpdate(prevProps, prevState) {
+        if (this.props.options !== prevProps.options ||
+        this.state.searchValue !== prevState.searchValue) {
+            const options = this.filterOptions(this.state.searchValue);
             this.setState({
-                data: this.props.data,
+                options,
             });
         }
     }
@@ -116,7 +118,7 @@ export default class Select extends PureComponent {
     }
 
     filterOptions = (searchValue) => {
-        return this.props.data.filter(
+        return this.props.options.filter(
             d => d.value.toLowerCase().includes(
                 searchValue.toLowerCase()
             )
@@ -125,7 +127,7 @@ export default class Select extends PureComponent {
 
     render() {
         const {
-            className,
+            className: _className,
             value,
             loading,
             disabled,
@@ -138,19 +140,25 @@ export default class Select extends PureComponent {
             expanded,
             searchValue,
             selectedItem,
-            data: _data,
+            options,
         } = this.state;
-
-        const data = this.filterOptions(searchValue);
 
         const showPlaceholder = !searchValue && !selectedItem;
         const showValue = !searchValue && selectedItem;
         const showClose = !loading && clearable && selectedItem;
 
+        const className = cs(
+            styles.selectContainer,
+            _className,
+            {
+                disabled,
+                [styles.disabled]: disabled,
+            }
+        );
         return (
             <div 
                 ref={this.wrapperRef}
-                className={cs(styles.selectContainer, className)}
+                className={className}
             >
                 <div
                     className={cs(styles.selectControl, 'select-control')}
@@ -174,24 +182,28 @@ export default class Select extends PureComponent {
                     </div>
                     <div className={cs(styles.selectIndicator, 'select-indicator')}>
                         {loading &&
-                            <Icon name="fas fa-spinner fa-spin" />
+                            <Icon 
+                                name="fas fa-spinner fa-spin" 
+                                className={styles.loading}
+                            />
                         }
                         {showClose &&
                             <Icon
                                 name="ion-md-close"
+                                className={styles.clear}
                                 onClick={this.handleClearIconClick} 
                             />
                         }
                         <Icon
                             name="ion-md-arrow-dropdown"
-                            className={styles.dropdown}
                             onClick={this.handleCaretClick}
                         />
                     </div>
                 </div>
                 { expanded &&
                         <Options
-                            data={data}
+                            data={options}
+                            loading={loading}
                             className={cs(styles.selectOptions, 'select_options')}
                             classNameItem={styles.selectOption}
                             selectedItem={selectedItem}

@@ -3,6 +3,11 @@
   position: relative;
   font-size: var(--font-size-normal);
 
+  &.disabled {
+    pointer-events: none;
+    filter: brightness(90%);
+  }
+
   .selectControl {
     display: flex;
     flex: 1;
@@ -35,8 +40,9 @@
     }
 
     .selectIndicator {
-      .dropdown {
-        margin-left: 12px;
+      .clear,
+      .loading {
+        margin: 0 8px;
       }
     }
   }

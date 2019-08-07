@@ -1,19 +1,21 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import cs from '../../cs';
 import styles from './styles.module.scss';
 
 const propTypes = {
     className: PropTypes.string,
     data: PropTypes.array.isRequired,
+    loading: PropTypes.bool,
     keyExtractor: PropTypes.func.isRequired,
     renderItem: PropTypes.func.isRequired,
     emptyComponent: PropTypes.elementType,
+    loadingComponent: PropTypes.elementType,
 };
 
 const defaultProps = {
     className: '',
+    loading: false,
 };
 
 export default class List extends PureComponent {
@@ -50,7 +52,6 @@ export default class List extends PureComponent {
     renderEmptyComponent = () => {
         const { 
             emptyComponent: EmptyComponent,
-            className,
         } = this.props;
         if(EmptyComponent) {
             return <EmptyComponent />;
@@ -63,27 +64,48 @@ export default class List extends PureComponent {
         }
     }
 
+    renderLoadingComponent = () => {
+        const { 
+            loadingComponent: LoadingComponent,
+        } = this.props;
+        if(LoadingComponent) {
+            return <LoadingComponent />;
+        } else {
+            return (
+                <div className={styles.loading}>
+                    Loading...
+                </div>
+            );
+        }
+    }
+
     render() {
         const { 
             data,
             className,
+            loading,
         } = this.props;
 
         const Item = this.renderItem;
 
         const EmptyComponent = this.renderEmptyComponent;
+        const LoadingComponent = this.renderLoadingComponent;
+
+        const children = [];
+
+        if(loading) {
+            children.push(<LoadingComponent />);
+        } else if(!data.length) {
+            children.push(<EmptyComponent />);
+        } else {
+            data.forEach(item => {
+                children.push(this.renderItem({item}));
+            });
+        }
 
         return (
-            <div className={cs(styles.list, className)}>
-            {
-                data.length?
-                (
-                    data.map(item => {
-                        return this.renderItem({item});
-                    })
-                ):
-                <EmptyComponent />
-            }
+            <div className={className}>
+                {children}
             </div>
         );
     }

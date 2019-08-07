@@ -12,7 +12,6 @@ const propTypes = {
     className: PropTypes.string,
     keyExtractor: PropTypes.func,
     onItemClick: PropTypes.func,
-    emptyComponent: PropTypes.elementType,
 };
 
 const defaultProps = {
@@ -41,19 +40,6 @@ export default class Options extends PureComponent {
                 {...otherProps}
             />
         );
-    }
-
-    renderEmptyComponent() {
-        const { emptyComponent } = this.props;
-        if(emptyComponent) {
-            return emptyComponent;
-        } else {
-            return (
-                <div className={styles.empty}>
-                    No item to display
-                </div>
-            )
-        }
     }
 
     render() {

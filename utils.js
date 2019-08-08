@@ -1,8 +1,71 @@
 export const isObject = (obj) => {
-    return obj === Object(obj);
+    if(obj === null) {
+        return false;
+    }
+
+    return  typeof obj === 'object' &&
+    ['Array', 'Object'].includes(obj.constructor.name);
 };
 
 export const isArray = Array.isArray;
+
+export const isEqual = (obj1, obj2, depth=1) => {
+    if (obj1 === obj2) {
+        return true;
+    }
+
+    if(!isObject(obj1) || depth===0) {
+        return obj1 === obj2;
+    }
+
+    // compare type
+    if (
+        Object.prototype.toString.call(obj1) !==
+        Object.prototype.toString.call(obj2)
+    ) {
+        return false;
+    }
+
+
+    // for array compare length first
+    if(isArray(obj1)) {
+        if(obj1.length !== obj2.length) {
+            return false;
+        }
+    }
+
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+
+    if(keys1.length !== keys2.length) {
+        return false;
+    }
+    //for i loop is faster than array loops
+    for(let i=0; i < keys1.length; i++) {
+        const k = keys1[i];
+
+        if(isObject(obj1[k])) {
+            const equal = isEqual(obj1[k], obj2[k], depth-1);
+            if(!equal) {
+                return false;
+            }
+        } else {
+            if(!(obj1[k] === obj2[k])) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+};
+
+export const isShallowEqual = (obj1, obj2) => {
+    return isEqual(obj1, obj2, 1);
+};
+
+export const isDeepEqual = (obj1, obj2) => {
+    return isEqual(obj1, obj2, 32);
+};
 
 export const throttle = (fn, wait, options = {}) => {
     let context;

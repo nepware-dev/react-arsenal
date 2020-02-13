@@ -123,7 +123,7 @@ export default class List extends PureComponent {
             children.push(<EmptyComponent />);
         } else {
             data.forEach(item => {
-                children.push(this.renderItem({item}));
+                children.push(<Item item={item} />);
             });
         }
 

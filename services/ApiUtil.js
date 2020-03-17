@@ -1,11 +1,10 @@
-
 export default class ApiUtil {
     constructor(baseUrl, store) {
         this.baseUrl = baseUrl;
         this.store = store;
     }
 
-    async get(url, params) {
+    async get(url, params={}) {
         let {auth: { token }} = this.store.getState();
         let headers = {};
         if(token) {

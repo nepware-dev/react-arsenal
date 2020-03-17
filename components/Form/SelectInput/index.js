@@ -74,11 +74,14 @@ export default class Select extends PureComponent {
     }
 
     handleClearIconClick = (event) => {
+        const {onChange} = this.props;
+
         event.stopPropagation();
         this.setState({
             selectedItem: null
         });
         this.hideOption();
+        onChange && onChange(null);
     }
 
     handleClickOutside = (event) => {
@@ -102,6 +105,7 @@ export default class Select extends PureComponent {
 
     handleOptionClick = ({item}) => {
         const {onChange} = this.props;
+
         this.setState({ selectedItem: item });
         this.hideOption();
         

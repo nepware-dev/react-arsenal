@@ -9,35 +9,47 @@ import styles from './styles.module.scss';
 const noop = () => {};
 
 const propTypes = {
+    data: PropTypes.array.isRequired,
     className: PropTypes.string,
-    keyExtractor: PropTypes.func,
+    classNameItem: PropTypes.string,
+    selectedItem: PropTypes.object,
+    keyExtractor: PropTypes.func.isRequired,
+    valueExtractor: PropTypes.func.isRequired,
     onItemClick: PropTypes.func,
 };
 
 const defaultProps = {
     className: '',
-    keyExtractor: item => item.key,
     onItemClick: noop,
+    selectedItem: {},
 };
 
 export default class Options extends PureComponent {
     static propTypes = propTypes;
     static defaultProps = defaultProps;
 
-    renderItem = (props) => {
-        const { 
-            className,
-            item,
-            onClick,
-            ...otherProps
-        } = props;
+    renderItem = ({item}) => {
+        const {
+            onItemClick,
+            classNameItem,
+            selectedItem,
+            valueExtractor,
+            keyExtractor,
+        } = this.props;
+
+        const _onItemClick = () => {
+            onItemClick({item});
+        }
+
+        const label = valueExtractor(item);
+        const selected = selectedItem && keyExtractor(item) === keyExtractor(selectedItem);
 
         return (
             <Option 
-                className={className}
-                item={item}
-                onClick={onClick}
-                {...otherProps}
+                className={classNameItem}
+                label={label}
+                selected={selected}
+                onClick={_onItemClick}
             />
         );
     }

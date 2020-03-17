@@ -89,8 +89,8 @@ export default class Modal extends React.PureComponent {
         } = this.props;
 
         const className = cs(
-            classNameFromProps,
             styles.modal,
+            classNameFromProps,
             'modal',
         );
 

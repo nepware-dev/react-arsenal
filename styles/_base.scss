@@ -1,0 +1,16 @@
+@import url('https://unpkg.com/ionicons@4.5.10-0/dist/css/ionicons.min.css');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
+
+@import './reset';
+
+:root {
+  --color-background: white;
+  --color-text: gray;
+
+  --color-primary: #1EA7FD;
+  --color-primary-text: white;
+
+  --border-radius-small: 4px;
+  
+  --font-size-normal: 14px;
+}

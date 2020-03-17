@@ -16,18 +16,22 @@ const propTypes = {
     disabled: PropTypes.bool,
     loading: PropTypes.bool,
     value: PropTypes.bool,
+    defaultValue: PropTypes.any,
     placeholder: PropTypes.string,
     options: PropTypes.array,
+    keyExtractor: PropTypes.func,
+    valueExtractor: PropTypes.func,
     onChange: noop,
 };
 
 const defaultProps = {
-    className: '',
     searchable: true,
     clearable: true,
     disabled: false,
     loading: false,
     placeholder: 'Select...',
+    keyExtractor: item => item.id,
+    valueExtractor: item => item.name,
     options: [],
 };
 
@@ -40,7 +44,7 @@ export default class Select extends PureComponent {
         this.state = {
             expanded: false,
             searchValue: '',
-            selectedItem: null,
+            selectedItem: props.defaultValue,
             options: props.options,
         };
         this.wrapperRef = React.createRef();
@@ -74,11 +78,14 @@ export default class Select extends PureComponent {
     }
 
     handleClearIconClick = (event) => {
+        const {onChange} = this.props;
+
         event.stopPropagation();
         this.setState({
             selectedItem: null
         });
         this.hideOption();
+        onChange && onChange(null);
     }
 
     handleClickOutside = (event) => {
@@ -101,8 +108,12 @@ export default class Select extends PureComponent {
     }
 
     handleOptionClick = ({item}) => {
+        const {onChange} = this.props;
+
         this.setState({ selectedItem: item });
         this.hideOption();
+        
+        onChange && onChange(item);
     }
 
     showOption = () => {
@@ -119,7 +130,7 @@ export default class Select extends PureComponent {
 
     filterOptions = (searchValue) => {
         return this.props.options.filter(
-            d => d.value.toLowerCase().includes(
+            d => this.props.valueExtractor(d).toLowerCase().includes(
                 searchValue.toLowerCase()
             )
         );
@@ -128,12 +139,13 @@ export default class Select extends PureComponent {
     render() {
         const {
             className: _className,
-            value,
             loading,
             disabled,
             clearable,
             searchable,
             placeholder,
+            keyExtractor,
+            valueExtractor,
         } = this.props;
 
         const {
@@ -177,7 +189,7 @@ export default class Select extends PureComponent {
                             <div className={styles.placeholder}>{placeholder}</div>
                         }
                         { showValue &&
-                            <div className={styles.value}>{selectedItem.value}</div>
+                            <div className={styles.value}>{valueExtractor(selectedItem)}</div>
                         }
                     </div>
                     <div className={cs(styles.selectIndicator, 'select-indicator')}>
@@ -203,6 +215,8 @@ export default class Select extends PureComponent {
                 { expanded &&
                         <Options
                             data={options}
+                            keyExtractor={keyExtractor}
+                            valueExtractor={valueExtractor}
                             loading={loading}
                             className={cs(styles.selectOptions, 'select_options')}
                             classNameItem={styles.selectOption}

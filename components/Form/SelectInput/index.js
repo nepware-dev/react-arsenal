@@ -101,8 +101,11 @@ export default class Select extends PureComponent {
     }
 
     handleOptionClick = ({item}) => {
+        const {onChange} = this.props;
         this.setState({ selectedItem: item });
         this.hideOption();
+        
+        onChange && onChange(item);
     }
 
     showOption = () => {

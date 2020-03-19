@@ -46,7 +46,7 @@ export default class Option extends PureComponent {
                 className={className} 
                 onClick={this.handleClick}
             >
-                {item.value}
+                {item.name}
             </div>
         );
     }

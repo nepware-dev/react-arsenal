@@ -126,7 +126,7 @@ export default class Select extends PureComponent {
 
     filterOptions = (searchValue) => {
         return this.props.options.filter(
-            d => d.value.toLowerCase().includes(
+            d => d.name.toLowerCase().includes(
                 searchValue.toLowerCase()
             )
         );

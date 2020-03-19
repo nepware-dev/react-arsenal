@@ -119,7 +119,7 @@ export default class List extends PureComponent {
 
         if(loading) {
             children.push(<LoadingComponent />);
-        } else if(!data.length) {
+        } else if(!data?.length) {
             children.push(<EmptyComponent />);
         } else {
             data.forEach(item => {

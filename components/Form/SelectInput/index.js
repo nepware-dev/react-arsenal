@@ -184,7 +184,7 @@ export default class Select extends PureComponent {
                             <div className={styles.placeholder}>{placeholder}</div>
                         }
                         { showValue &&
-                            <div className={styles.value}>{selectedItem.value}</div>
+                            <div className={styles.value}>{selectedItem.name}</div>
                         }
                     </div>
                     <div className={cs(styles.selectIndicator, 'select-indicator')}>

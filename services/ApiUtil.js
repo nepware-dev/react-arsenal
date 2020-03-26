@@ -26,11 +26,11 @@ export default class ApiUtil {
         }
         url = `${this.baseUrl}${url}`;
       let options = {
-            // headers: {
-            //     ...headers,
-            //     Accept: 'application/json',
-            //     'Content-Type': 'application/json',
-            // },
+             headers: {
+                 ...headers,
+                 Accept: 'application/json',
+                 'Content-Type': 'application/json',
+             },
             method: 'POST',
             body: JSON.stringify(body)
         };

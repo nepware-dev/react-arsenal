@@ -18,6 +18,7 @@ const propTypes = {
     value: PropTypes.bool,
     placeholder: PropTypes.string,
     options: PropTypes.array,
+    initialSelectedItem: PropTypes.any,
     onChange: noop,
 };
 
@@ -28,6 +29,7 @@ const defaultProps = {
     disabled: false,
     loading: false,
     placeholder: 'Select...',
+    initialSelectedItem: null,
     options: [],
 };
 
@@ -40,7 +42,7 @@ export default class Select extends PureComponent {
         this.state = {
             expanded: false,
             searchValue: '',
-            selectedItem: null,
+            selectedItem: props.initialSelectedItem,
             options: props.options,
         };
         this.wrapperRef = React.createRef();

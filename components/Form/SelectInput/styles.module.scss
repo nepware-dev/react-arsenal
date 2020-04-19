@@ -21,6 +21,7 @@
       width: 100%;
       border: none;
       outline: none;
+      color: inherit;
     }
 
     .selectValue {
@@ -63,6 +64,7 @@
     background-color: var(--color-background);
     box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 4px 11px;
     border-radius: var(--border-radius-small);
+    z-index: 1;
   }
 
   .selectOption {

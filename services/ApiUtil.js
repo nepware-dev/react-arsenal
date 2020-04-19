@@ -1,11 +1,10 @@
-
 export default class ApiUtil {
     constructor(baseUrl, store) {
         this.baseUrl = baseUrl;
         this.store = store;
     }
 
-    async get(url, params) {
+    async get(url, params={}) {
         let {auth: { token }} = this.store.getState();
         let headers = {};
         if(token) {
@@ -27,11 +26,11 @@ export default class ApiUtil {
         }
         url = `${this.baseUrl}${url}`;
       let options = {
-            // headers: {
-            //     ...headers,
-            //     Accept: 'application/json',
-            //     'Content-Type': 'application/json',
-            // },
+             headers: {
+                 ...headers,
+                 Accept: 'application/json',
+                 'Content-Type': 'application/json',
+             },
             method: 'POST',
             body: JSON.stringify(body)
         };

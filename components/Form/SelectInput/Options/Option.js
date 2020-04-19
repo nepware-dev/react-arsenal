@@ -8,45 +8,41 @@ const noop = () => {};
 
 const propTypes = {
     className: PropTypes.string,
-    item: PropTypes.object.isRequired,
+    selected: PropTypes.bool,
+    label: PropTypes.string.isRequired,
     onClick: PropTypes.func,
 };
 
 const defaultProps = {
-    className: '',
     onClick: noop,
+    selected: false,
 };
 
 export default class Option extends PureComponent {
     static propTypes = propTypes;
     static defaultProps = defaultProps;
 
-    handleClick = () => {
-        const {onClick, item } = this.props;
-
-        onClick({item}); 
-    }
-
     render() {
         const {
             className: _className,
-            selectedItem,
-            item,
+            label,
+            selected,
+            onClick,
         } = this.props;
 
         const className = cs(
             styles.option, 
             _className,
             {
-                [styles.selected]: selectedItem && selectedItem.key===item.key,
+                [styles.selected]: selected,
             }
         );
         return (
             <div 
                 className={className} 
-                onClick={this.handleClick}
+                onClick={onClick}
             >
-                {item.value}
+                {label}
             </div>
         );
     }

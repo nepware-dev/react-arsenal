@@ -36,7 +36,6 @@ export default class List extends PureComponent {
             className: _className, // ignore
             classNameItem: className,
             renderItem: _renderItem,
-            keyExtractor,
             data, // ignore
             onClick: _onClick, // ignore
             onItemClick: onClick,
@@ -45,11 +44,9 @@ export default class List extends PureComponent {
 
         const Item = item.render || _renderItem;
 
-        const key = keyExtractor(item);
 
         return (
             <Item
-                key={key}
                 item={item}
                 className={className}
                 onClick={onClick}
@@ -108,6 +105,7 @@ export default class List extends PureComponent {
             className,
             loading,
             onEndReached,
+            keyExtractor,
         } = this.props;
 
         const Item = this.renderItem;
@@ -119,11 +117,12 @@ export default class List extends PureComponent {
 
         if(loading) {
             children.push(<LoadingComponent />);
-        } else if(!data.length) {
+        } else if(!data?.length) {
             children.push(<EmptyComponent />);
         } else {
             data.forEach(item => {
-                children.push(<Item item={item} />);
+                const key = keyExtractor(item);
+                children.push(<Item key={key} item={item} />);
             });
         }
 

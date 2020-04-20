@@ -19,6 +19,7 @@
 
     .input {
       width: 100%;
+      padding: none;
       border: none;
       outline: none;
       color: inherit;
@@ -29,9 +30,11 @@
       position: relative;
       flex: 1;
       flex-direction: row;
+      align-items: center;
 
       .input {
         position: absolute;
+        padding: 0;
         left: 0;
       }
 

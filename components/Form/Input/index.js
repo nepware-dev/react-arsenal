@@ -39,6 +39,7 @@ export default class Input extends Component {
             inputRef,
             disabled,
             required,
+            onChange,
             ...otherProps
         } = this.props;
 

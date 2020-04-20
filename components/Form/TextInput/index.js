@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import Input from '../Input';
+
 import cs from '../../../cs';
 import styles from './styles.module.scss';
 
@@ -35,7 +37,6 @@ export default class TextInput extends Component {
             className: _className,
             disabled,
             required,
-            onChange,
             ...otherProps
         } = this.props;
 
@@ -49,7 +50,7 @@ export default class TextInput extends Component {
         );
 
         return (
-            <input
+            <Input
                 type="text"
                 disabled={disabled}
                 className={className}

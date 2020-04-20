@@ -1,0 +1,61 @@
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+
+import cs from '../../cs';
+import styles from './styles.module.scss';
+
+const noop = () => {};
+
+const propTypes = {
+    children: PropTypes.any,
+    className: PropTypes.string,
+    onClick: PropTypes.func,
+    success: PropTypes.bool,
+    warning: PropTypes.bool,
+    danger: PropTypes.bool,
+    outline: PropTypes.bool,
+    disabled: PropTypes.bool,
+};
+
+const defaultProps = {
+    onClick: noop,
+    disabled: false,
+};
+
+export default class Button extends Component {
+    static propTypes = propTypes;
+    static defaultProps = defaultProps;
+
+    render() {
+        const {
+            className,
+            onClick,
+            children,
+            success,
+            warning,
+            danger,
+            outline,
+            disabled,
+        } = this.props;
+
+        return (
+            <button
+                className={cs(
+                    styles.button,
+                    className,
+                    'button',
+                    {
+                        [styles.success]: success,
+                        [styles.warning]: warning,
+                        [styles.danger]: danger,
+                        [styles.outline]: outline,
+                        [styles.disabled]: disabled,
+                    }
+                )}
+                onClick={onClick}
+            >
+                    {children}
+            </button>
+        );
+    }
+}

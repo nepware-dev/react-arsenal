@@ -1,9 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import './styles.scss';
+import cs from '../../cs';
+import styles from './styles.module.scss';
 
 const propTypes = {
+    children: PropTypes.oneOfType([
+      PropTypes.arrayOf(PropTypes.node),
+      PropTypes.node
+    ]),
     label: PropTypes.string.isRequired,
 };
 
@@ -35,15 +40,19 @@ export default class Dropdown extends React.Component {
     render () {
         const { children, label } = this.props;    
         return (
-            <div className={`dropdown ${this.state.isOpen ? 'open' : ''}`}>
+            <div className={cs(
+                styles.dropdown,
+                {
+                    [styles.open]: this.state.isOpen
+                })}>
                 <div
-                    className="dropdown-toggle"
+                    className={styles.dropdownToggle}
                     type="button"
                     onClick={this.showDropdown}>
-                    <span className='dropdown-label'>{label}</span>
-                    <span className="caret"></span>
+                    <span className={styles.dropdownLabel}>{label}</span>
+                    <span className={styles.caret}></span>
                 </div>
-                <div className="dropdown-menu">
+                <div className={styles.dropdownMenu}>
                     {children}
                 </div>
             </div>

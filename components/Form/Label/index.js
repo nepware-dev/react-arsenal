@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import cs from '../../../cs';
-import styles from './styles';
+import styles from './styles.module.scss';
 
 const propTypes = {
     className: PropTypes.string,
-    text: PropTypes.string,
+    children: PropTypes.any,
     disabled: PropTypes.bool,
     required: PropTypes.bool,
 };
@@ -24,24 +24,24 @@ export default class Label extends Component {
 
     render() {
         const {
-            text,
+            children,
             className: _className,
             required,
             disabled,
         } = this.props;
 
-        const className =  [
+        const className =  cs(
             styles.label,
             _className,
             {
                 required,
                 disabled,
             },
-        ]
+        );
 
         return (
             <div className={className}>
-                { text }
+                { children }
             </div>
         );
     }

@@ -1,16 +1,28 @@
 @import url('https://unpkg.com/ionicons@4.5.10-0/dist/css/ionicons.min.css');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
 
+@import './mixin';
 @import './reset';
 
 :root {
   --color-background: white;
-  --color-text: gray;
+  --color-text: #505050;
+
+  --color-border: #dadada;
+  --color-input-outline: #b6def7;
+
+  --border-radius-small: 4px;
 
   --color-primary: #1EA7FD;
   --color-primary-text: white;
 
-  --border-radius-small: 4px;
+  --color-success: #5cb85c;
+  --color-success-text: white;
+  --color-warning: #eea236;
+  --color-warning-text: white;
+  --color-danger: #d9534f;
+  --color-danger-text: white;
   
+  --font-size-small: 12px;
   --font-size-normal: 14px;
 }

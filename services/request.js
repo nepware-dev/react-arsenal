@@ -1,29 +1,32 @@
 const request = (baseUrl, originalFetch, interceptors) => {
-    return (url, config={}) => {
+    return (url, options={}) => {
         return new Promise((resolve, reject) => {
-            const _url = getUrl(url, config);
-            const request = new Request(_url, config);
-            interceptors?.request?.forEach(f => f(request));
+            const _url = getUrl(url, options);
+            const controller = new AbortController();
+            const request = new Request(_url, {...options, signal: controller.signal});
+            interceptors?.request?.forEach(f => f(request, controller));
             originalFetch(request).then(async response => {
-                interceptors?.response?.forEach(f => f(response));
+                interceptors?.response?.forEach(f => f(response, request, controller));
                 let data;
-                if(response.contentType?.includes('application/json')) {
+                if(/application\/json/.test(response.contentType)) {
                     data = await response.json();
-                } else {
+                } else if(/text/.test(response.contentType)) {
                     data = await response.text();
+                } else {
+                    data = await response.blob();
                 }
                 return resolve({error: !response.ok, data, response});
             }).catch(err => {
-                interceptors?.error?.forEach(f => f(err, request));
+                interceptors?.fatal?.forEach(f => f(err, request, controller));
                 return reject(err);
             });
         });
     };
 
     function getUrl(_url, {query}) {
-        const url = new URL(_url, baseUrl).toString();
-        const querystring = new URLSearchParams(query).toString();
-        return querystring?`${url}?${querystring}`:url;
+        const url = new URL(_url, baseUrl);
+        url.search = new URLSearchParams(query);
+        return url.toString();
     }
 }
 
@@ -33,6 +36,7 @@ class RequestBuilder {
         this.interceptors = {
             request: [],
             response: [],
+            fatal: [],
         };
         this.fetch = fetch;
     }
@@ -44,6 +48,11 @@ class RequestBuilder {
 
     setResponseInterceptors(interceptors) {
         this.interceptors.response = interceptors;
+        return this;
+    }
+
+    setFatalInterceptors(interceptors) {
+        this.interceptors.fatal = interceptors;
         return this;
     }
 

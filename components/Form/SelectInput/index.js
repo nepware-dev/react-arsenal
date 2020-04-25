@@ -161,11 +161,11 @@ export default class Select extends PureComponent {
 
         const className = cs(
             styles.selectContainer,
-            _className,
             {
                 disabled,
                 [styles.disabled]: disabled,
-            }
+            },
+            _className,
         );
         return (
             <div 

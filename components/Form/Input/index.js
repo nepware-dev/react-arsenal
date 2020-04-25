@@ -44,12 +44,12 @@ export default class Input extends Component {
         } = this.props;
 
         const className = cs(
-            _className,
             styles.input,
             {
                 required,
                 disabled,
-            }
+            },
+            _className,
         );
 
         return (

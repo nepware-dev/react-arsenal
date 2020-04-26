@@ -5,6 +5,8 @@ import cs from '../../cs';
 
 import styles from './styles.module.scss';
 
+const noop = () => {};
+
 const LEFT_PAGE = 'LEFT';
 const RIGHT_PAGE = 'RIGHT';
 
@@ -64,11 +66,11 @@ const fetchPageNumbers = (totalPages, currentPage, pageNeighbours) => {
 };
 
 const Pagination = ({
-    totalRecords = 0,
-    pageLimit = 20,
-    pageNeighbours = 2,
-    onChange = f => f,
-    className
+    totalRecords,
+    pageLimit,
+    pageNeighbours,
+    onChange,
+    className,
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -82,7 +84,7 @@ const Pagination = ({
 
     const pages = fetchPageNumbers(totalPages, currentPage, pageNeighbours);
 
-    let gotoPage = page => {
+    const gotoPage = page => {
         const currentPage = Math.max(0, Math.min(page, totalPages));
 
         setCurrentPage(currentPage);
@@ -112,10 +114,10 @@ const Pagination = ({
     return (
         <>
             <ul className={cs(styles.pagination, className)}>
-                {pages.map((page, index) => {
+                {pages.map((page) => {
                     if (page === LEFT_PAGE)
                         return (
-                            <li key={index} className={styles.pageItem}>
+                            <li key='left_page' className={styles.pageItem}>
                                 <a
                                     className={styles.pageLink}
                                     href="#"
@@ -129,7 +131,7 @@ const Pagination = ({
 
                     if (page === RIGHT_PAGE)
                         return (
-                            <li key={index} className={styles.pageItem}>
+                            <li key='right_page' className={styles.pageItem}>
                                 <a
                                     className={styles.pageLink}
                                     href="#"
@@ -143,7 +145,7 @@ const Pagination = ({
 
                     return (
                         <li
-                            key={index}
+                            key={page}
                             className={styles.pageItem}
                         >
                             <a
@@ -164,10 +166,16 @@ const Pagination = ({
 };
 
 Pagination.propTypes = {
+    className: PropTypes.string,
     totalRecords: PropTypes.number.isRequired,
-    pageLimit: PropTypes.number,
+    pageLimit: PropTypes.number.isRequired,
     pageNeighbours: PropTypes.number,
     onChange: PropTypes.func
 };
 
-export default Pagination;
+Pagination.defaultProps = {
+    pageNeighbours: 2,
+    onChange: noop,
+};
+
+export default React.memo(Pagination);

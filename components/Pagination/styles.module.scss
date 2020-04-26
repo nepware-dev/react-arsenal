@@ -3,30 +3,35 @@
   list-style-type: none;
   margin: 0px;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  padding: 0.75rem 1rem;
-  
-  .pageLink {
-    padding: 0.75rem 1rem;
-    text-decoration: none;
-    min-width: 3.5rem;
-    text-align: center;
-    box-shadow: none;
-    color: var(--color-primary);
-    border-color: var(--color-primary);
-    font-weight: 900;
-    font-size: 1rem;
-    
-    &.active {
-      pointer-events: none;
-      color: var(--color-primary-text);
-      background-color: var(--color-primary);
-    }
+  border-radius: 4px;
+  padding: 0;
+  overflow: hidden;
 
-    &:hover {
-      background-color: var(--color-primary);
-      color: var(--color-primary-text);
-      filter: brightness(120%);
+  .pageItem {
+    display: flex;
+
+    .pageLink {
+      padding: 0.75rem;
+      text-decoration: none;
+      min-width: 2.5rem;
+      text-align: center;
+      box-shadow: none;
+      color: var(--color-text);
+      border-color: var(--color-primary);
+      font-weight: 500;
+      font-size: var(--font-size-small);
+
+      &.active {
+        pointer-events: none;
+        color: var(--color-primary-text);
+        background-color: var(--color-primary);
+      }
+
+      &:hover {
+        background-color: var(--color-primary);
+        color: var(--color-primary-text);
+        filter: brightness(120%);
+      }
     }
   }
-  
 }

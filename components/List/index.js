@@ -14,12 +14,14 @@ const propTypes = {
     loadingComponent: PropTypes.elementType,
     onEndReachedThreshold: PropTypes.number,
     onEndReached: PropTypes.func,
+    component: PropTypes.any,
 };
 
 const defaultProps = {
     className: '',
     loading: false,
     onEndReachedThreshold: 10,
+    component: "div",
 };
 
 export default class List extends PureComponent {
@@ -106,6 +108,7 @@ export default class List extends PureComponent {
             loading,
             onEndReached,
             keyExtractor,
+            component: Component,
         } = this.props;
 
         const Item = this.renderItem;
@@ -120,8 +123,8 @@ export default class List extends PureComponent {
         } else if(!data?.length) {
             children.push(<EmptyComponent />);
         } else {
-            data.forEach(item => {
-                const key = keyExtractor(item);
+            data.forEach((item, index) => {
+                const key = keyExtractor(item, index);
                 children.push(<Item key={key} item={item} />);
             });
         }
@@ -132,13 +135,13 @@ export default class List extends PureComponent {
         }
 
         return (
-            <div
+            <Component
                 ref={this.ref}
                 className={className}
                 {...props}
             >
                 {children}
-            </div>
+            </Component>
         );
     }
 }

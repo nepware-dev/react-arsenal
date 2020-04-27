@@ -2,7 +2,7 @@ import {
     isObject,
     isArray,
     isEqual,
-} from './utils';
+} from './index';
 
 it('isObject test', () => {
     expect(isObject(null)).toBeFalsy();

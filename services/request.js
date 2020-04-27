@@ -1,3 +1,5 @@
+import {sleep} from '../utils';
+
 const request = (baseUrl, originalFetch, interceptors) => {
     return (url, options={}) => {
         return new Promise((resolve, reject) => {
@@ -16,9 +18,9 @@ const request = (baseUrl, originalFetch, interceptors) => {
                     data = await response.blob();
                 }
                 return resolve({error: !response.ok, data, response});
-            }).catch(err => {
-                interceptors?.fatal?.forEach(f => f(err, request, controller));
-                return reject(err);
+            }).catch(error => {
+                interceptors?.fatal?.forEach(f => f(error, request, controller));
+                return reject(error);
             });
         });
     };
@@ -30,15 +32,69 @@ const request = (baseUrl, originalFetch, interceptors) => {
     }
 }
 
+const withRetry = (request, config) => {
+    return (...args) => {
+        return new Promise((resolve, reject) => {
+            const wrappedRequest = (attempt) => {
+                request(...args).then(res => {
+                    if(shouldRetry(attempt, null, res.response)) {
+                        retry(attempt, null, res.response);
+                    } else {
+                        resolve(res);
+                    }
+                }).catch(error => {
+                    if(shouldRetry(attempt, error)) {
+                        retry(attempt, error);
+                    } else {
+                        reject(error);
+                    }
+                });
+            }
+
+            const shouldRetry = (attempt, error, response) => {
+                if(
+                    attempt >= config.maxRetries
+                    || !config.methodWhitelist.includes(args[1]?.method || 'GET')
+                ) {
+                    return false;
+                }
+
+                if(config.statusForcelist.includes(response?.status) || error) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            const retry = async (attempt) => {
+                attempt+=1;
+                //TODO: prefer Retry-After header if available to calculate retryDelay
+                const retryDelay = config.backoffFactor*Math.pow(2, attempt-1);
+                console.log(`[Retrying request attempt: ${attempt}, waiting for ${retryDelay}sec]`);
+                await sleep(retryDelay*1000);
+                wrappedRequest(attempt);
+            }
+            wrappedRequest(0);
+        });
+    };
+}
+
+
 class RequestBuilder {
     constructor(baseUrl) {
+        this.fetch = fetch;
         this.baseUrl = baseUrl?.replace(/\/^/, '');
         this.interceptors = {
             request: [],
             response: [],
             fatal: [],
         };
-        this.fetch = fetch;
+        this.retryConfig = {
+            maxRetries: 5,
+            statusForcelist: [429, 500, 502, 503, 504],
+            backoffFactor: 0.5,
+            methodWhitelist: ["HEAD", "GET", "PUT", "PATCH","DELETE", "OPTIONS", "TRACE"],
+        };
     }
 
     setRequestInterceptors(interceptors) {
@@ -56,13 +112,22 @@ class RequestBuilder {
         return this;
     }
 
+    setRetryConfig(config) {
+        this.retryConfig = {
+            ...this.retryConfig,
+            ...config,
+        };
+        return this;
+    }
+
     setFetch(_fetch) {
         this.fetch = _fetch;
         return this;
     }
 
     build() {
-        return request(this.baseUrl, this.fetch, this.interceptors);
+        const _request = request(this.baseUrl, this.fetch, this.interceptors);
+        return withRetry(_request, this.retryConfig);
     }
 }
 

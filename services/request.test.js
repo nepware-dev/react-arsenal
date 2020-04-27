@@ -1,6 +1,6 @@
 import RequestBuilder from './request';
 
-const request = new RequestBuilder().build();
+const request = new RequestBuilder().setRetryConfig({backoffFactor: 0, maxRetries: 2}).build();
 
 it('test if request error resolves correctly', async() => {
     let error, data;
@@ -8,8 +8,11 @@ it('test if request error resolves correctly', async() => {
             headers: {'content-type': 'application/json'}
     }));
     expect(error).toBeFalsy();
-    ({error, data} = await request('https://httpstat.us/406', {
+
+    ({error, data} = await request('https://httpstat.us/429', {
         headers: {'content-type': 'application/json'}
     }));
     expect(error).toBeTruthy();
-});
+
+    await expect(request('https://non-existant.com/')).rejects.toThrow();
+}, 60000);

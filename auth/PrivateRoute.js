@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Route, Redirect } from 'react-router-dom';
 
 
@@ -9,7 +10,7 @@ export const PrivateRoute = ({
 }) => {
   return (
     <Route {...rest} render={props => (
-      isAuthenticated || (localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).isAuthenticated : false) ? (
+      isAuthenticated ? (
         <Component {...props} />
       ) : (
         <Redirect to={{
@@ -19,4 +20,9 @@ export const PrivateRoute = ({
       )
     )} />
   )
+}
+
+PrivateRoute.protoTypes = {
+  component: PropTypes.element,
+  isAuthenticated: PropTypes.bool.isRequired,
 }

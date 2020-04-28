@@ -21,7 +21,7 @@ const propTypes = {
     options: PropTypes.array,
     keyExtractor: PropTypes.func,
     valueExtractor: PropTypes.func,
-    onChange: noop,
+    onChange: PropTypes.func,
 };
 
 const defaultProps = {
@@ -30,9 +30,10 @@ const defaultProps = {
     disabled: false,
     loading: false,
     placeholder: 'Select...',
-    keyExtractor: item => item.id,
-    valueExtractor: item => item.name,
+    keyExtractor: (item) => item.id,
+    valueExtractor: (item) => item.name,
     options: [],
+    onChange: noop,
 };
 
 export default class Select extends PureComponent {
@@ -60,8 +61,10 @@ export default class Select extends PureComponent {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (this.props.options !== prevProps.options ||
-        this.state.searchValue !== prevState.searchValue) {
+        if (
+            this.props.options !== prevProps.options ||
+            this.state.searchValue !== prevState.searchValue
+        ) {
             const options = this.filterOptions(this.state.searchValue);
             this.setState({
                 options,
@@ -69,24 +72,22 @@ export default class Select extends PureComponent {
         }
     }
 
-    // TODO: fix event
-    handleInputChange = (event) => {
-        const searchValue = event.target.value;
-        this.setState({ 
-            searchValue,
+    handleInputChange = (value) => {
+        this.setState({
+            searchValue: value,
         });
-    }
+    };
 
     handleClearIconClick = (event) => {
-        const {onChange} = this.props;
+        const { onChange } = this.props;
 
         event.stopPropagation();
         this.setState({
-            selectedItem: null
+            selectedItem: null,
         });
         this.hideOption();
         onChange && onChange(null);
-    }
+    };
 
     handleClickOutside = (event) => {
         const { current: wrapper } = this.wrapperRef;
@@ -94,47 +95,44 @@ export default class Select extends PureComponent {
         if (!wrapper.contains(event.target)) {
             this.hideOption();
         }
-    }
+    };
 
     handleCaretClick = (event) => {
         event.stopPropagation();
-        const {
-            expanded
-        } = this.state;
-        if(expanded)
-            this.hideOption();
-        else 
-            this.showOption();
-    }
+        const { expanded } = this.state;
+        if (expanded) this.hideOption();
+        else this.showOption();
+    };
 
-    handleOptionClick = ({item}) => {
-        const {onChange} = this.props;
+    handleOptionClick = ({ item }) => {
+        const { onChange } = this.props;
 
         this.setState({ selectedItem: item });
         this.hideOption();
-        
+
         onChange && onChange(item);
-    }
+    };
 
     showOption = () => {
         this.setState({ expanded: true });
         this.inputRef.current && this.inputRef.current.focus();
-    }
+    };
 
     hideOption = () => {
-        this.setState({ 
+        this.setState({
             expanded: false,
             searchValue: '',
         });
-    }
+    };
 
     filterOptions = (searchValue) => {
-        return this.props.options.filter(
-            d => this.props.valueExtractor(d).toLowerCase().includes(
-                searchValue.toLowerCase()
-            )
+        return this.props.options.filter((d) =>
+            this.props
+                .valueExtractor(d)
+                .toLowerCase()
+                .includes(searchValue.toLowerCase())
         );
-    }
+    };
 
     render() {
         const {
@@ -148,12 +146,7 @@ export default class Select extends PureComponent {
             valueExtractor,
         } = this.props;
 
-        const {
-            expanded,
-            searchValue,
-            selectedItem,
-            options,
-        } = this.state;
+        const { expanded, searchValue, selectedItem, options } = this.state;
 
         const showPlaceholder = !searchValue && !selectedItem;
         const showValue = !searchValue && selectedItem;
@@ -165,65 +158,59 @@ export default class Select extends PureComponent {
                 disabled,
                 [styles.disabled]: disabled,
             },
-            _className,
+            _className
         );
         return (
-            <div 
-                ref={this.wrapperRef}
-                className={className}
-            >
+            <div ref={this.wrapperRef} className={className}>
                 <div
                     className={cs(styles.selectControl, 'select-control')}
                     onClick={this.showOption}
                 >
                     <div className={cs(styles.selectValue, 'select-value')}>
-                        {searchable &&
+                        {searchable && (
                             <Input
                                 inputRef={this.inputRef}
                                 value={searchValue}
-                                className={styles.input} 
+                                className={styles.input}
                                 onChange={this.handleInputChange}
                             />
-                        }
-                        { showPlaceholder &&
+                        )}
+                        {showPlaceholder && (
                             <div className={styles.placeholder}>{placeholder}</div>
-                        }
-                        { showValue &&
+                        )}
+                        {showValue && (
                             <div className={styles.value}>{valueExtractor(selectedItem)}</div>
-                        }
+                        )}
                     </div>
                     <div className={cs(styles.selectIndicator, 'select-indicator')}>
-                        {loading &&
-                            <Icon 
-                                name="fas fa-spinner fa-spin" 
-                                className={styles.loading}
-                            />
-                        }
-                        {showClose &&
+                        {loading && (
+                            <Icon name="fas fa-spinner fa-spin" className={styles.loading} />
+                        )}
+                        {showClose && (
                             <Icon
                                 name="ion-md-close"
                                 className={styles.clear}
-                                onClick={this.handleClearIconClick} 
+                                onClick={this.handleClearIconClick}
                             />
-                        }
+                        )}
                         <Icon
                             name="ion-md-arrow-dropdown"
                             onClick={this.handleCaretClick}
                         />
                     </div>
                 </div>
-                { expanded &&
-                        <Options
-                            data={options}
-                            keyExtractor={keyExtractor}
-                            valueExtractor={valueExtractor}
-                            loading={loading}
-                            className={cs(styles.selectOptions, 'select_options')}
-                            classNameItem={styles.selectOption}
-                            selectedItem={selectedItem}
-                            onItemClick={this.handleOptionClick}
-                        />
-                }
+                {expanded && (
+                    <Options
+                        data={options}
+                        keyExtractor={keyExtractor}
+                        valueExtractor={valueExtractor}
+                        loading={loading}
+                        className={cs(styles.selectOptions, 'select_options')}
+                        classNameItem={styles.selectOption}
+                        selectedItem={selectedItem}
+                        onItemClick={this.handleOptionClick}
+                    />
+                )}
             </div>
         );
     }

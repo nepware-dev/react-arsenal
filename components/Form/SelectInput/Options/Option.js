@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
 
 import cs from '../../../../cs';
@@ -30,18 +30,11 @@ export default class Option extends PureComponent {
             onClick,
         } = this.props;
 
-        const className = cs(
-            styles.option, 
-            _className,
-            {
-                [styles.selected]: selected,
-            }
-        );
+        const className = cs(styles.option, _className, {
+            [styles.selected]: selected,
+        });
         return (
-            <div 
-                className={className} 
-                onClick={onClick}
-            >
+            <div className={className} onClick={onClick}>
                 {label}
             </div>
         );

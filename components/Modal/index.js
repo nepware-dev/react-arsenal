@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import FocusTrap from 'react-focus-trap';
+import FocusTrap from 'focus-trap-react';
 
 import Portal from '../Portal';
 import styles from './styles.module.scss';
@@ -16,6 +16,7 @@ const propTypes = {
         PropTypes.element,
     ]).isRequired,
     className: PropTypes.string,
+    overlayClassName: PropTypes.string,
     closeOnEscape: PropTypes.bool,
     closeOnOutsideClick: PropTypes.bool,
     onClose: PropTypes.func,
@@ -23,6 +24,7 @@ const propTypes = {
 
 const defaultProps = {
     className: '',
+    overlayClassName: '',
     closeOnEscape: false,
     closeOnOutsideClick: false,
     onClose: noop,
@@ -40,23 +42,12 @@ export default class Modal extends React.PureComponent {
     componentDidMount() {
         document.addEventListener('keydown', this.handleKeyPressed);
         document.addEventListener('mousedown', this.handleClickOutside);
-        this.updateBodyTansparency(true);
     }
 
     componentWillUnmount() {
         document.removeEventListener('keydown', this.handleKeyPressed);
         document.removeEventListener('mousedown', this.handleClickOutside);
-        this.updateBodyTansparency(false);
     }
-
-    updateBodyTansparency(modalShown) {
-        if(modalShown) {
-            document.getElementById('root').style.filter = 'brightness(50%)';
-        } else {
-            document.getElementById('root').style.filter = 'brightness(100%)';
-        }
-    }
-
 
     handleClickOutside = (event) => {
         const {
@@ -86,6 +77,7 @@ export default class Modal extends React.PureComponent {
         const {
             children,
             className: classNameFromProps,
+            overlayClassName: overlayClassNameFromProps,
         } = this.props;
 
         const className = cs(
@@ -94,14 +86,22 @@ export default class Modal extends React.PureComponent {
             'modal',
         );
 
+        const overlayClassName = cs(
+            styles.overlay,
+            overlayClassNameFromProps,
+            'overlay',
+        );
+
         return (
             <Portal>
                 <FocusTrap>
-                    <div
-                        ref={this.wrapperRef}
-                        className={className}
-                    >
-                            { children }
+                    <div className={overlayClassName}>
+                        <div
+                            ref={this.wrapperRef}
+                            className={className}
+                        >
+                                { children }
+                        </div>
                     </div>
                 </FocusTrap>
             </Portal>

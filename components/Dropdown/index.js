@@ -9,12 +9,19 @@ const propTypes = {
       PropTypes.arrayOf(PropTypes.node),
       PropTypes.node
     ]),
-    label: PropTypes.string.isRequired,
+    label: PropTypes.string,
+    renderLabel: PropTypes.func,
+    className: PropTypes.string,
+    labelContainerClassName: PropTypes.string,
 };
 
 const defaultProps = {};
 
 export default class Dropdown extends React.Component {  
+    componentWillUnmount() {
+        this.hideDropdown();
+    }
+
     static propTypes = propTypes;
     static defaultProps = defaultProps;
 
@@ -38,19 +45,23 @@ export default class Dropdown extends React.Component {
     };
 
     render () {
-        const { children, label } = this.props;    
+        const { children, label, renderLabel, labelContainerClassName, className } = this.props;
         return (
             <div className={cs(
                 styles.dropdown,
-                {
+                className, {
                     [styles.open]: this.state.isOpen
                 })}>
                 <div
-                    className={styles.dropdownToggle}
+                    className={cs(styles.dropdownToggle, labelContainerClassName)}
                     type="button"
                     onClick={this.showDropdown}>
-                    <span className={styles.dropdownLabel}>{label}</span>
-                    <span className={styles.caret}></span>
+                    {renderLabel ? renderLabel() : (
+                        <>
+                            <span className={styles.dropdownLabel}>{label}</span>
+                            <span className={styles.caret}></span>
+                        </>
+                    )}
                 </div>
                 <div className={styles.dropdownMenu}>
                     {children}

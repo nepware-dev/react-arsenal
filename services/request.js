@@ -6,20 +6,20 @@ const request = (baseUrl, originalFetch, interceptors) => {
             const _url = getUrl(url, options);
             const controller = new AbortController();
             const request = new Request(_url, {...options, signal: controller.signal});
-            interceptors?.request?.forEach(f => f(request, controller));
+            interceptors.request.forEach(f => f(request, controller));
             originalFetch(request).then(async response => {
-                interceptors?.response?.forEach(f => f(response, request, controller));
+                interceptors.response.forEach(f => f(response, request, controller));
                 let data;
-                if(/application\/json/.test(response.contentType)) {
+                if(/application\/json/.test(response.headers.get('Content-Type'))) {
                     data = await response.json();
-                } else if(/text/.test(response.contentType)) {
+                } else if(/text/.test(response.headers.get('Content-Type'))) {
                     data = await response.text();
                 } else {
                     data = await response.blob();
                 }
                 return resolve({error: !response.ok, data, response});
             }).catch(error => {
-                interceptors?.fatal?.forEach(f => f(error, request, controller));
+                interceptors.fatal.forEach(f => f(error, request, controller));
                 return reject(error);
             });
         });

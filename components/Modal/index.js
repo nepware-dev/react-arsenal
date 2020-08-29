@@ -42,12 +42,23 @@ export default class Modal extends React.PureComponent {
     componentDidMount() {
         document.addEventListener('keydown', this.handleKeyPressed);
         document.addEventListener('mousedown', this.handleClickOutside);
+        this.updateBody(true);
     }
 
     componentWillUnmount() {
         document.removeEventListener('keydown', this.handleKeyPressed);
         document.removeEventListener('mousedown', this.handleClickOutside);
+        this.updateBody(false);
     }
+
+    updateBody(modalShown) {
+        if(modalShown) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    }
+
 
     handleClickOutside = (event) => {
         const {

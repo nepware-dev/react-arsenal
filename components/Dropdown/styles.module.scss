@@ -1,10 +1,6 @@
 .dropdown {
   position: relative;
 
-  &.open>.dropdownMenu {
-    display: block;
-  }
-
   .dropdownToggle {
     display: inline-block;
     cursor: pointer;    
@@ -31,5 +27,17 @@
     border: 1px solid var(--color-border);
     border-radius: 4px;
     box-shadow: 0 6px 12px rgba(0,0,0,.175);
+  }
+
+  .alignLeft {
+    left: 0;
+  }
+
+  .alignRight {
+    right: 0;
+  }
+
+  &.open > .dropdownMenu {
+    display: block;
   }
 }

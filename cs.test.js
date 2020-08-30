@@ -16,6 +16,14 @@ it('remove false values from object', () => {
     expect(result).toEqual(expected);
 });
 
+it('remove false values from array', () => {
+    const input = ['name', false, [ 'name1', true]];
+    const result = cs(...input);
+    const expected = 'name name1';
+
+    expect(result).toEqual(expected);
+});
+
 it('works in single value', () => {
     const input = ['name'];
     const result = cs(...input);

@@ -13,9 +13,13 @@ const propTypes = {
     renderLabel: PropTypes.func,
     className: PropTypes.string,
     labelContainerClassName: PropTypes.string,
+    align: PropTypes.string,
+    showOnHover: PropTypes.bool,
 };
 
-const defaultProps = {};
+const defaultProps = {
+    align: 'left',
+};
 
 export default class Dropdown extends React.Component {  
     componentWillUnmount() {
@@ -34,6 +38,18 @@ export default class Dropdown extends React.Component {
         };
     }
 
+    onMouseEnter = () => {
+        this.props.showOnHover && this.showDropdown();
+    }
+
+    onMouseLeave = () => {
+        this.props.showOnHover && this.hideDropdown();
+    }
+
+    onClick = () => {
+        this.state.isOpen?this.hideDropdown():this.showDropdown();
+    }
+
     showDropdown = () => {
         this.setState({ isOpen: true });
         document.addEventListener("click", this.hideDropdown);
@@ -45,17 +61,20 @@ export default class Dropdown extends React.Component {
     };
 
     render () {
-        const { children, label, renderLabel, labelContainerClassName, className } = this.props;
+        const { children, label, renderLabel, labelContainerClassName, className, align } = this.props;
         return (
             <div className={cs(
                 styles.dropdown,
-                className, {
-                    [styles.open]: this.state.isOpen
+                className,
+                {
+                    [styles.open]: this.state.isOpen,
                 })}>
                 <div
                     className={cs(styles.dropdownToggle, labelContainerClassName)}
                     type="button"
-                    onClick={this.showDropdown}>
+                    onMouseEnter={this.onMouseEnter}
+                    onMouseLeave={this.onMouseLeave}
+                    onClick={this.onClick}>
                     {renderLabel ? renderLabel() : (
                         <>
                             <span className={styles.dropdownLabel}>{label}</span>
@@ -63,9 +82,14 @@ export default class Dropdown extends React.Component {
                         </>
                     )}
                 </div>
-                <div className={styles.dropdownMenu}>
-                    {children}
-                </div>
+                <div className={cs(
+                    styles.dropdownMenu,
+                    {
+                        [styles.alignLeft]: align==='left',
+                        [styles.alignRight]: align==='right',
+                    })}>
+                {children}
+            </div>
             </div>
         )
     }

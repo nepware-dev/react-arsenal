@@ -72,7 +72,7 @@ export default class Select extends PureComponent {
         }
     }
 
-    handleInputChange = (value) => {
+    handleInputChange = ({value}) => {
         this.setState({
             searchValue: value,
         });

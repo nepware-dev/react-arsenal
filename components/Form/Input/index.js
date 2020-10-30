@@ -30,7 +30,7 @@ export default class Input extends Component {
 
     handleChange = (event) => {
         const { onChange } = this.props;
-        onChange(event.target.value);
+        onChange(event.target);
     }
 
     render() {

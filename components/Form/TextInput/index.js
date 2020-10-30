@@ -29,7 +29,7 @@ export default class TextInput extends Component {
 
     handleChange = (event) => {
         const { onChange } = this.props;
-        onChange(event.target.value);
+        onChange(event.target);
     }
 
     render() {

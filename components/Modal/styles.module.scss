@@ -5,6 +5,7 @@
     right: 0;
     left: 0;
     background-color: rgba(0,0,0,0.7);
+    z-index: 9998;
 }
 
 .modal {
@@ -17,4 +18,5 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.20);
     background-color: lightgray;
     max-height: 96vh;
+    z-index: 9999;
 }

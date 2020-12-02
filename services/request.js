@@ -27,7 +27,9 @@ const request = (baseUrl, originalFetch, interceptors) => {
 
     function getUrl(_url, {query}) {
         const url = new URL(_url, baseUrl);
-        url.search = new URLSearchParams(query);
+        if(query) {
+            url.search = new URLSearchParams(query);
+        }
         return url.toString();
     }
 }

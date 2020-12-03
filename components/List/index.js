@@ -62,7 +62,7 @@ export default class List extends PureComponent {
             emptyComponent: EmptyComponent,
         } = this.props;
         if(EmptyComponent) {
-            return <EmptyComponent />;
+            return EmptyComponent;
         } else {
             return (
                 <div className={styles.empty}>

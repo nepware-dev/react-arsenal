@@ -1,5 +1,4 @@
 import React from 'react';
-import PropType from 'prop-types';
 
 import Button from '../Button';
 
@@ -16,7 +15,7 @@ class Trap extends React.Component {
     }
 
     refreshPage = () => {
-        window. location. reload(false);
+        window.location.reload(false);
     }
 
     render() {

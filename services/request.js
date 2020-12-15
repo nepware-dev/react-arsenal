@@ -1,3 +1,4 @@
+import 'whatwg-fetch'; // Fetch Polyfill
 import {sleep} from '../utils';
 
 const request = (baseUrl, originalFetch, interceptors) => {

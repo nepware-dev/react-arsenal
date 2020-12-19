@@ -1,3 +1,4 @@
+import 'yet-another-abortcontroller-polyfill';
 import 'whatwg-fetch'; // Fetch Polyfill
 import {sleep} from '../utils';
 

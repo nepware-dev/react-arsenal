@@ -33,7 +33,7 @@ export default class List extends PureComponent {
         this.ref = React.createRef();
     }
 
-    renderItem = ({item}) => {
+    renderItem = ({item, index}) => {
         const { 
             className: _className, // ignore
             classNameItem: className,
@@ -50,6 +50,7 @@ export default class List extends PureComponent {
         return (
             <Item
                 item={item}
+                index={index}
                 className={className}
                 onClick={onClick}
                 {...otherProps}
@@ -125,7 +126,7 @@ export default class List extends PureComponent {
         } else {
             data.forEach((item, index) => {
                 const key = keyExtractor(item, index);
-                children.push(<Item key={key} item={item} />);
+                children.push(<Item key={key} item={item} index={index} />);
             });
         }
 

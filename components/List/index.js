@@ -1,7 +1,7 @@
-import React, { PureComponent } from 'react';
+import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
 
-import { throttle } from '../../utils';
+import {throttle} from '../../utils';
 import styles from './styles.module.scss';
 
 const propTypes = {
@@ -34,7 +34,7 @@ export default class List extends PureComponent {
     }
 
     renderItem = ({item, index}) => {
-        const { 
+        const {
             className: _className, // ignore
             classNameItem: className,
             renderItem: _renderItem,
@@ -59,7 +59,7 @@ export default class List extends PureComponent {
     }
 
     renderEmptyComponent = () => {
-        const { 
+        const {
             emptyComponent: EmptyComponent,
         } = this.props;
         if(EmptyComponent) {
@@ -74,7 +74,7 @@ export default class List extends PureComponent {
     }
 
     renderLoadingComponent = () => {
-        const { 
+        const {
             loadingComponent: LoadingComponent,
         } = this.props;
         if(LoadingComponent) {
@@ -89,21 +89,21 @@ export default class List extends PureComponent {
     }
 
     onScroll = throttle((event) => {
-        const { 
+        const {
             onEndReached,
             onEndReachedThreshold,
         } = this.props;
 
-            const element = this.ref.current;
-            const distanceFromEnd = element.scrollHeight - element.scrollTop - element.offsetHeight;
+        const element = this.ref.current;
+        const distanceFromEnd = element.scrollHeight - element.scrollTop - element.offsetHeight;
 
-            if (onEndReachedThreshold > distanceFromEnd) {
-                onEndReached();
-            }
-    }, 200, { leading: false, trailing: true });
+        if(onEndReachedThreshold > distanceFromEnd) {
+            onEndReached();
+        }
+    }, 200, {leading: false, trailing: true});
 
     render() {
-        const { 
+        const {
             data,
             className,
             loading,
@@ -132,7 +132,7 @@ export default class List extends PureComponent {
 
         const props = {};
         if(onEndReached) {
-            props.onScroll=this.onScroll
+            props.onScroll = this.onScroll
         }
 
         return (

@@ -8,7 +8,7 @@ const TabHeader = (props) => {
     const {title, index, className, activeClassName, active, selectTab, ...childProps} = useTabContext(props);
 
     const handleClick = useCallback((e) => {
-        !active && selectTab && selectTab(e, index);
+        selectTab && selectTab(e, index);
     }, []);
 
     if(!title) {

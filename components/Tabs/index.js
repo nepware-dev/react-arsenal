@@ -34,7 +34,7 @@ export default (props) => {
             const selectedTab = e.target.getAttribute('label');
             onChange && onChange({activeTab: selectedTab, previousTab: tabContext.activeTab});
             setActiveTab(selectedTab);
-            if(mode === 'scroll') {
+            if(mode === 'scroll' && tabsRef.current[index]) {
                 tabsRef.current[index].scrollIntoView({
                     behavior: 'smooth'
                 });

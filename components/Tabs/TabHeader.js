@@ -9,7 +9,7 @@ const TabHeader = (props) => {
 
     const handleClick = useCallback((e) => {
         selectTab && selectTab(e, index);
-    }, []);
+    }, [index, selectTab]);
 
     if(!title) {
         return null;

@@ -41,7 +41,7 @@ export default (props) => {
             }
         },
         activeTab
-    }), [activeTab, onChange]);
+    }), [activeTab, mode, onChange]);
 
     const renderTabHeader = useCallback(({item: child, index}) => {
         const childProps = {...child.props};
@@ -53,7 +53,7 @@ export default (props) => {
 
     const renderTabContent = useCallback(({item: child, index}) => {
         return <TabContent mode={mode} ref={el => tabsRef.current[index] = el} {...child.props} />;
-    }, []);
+    }, [mode]);
 
     return (
         <TabContext.Provider value={tabContext}>

@@ -7,11 +7,12 @@ import styles from './styles.module.scss';
 class Trap extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { errror: false };
+        this.state = {error: false};
     }
 
     componentDidCatch(error, errorInfo) {
-        return this.setState({ error, errorInfo });
+        this.props.onCatchError && this.props.onCatchError(error, errorInfo);
+        return this.setState({error, errorInfo});
     }
 
     refreshPage = () => {
@@ -19,7 +20,7 @@ class Trap extends React.Component {
     }
 
     render() {
-        if (this.state.error) {
+        if(this.state.error) {
             return (
                 <div className={styles.container}>
                     <h1>Something went wrong.</h1>

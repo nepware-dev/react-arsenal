@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
 
 import Input from '../Input';
@@ -11,6 +11,7 @@ const noop = () => {};
 
 const propTypes = {
     className: PropTypes.string,
+    controlClassName: PropTypes.string,
     searchable: PropTypes.bool,
     clearable: PropTypes.bool,
     disabled: PropTypes.bool,
@@ -61,7 +62,7 @@ export default class Select extends PureComponent {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (
+        if(
             this.props.options !== prevProps.options ||
             this.state.searchValue !== prevState.searchValue
         ) {
@@ -79,7 +80,7 @@ export default class Select extends PureComponent {
     };
 
     handleClearIconClick = (event) => {
-        const { onChange } = this.props;
+        const {onChange} = this.props;
 
         event.stopPropagation();
         this.setState({
@@ -90,31 +91,31 @@ export default class Select extends PureComponent {
     };
 
     handleClickOutside = (event) => {
-        const { current: wrapper } = this.wrapperRef;
+        const {current: wrapper} = this.wrapperRef;
 
-        if (!wrapper.contains(event.target)) {
+        if(!wrapper.contains(event.target)) {
             this.hideOption();
         }
     };
 
     handleCaretClick = (event) => {
         event.stopPropagation();
-        const { expanded } = this.state;
-        if (expanded) this.hideOption();
+        const {expanded} = this.state;
+        if(expanded) this.hideOption();
         else this.showOption();
     };
 
-    handleOptionClick = ({ item }) => {
-        const { onChange } = this.props;
+    handleOptionClick = ({item}) => {
+        const {onChange} = this.props;
 
-        this.setState({ selectedItem: item });
+        this.setState({selectedItem: item});
         this.hideOption();
 
         onChange && onChange(item);
     };
 
     showOption = () => {
-        this.setState({ expanded: true });
+        this.setState({expanded: true});
         this.inputRef.current && this.inputRef.current.focus();
     };
 
@@ -137,6 +138,7 @@ export default class Select extends PureComponent {
     render() {
         const {
             className: _className,
+            controlClassName,
             loading,
             disabled,
             clearable,
@@ -146,7 +148,7 @@ export default class Select extends PureComponent {
             valueExtractor,
         } = this.props;
 
-        const { expanded, searchValue, selectedItem, options } = this.state;
+        const {expanded, searchValue, selectedItem, options} = this.state;
 
         const showPlaceholder = !searchValue && !selectedItem;
         const showValue = !searchValue && selectedItem;
@@ -163,7 +165,7 @@ export default class Select extends PureComponent {
         return (
             <div ref={this.wrapperRef} className={className}>
                 <div
-                    className={cs(styles.selectControl, 'select-control')}
+                    className={cs(styles.selectControl, 'select-control', controlClassName)}
                     onClick={this.showOption}
                 >
                     <div className={cs(styles.selectValue, 'select-value')}>

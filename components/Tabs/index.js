@@ -8,15 +8,18 @@ import TabContent from './TabContent';
 import cs from '../../cs';
 import styles from './styles.module.scss';
 
+const getChildren = children => React.Children.toArray(children);
 const getDefaultActiveTab = children => children?.[0]?.props?.label;
 
 export const Tab = () => null;
 
 export default (props) => {
+    const {children} = props;
+    const _children = getChildren(children);
+
     const {
         onChange,
-        children,
-        defaultActiveTab = getDefaultActiveTab(children),
+        defaultActiveTab = getDefaultActiveTab(_children),
         headerClassName,
         tabItemClassName,
         activeTabItemClassName,
@@ -25,7 +28,7 @@ export default (props) => {
     } = props;
 
     const tabsRef = useRef();
-    tabsRef.current = new Array(children.length);
+    tabsRef.current = new Array(_children.length);
 
     const [activeTab, setActiveTab] = useState(defaultActiveTab);
 
@@ -59,13 +62,13 @@ export default (props) => {
         <TabContext.Provider value={tabContext}>
             <List
                 className={cs(headerClassName, styles.header)}
-                data={children}
+                data={_children}
                 keyExtractor={item => item.label}
                 renderItem={renderTabHeader}
             />
             <List
                 className={contentContainerClassName}
-                data={children}
+                data={_children}
                 keyExtractor={item => item.label}
                 renderItem={renderTabContent}
             />

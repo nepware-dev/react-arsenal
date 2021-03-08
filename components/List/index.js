@@ -15,6 +15,8 @@ const propTypes = {
     onEndReachedThreshold: PropTypes.number,
     onEndReached: PropTypes.func,
     component: PropTypes.any,
+    ListHeaderComponent: PropTypes.func,
+    ListFooterComponent: PropTypes.func
 };
 
 const defaultProps = {
@@ -110,6 +112,8 @@ export default class List extends PureComponent {
             onEndReached,
             keyExtractor,
             component: Component,
+            ListHeaderComponent,
+            ListFooterComponent
         } = this.props;
 
         const Item = this.renderItem;
@@ -136,13 +140,17 @@ export default class List extends PureComponent {
         }
 
         return (
-            <Component
-                ref={this.ref}
-                className={className}
-                {...props}
-            >
-                {children}
-            </Component>
+            <>
+                {ListHeaderComponent && <ListHeaderComponent />}
+                <Component
+                    ref={this.ref}
+                    className={className}
+                    {...props}
+                >
+                    {children}            
+                </Component>
+               {ListFooterComponent && <ListFooterComponent />} 
+            </>
         );
     }
 }

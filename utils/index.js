@@ -108,3 +108,9 @@ export const throttle = (fn, wait, options = {}) => {
 export const sleep = (milliseconds) => {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
+
+export const isIntersectionObserverAvailable = () => (
+    typeof window !== 'undefined' &&
+    'IntersectionObserver' in window &&
+    'isIntersecting' in window.IntersectionObserverEntry.prototype
+);

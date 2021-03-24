@@ -24,7 +24,8 @@ class Trap extends React.Component {
             return (
                 <div className={styles.container}>
                     <h1>Something went wrong.</h1>
-                    <p>Please be patient. A team of highly trained monkeys has been dispatched to deal with this situation.</p>
+                    <p>Please be patient, we are currently trying to fix the problem.</p>
+                    <p>In meanwhile you can refresh the page or wait a few minutes.</p>
                     <details className={styles.details}>
                         {this.state.error && this.state.error.toString()}
                         <br />

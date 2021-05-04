@@ -17,7 +17,6 @@ const TabHeader = (props) => {
 
     return (
         <div className={cs(styles.headerItem, className, {
-            [styles.headerItemActive]: active,
             [activeClassName]: active
         })} onClick={handleClick} {...childProps}>
             {title}

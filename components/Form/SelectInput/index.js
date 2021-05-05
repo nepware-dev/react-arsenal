@@ -166,7 +166,7 @@ export default class Select extends PureComponent {
             <div ref={this.wrapperRef} className={className}>
                 <div
                     className={cs(styles.selectControl, 'select-control', controlClassName)}
-                    onClick={this.showOption}
+                    onClick={this.handleCaretClick}
                 >
                     <div className={cs(styles.selectValue, 'select-value')}>
                         {searchable && (

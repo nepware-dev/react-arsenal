@@ -55,7 +55,8 @@ export default (props) => {
     }, [activeTabItemClassName, tabItemClassName]);
 
     const renderTabContent = useCallback(({item: child, index}) => {
-        return <TabContent mode={mode} ref={el => tabsRef.current[index] = el} {...child.props} />;
+        const {title, ...childProps} = child.props;
+        return <TabContent mode={mode} ref={el => tabsRef.current[index] = el} {...childProps} />;
     }, [mode]);
 
     return (

@@ -16,7 +16,7 @@ const propTypes = {
     clearable: PropTypes.bool,
     disabled: PropTypes.bool,
     loading: PropTypes.bool,
-    value: PropTypes.bool,
+    value: PropTypes.string,
     defaultValue: PropTypes.any,
     placeholder: PropTypes.string,
     options: PropTypes.array,

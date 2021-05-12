@@ -15,6 +15,7 @@ const propTypes = {
         current: PropTypes.elementType 
     }),
     onChange: PropTypes.func,
+    errorMessage: PropTypes.string,
 };
 
 const defaultProps = {
@@ -40,11 +41,15 @@ export default class Input extends Component {
             disabled,
             required,
             onChange,
+            errorMessage,
             ...otherProps
         } = this.props;
 
+        const hasError = !!errorMessage;
+
         const className = cs(
             styles.input,
+            {[styles.inputError]: hasError},
             {
                 required,
                 disabled,
@@ -53,12 +58,15 @@ export default class Input extends Component {
         );
 
         return (
+            <>
             <input
                 ref={inputRef}
                 className={className}
                 onChange={this.handleChange}
                 {...otherProps}
             />
+                {hasError && <span className={styles.errorText}>{errorMessage}</span>}
+            </>
         );
     }
 }

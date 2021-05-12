@@ -8,4 +8,14 @@
   &:focus, &:hover {
     border: 1px solid var(--color-input-outline);
   }
+
+  &Error,
+  &Error:hover {
+    border: 1px solid var(--color-danger);
+  }
+}
+
+.errorText {
+  color: var(--color-danger);
+  font-size: 12px;
 }

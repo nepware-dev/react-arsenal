@@ -1,5 +1,5 @@
 import React, {useMemo, useCallback} from 'react';
-import PropType from 'prop-types';
+import PropTypes from 'prop-types';
 
 import List from '../List';
 import cs from '../../cs';
@@ -7,44 +7,64 @@ import styles from './styles.module.scss';
 
 const Table = ({
     className,
+    headerClassName,
+    headerRowClassName,
+    bodyClassName,
+    bodyRowClassName,
     data,
     columns,
+    renderHeaderItem,
+    renderDataItem,
+    page=1,
+    maxRows=10,
 }) => {
+    const visibleData = useMemo(() => {
+        const initIndex = (page - 1) * maxRows;
+        return data.slice(initIndex, initIndex + maxRows)
+    }, [data, maxRows, page]);
 
     const Header = useMemo(() => {
         return (
-            <thead className={styles.head}>
-                <tr className={styles.headerRow}>
+            <thead className={cs(styles.head, headerClassName)}>
+                <tr className={cs(styles.headerRow, headerRowClassName)}>
                     {columns.map(col => {
-                        return <td key={col.accessor} className={styles.data}>{col.Header}</td>
+                        return (
+                            <th key={col.accessor} className={styles.data}>
+                                {renderHeaderItem ? renderHeaderItem({column: col}) : col.Header}
+                            </th>
+                        );
                     })}
                     </tr>
             </thead>
         );
-    }, [columns]);
+    }, [columns, renderHeaderItem]);
 
     const renderRow = useCallback(({item}) => {
         return (
-            <tr className={styles.row}>
+            <tr className={cs(styles.row, bodyRowClassName)}>
                 {columns.map(col => {
-                    return <td key={col.accessor} className={styles.data}>{item[col.accessor]}</td>
+                    return (
+                        <td key={col.accessor} className={styles.data}>
+                            {renderDataItem ? renderDataItem({item, column: col}) : item[col.accessor]}
+                        </td>
+                    );
                 })}
             </tr>
         );
-    }, [columns]);
+    }, [columns, renderDataItem]);
 
 
     const Body = useMemo(() => {
         return (
             <List
-                className={styles.body}
-                data={data}
+                className={cs(styles.body, bodyClassName)}
+                data={visibleData}
                 renderItem={renderRow}
                 keyExtractor={(item, index) => index}
                 component="tbody"
             />
         );
-    }, [data]);
+    }, [visibleData]);
 
     return (
         <table className={cs(styles.table, className)}>
@@ -55,9 +75,17 @@ const Table = ({
 }
 
 Table.propTypes = {
-    className: PropType.string,
-    data: PropType.array.isRequired,
-    columns: PropType.array.isRequired,
+    className: PropTypes.string,
+    headerClassName: PropTypes.string,
+    headerRowClassName: PropTypes.string,
+    bodyClassName: PropTypes.string,
+    bodyRowClassName: PropTypes.string,
+    data: PropTypes.array.isRequired,
+    columns: PropTypes.array.isRequired,
+    renderHeaderItem: PropTypes.any,
+    renderDataItem: PropTypes.any,
+    page: PropTypes.number,
+    maxRows: PropTypes.number,
 }
 
 export default React.memo(Table);

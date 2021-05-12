@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import cs from '../../cs';
@@ -71,20 +71,17 @@ const Pagination = ({
     pageNeighbours,
     onChange,
     className,
+    pageItemClassName,
+    activePageItemClassName,
+    pageNum,
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
 
     const totalPages = Math.ceil(totalRecords / pageLimit);
 
-    useEffect(() => {
-        gotoPage(1);
-    }, []);
-
-    if (!totalRecords || totalPages === 1) return null;
-
     const pages = fetchPageNumbers(totalPages, currentPage, pageNeighbours);
 
-    const gotoPage = page => {
+    const gotoPage = useCallback(page => {
         const currentPage = Math.max(0, Math.min(page, totalPages));
 
         setCurrentPage(currentPage);
@@ -94,22 +91,34 @@ const Pagination = ({
             pageLimit,
             totalRecords
         });
-    };
+    }, [onChange]);
 
-    const handleClick = page => evt => {
+    useEffect(() => {
+        if(pageNum > totalPages) {
+            gotoPage(totalPages);
+        }
+    }, [pageNum, gotoPage, pageLimit]);
+
+    useEffect(() => {
+        gotoPage(1);
+    }, [gotoPage]);
+
+    const handleClick = useCallback(page => evt => {
         evt.preventDefault();
         gotoPage(page);
-    };
+    }, [gotoPage]);
 
-    const handleMoveLeft = evt => {
+    const handleMoveLeft = useCallback(evt => {
         evt.preventDefault();
         gotoPage(currentPage - pageNeighbours * 2 - 1);
-    };
+    }, [gotoPage, currentPage, pageNeighbours]);
 
-    const handleMoveRight = evt => {
+    const handleMoveRight = useCallback(evt => {
         evt.preventDefault();
         gotoPage(currentPage + pageNeighbours * 2 + 1);
-    };
+    }, [gotoPage, currentPage, pageNeighbours]);
+
+    if (!totalRecords || totalPages === 1) return null;
 
     return (
         <>
@@ -119,7 +128,7 @@ const Pagination = ({
                         return (
                             <li key='left_page' className={styles.pageItem}>
                                 <a
-                                    className={styles.pageLink}
+                                    className={cs(styles.pageLink, pageItemClassName)}
                                     href="#"
                                     aria-label="Previous"
                                     onClick={handleMoveLeft}
@@ -133,7 +142,7 @@ const Pagination = ({
                         return (
                             <li key='right_page' className={styles.pageItem}>
                                 <a
-                                    className={styles.pageLink}
+                                    className={cs(styles.pageLink, pageItemClassName)}
                                     href="#"
                                     aria-label="Next"
                                     onClick={handleMoveRight}
@@ -146,11 +155,12 @@ const Pagination = ({
                     return (
                         <li
                             key={page}
-                            className={styles.pageItem}
+                            className={cs(styles.pageItem)}
                         >
                             <a
-                                className={cs(styles.pageLink, {
-                                    [styles.active]: currentPage === page
+                                className={cs(styles.pageLink, pageItemClassName, {
+                                    [styles.active]: currentPage === page,
+                                    [activePageItemClassName]: currentPage === page,
                                 })}
                                 href="#"
                                 onClick={handleClick(page)}
@@ -170,7 +180,10 @@ Pagination.propTypes = {
     totalRecords: PropTypes.number.isRequired,
     pageLimit: PropTypes.number.isRequired,
     pageNeighbours: PropTypes.number,
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
+    pageItemClassName: PropTypes.string,
+    activePageItemClassName: PropTypes.string,
+    pageNum: PropTypes.number,
 };
 
 Pagination.defaultProps = {

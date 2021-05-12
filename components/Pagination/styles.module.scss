@@ -11,10 +11,12 @@
     display: flex;
 
     .pageLink {
-      padding: 0.75rem;
       text-decoration: none;
-      min-width: 2.5rem;
-      text-align: center;
+      min-width: 2rem;
+      min-height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       box-shadow: none;
       color: var(--color-text);
       border-color: var(--color-primary);

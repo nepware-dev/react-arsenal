@@ -1,4 +1,5 @@
 import React, {useMemo, useCallback, useRef, useState} from 'react';
+import PropTypes from 'prop-types';
 
 import List from '../List';
 import TabContext from './TabContext';
@@ -13,13 +14,14 @@ const getDefaultActiveTab = children => children?.[0]?.props?.label;
 
 export const Tab = () => null;
 
-export default (props) => {
+const Tabs = (props) => {
     const {children} = props;
     const _children = getChildren(children);
 
     const {
         onChange,
         defaultActiveTab = getDefaultActiveTab(_children),
+        activeTab: controlledActiveTab,
         headerClassName,
         tabItemClassName,
         activeTabItemClassName,
@@ -30,21 +32,23 @@ export default (props) => {
     const tabsRef = useRef();
     tabsRef.current = new Array(_children.length);
 
-    const [activeTab, setActiveTab] = useState(defaultActiveTab);
+    const [activeTab, setActiveTab] = useState(controlledActiveTab ? controlledActiveTab : defaultActiveTab);
 
     const tabContext = useMemo(() => ({
         selectTab: (e, index) => {
             const selectedTab = e.target.getAttribute('label');
             onChange && onChange({activeTab: selectedTab, previousTab: tabContext.activeTab});
-            setActiveTab(selectedTab);
-            if(mode === 'scroll' && tabsRef.current[index]) {
-                tabsRef.current[index].scrollIntoView({
-                    behavior: 'smooth'
-                });
+            if(!controlledActiveTab) {
+                setActiveTab(selectedTab);
+                if(mode === 'scroll' && tabsRef.current[index]) {
+                    tabsRef.current[index].scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
             }
         },
-        activeTab
-    }), [activeTab, mode, onChange]);
+        activeTab: controlledActiveTab?controlledActiveTab:activeTab
+    }), [activeTab, mode, onChange, controlledActiveTab]);
 
     const renderTabHeader = useCallback(({item: child, index}) => {
         const childProps = {...child.props};
@@ -76,3 +80,41 @@ export default (props) => {
         </TabContext.Provider>
     );
 };
+
+export default Tabs;
+
+Tabs.propTypes = {
+    /**
+     * Callback called when tab is changed. Called with activeTab and previousTab values
+     */
+    onChange: PropTypes.func,
+    /**
+     * Label of Initial active Tab. Use when tab is not controlled.
+     */
+    defaultActiveTab: PropTypes.string,
+    /**
+     * Label of active tab. Tab is controlled if used.
+     */
+    activeTab: PropTypes.string,
+    /**
+     * Classname for header
+     */
+    headerClassName: PropTypes.string,
+    /**
+     * Classname for each header item
+     */
+    tabItemClassName: PropTypes.string,
+    /**
+     * ClassName for active header Item
+     */
+    activeTabItemClassName: PropTypes.string,
+    /**
+     * ClassName for content container
+     */
+    contentContainerClassName: PropTypes.string,
+    /**
+     * Decides the mode of tab layout
+     * One of 'switch' (default) or 'scroll'
+     */
+    mode: PropTypes.string,
+}

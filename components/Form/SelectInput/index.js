@@ -23,6 +23,7 @@ const propTypes = {
     keyExtractor: PropTypes.func,
     valueExtractor: PropTypes.func,
     onChange: PropTypes.func,
+    optionsDirection: PropTypes.string,
 };
 
 const defaultProps = {
@@ -35,6 +36,7 @@ const defaultProps = {
     valueExtractor: (item) => item.name,
     options: [],
     onChange: noop,
+    optionsDirection: 'down',
 };
 
 export default class Select extends PureComponent {
@@ -146,6 +148,7 @@ export default class Select extends PureComponent {
             placeholder,
             keyExtractor,
             valueExtractor,
+            optionsDirection,
         } = this.props;
 
         const {expanded, searchValue, selectedItem, options} = this.state;
@@ -207,7 +210,9 @@ export default class Select extends PureComponent {
                         keyExtractor={keyExtractor}
                         valueExtractor={valueExtractor}
                         loading={loading}
-                        className={cs(styles.selectOptions, 'select_options')}
+                        className={cs(styles.selectOptions, 'select_options', {
+                            [styles.selectOptionsUp]: optionsDirection==='up'
+                        })}
                         classNameItem={styles.selectOption}
                         selectedItem={selectedItem}
                         onItemClick={this.handleOptionClick}

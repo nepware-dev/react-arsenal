@@ -1,4 +1,4 @@
-import React, {useMemo, useCallback, useRef, useState} from 'react';
+import React, {useMemo, useCallback, useRef, useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 
 import List from '../List';
@@ -7,6 +7,8 @@ import TabHeader from './TabHeader';
 import TabContent from './TabContent';
 
 import cs from '../../cs';
+import {scrollToElement} from '../../utils';
+
 import styles from './styles.module.scss';
 
 const getChildren = children => React.Children.toArray(children);
@@ -22,6 +24,7 @@ const Tabs = (props) => {
         onChange,
         defaultActiveTab = getDefaultActiveTab(_children),
         activeTab: controlledActiveTab,
+        renderHeader,
         headerClassName,
         tabItemClassName,
         activeTabItemClassName,
@@ -34,16 +37,35 @@ const Tabs = (props) => {
 
     const [activeTab, setActiveTab] = useState(controlledActiveTab ? controlledActiveTab : defaultActiveTab);
 
+    const onScroll = useCallback(() => {
+        const scrollPos = document.body.scrollTop || document.documentElement.scrollTop;
+        tabsRef.current?.forEach(refElement => {
+            const elOffset = refElement.offsetTop;
+            const dims = refElement.getBoundingClientRect();
+            if(scrollPos > elOffset - dims.height && scrollPos < elOffset) {
+                const newActive = refElement.getAttribute('label');
+                if(activeTab!==newActive) {
+                    setActiveTab(newActive);
+                }
+            }
+        });
+    }, [activeTab]);
+
+    useEffect(() => {
+        if(mode==='scroll') {
+            document.addEventListener('scroll', onScroll);
+        }
+        return () => document.removeEventListener('scroll', onScroll);
+    }, [onScroll]);
+
     const tabContext = useMemo(() => ({
         selectTab: (e, index) => {
-            const selectedTab = e.target.getAttribute('label');
+            const selectedTab = e.currentTarget.getAttribute('label');
             onChange && onChange({activeTab: selectedTab, previousTab: tabContext.activeTab});
             if(!controlledActiveTab) {
                 setActiveTab(selectedTab);
                 if(mode === 'scroll' && tabsRef.current[index]) {
-                    tabsRef.current[index].scrollIntoView({
-                        behavior: 'smooth'
-                    });
+                    scrollToElement(tabsRef.current[index]);
                 }
             }
         },
@@ -55,8 +77,8 @@ const Tabs = (props) => {
 
         delete childProps.className;
 
-        return <TabHeader index={index} className={tabItemClassName} activeClassName={activeTabItemClassName} {...childProps} />;
-    }, [activeTabItemClassName, tabItemClassName]);
+        return <TabHeader renderHeader={renderHeader} index={index} className={tabItemClassName} activeClassName={activeTabItemClassName} {...childProps} />;
+    }, [activeTabItemClassName, tabItemClassName, renderHeader]);
 
     const renderTabContent = useCallback(({item: child, index}) => {
         const {title, ...childProps} = child.props;
@@ -97,6 +119,10 @@ Tabs.propTypes = {
      */
     activeTab: PropTypes.string,
     /**
+     * Render callback for header item.
+     */
+    renderHeader: PropTypes.any,
+    /**
      * Classname for header
      */
     headerClassName: PropTypes.string,
@@ -115,6 +141,7 @@ Tabs.propTypes = {
     /**
      * Decides the mode of tab layout
      * One of 'switch' (default) or 'scroll'
+     * When using scroll mode, the scroll-margin-top property on Tab will be used to calculate scroll offset.
      */
     mode: PropTypes.string,
 }

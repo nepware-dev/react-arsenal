@@ -31,7 +31,15 @@ export const InputField = (props) => {
         ...inputProps
     } = useFormContext(props);
 
-    const handleChange = useCallback(({name, value}) => {
+    const handleChange = useCallback((payload) => {
+        let name, value;
+        if(payload?.nativeEvent instanceof Event) {
+            name = payload.target.name;
+            value = payload.target.value;
+        } else {
+            name = payload.name;
+            value = payload.value;
+        }
         const updatedData = {
             ...formData,
             [name]: value,

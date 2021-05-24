@@ -114,3 +114,17 @@ export const isIntersectionObserverAvailable = () => (
     'IntersectionObserver' in window &&
     'isIntersecting' in window.IntersectionObserverEntry.prototype
 );
+
+export const scrollToElement = (element) => {
+    if(!element) {
+        return;
+    }
+    const headerOffset = getComputedStyle(element).scrollMarginTop.replace('px','');
+    const elementPosition = element.getBoundingClientRect().top;
+    const offsetPosition = elementPosition - headerOffset;
+
+    window.scrollBy({
+        top: offsetPosition,
+        behavior: "smooth"
+    });
+};

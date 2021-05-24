@@ -36,6 +36,7 @@ export default class Button extends Component {
             danger,
             outline,
             disabled,
+            type,
         } = this.props;
 
         return (
@@ -53,6 +54,7 @@ export default class Button extends Component {
                     }
                 )}
                 onClick={onClick}
+                type={type}
             >
                     {children}
             </button>

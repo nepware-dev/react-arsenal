@@ -1,5 +1,7 @@
 import React, {useCallback, useMemo, useState} from 'react';
 
+import {getErrorMessage} from '../../utils/error';
+
 import Label from './Label';
 import FormContext, {useFormContext} from './FormContext';
 
@@ -68,6 +70,7 @@ const Form = (props) => {
         onChangeData = noop,
         error,
         warning,
+        formErrorClassName,
         ...formProps
     } = props;
 
@@ -89,10 +92,28 @@ const Form = (props) => {
         onChangeData,
     }), [error, warning, formData]);
 
+    const hasFormError = useMemo(() => {
+        if(!error) {
+            return false;
+        }
+        for(let key in Object.keys(initialData)) {
+            if(error[key]) {
+                return false;
+            }
+        }
+        return true;
+    }, [initialData, error]);
+
     return (
         <FormContext.Provider value={formContext}>
             <form {...formProps} onSubmit={handleSubmitForm}>
-                {_children}
+                {_children.slice(0, -1)}
+                {hasFormError && (
+                    <div className={formErrorClassName}>
+                        <span>{getErrorMessage(error) || 'An error occured! Please try again.'}</span>
+                    </div>
+                )}
+                {_children.slice(-1)}
             </form>
         </FormContext.Provider>
     );

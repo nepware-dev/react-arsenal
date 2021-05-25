@@ -112,6 +112,7 @@ export default class List extends PureComponent {
             onEndReached,
             keyExtractor,
             component: Component,
+            contentContainerClassName,
             ListHeaderComponent,
             ListFooterComponent
         } = this.props;
@@ -134,13 +135,20 @@ export default class List extends PureComponent {
             });
         }
 
+        let ContainerComponent = React.Fragment;
+        const containerProps = {};
+        if(contentContainerClassName) {
+            ContainerComponent = 'div';
+            containerProps.className=contentContainerClassName;
+        }
+
         const props = {};
         if(onEndReached) {
             props.onScroll = this.onScroll
         }
 
         return (
-            <>
+            <ContainerComponent {...containerProps}>
                 {ListHeaderComponent && <ListHeaderComponent />}
                 <Component
                     ref={this.ref}
@@ -150,7 +158,7 @@ export default class List extends PureComponent {
                     {children}            
                 </Component>
                {ListFooterComponent && <ListFooterComponent />} 
-            </>
+            </ContainerComponent>
         );
     }
 }

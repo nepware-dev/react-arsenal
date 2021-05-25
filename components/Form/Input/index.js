@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import cs from '../../../cs';
+import {isArray} from '../../../utils'
+
 import styles from './styles.module.scss';
 
 const noop = () => {};
@@ -15,7 +17,7 @@ const propTypes = {
         current: PropTypes.elementType 
     }),
     onChange: PropTypes.func,
-    errorMessage: PropTypes.string,
+    errorMessage: PropTypes.any,
     info: PropTypes.string,
 };
 
@@ -33,6 +35,13 @@ export default class Input extends Component {
     handleChange = (event) => {
         const { onChange } = this.props;
         onChange(event.target);
+    }
+
+    getErrorMessage = () => {
+        if(isArray(this.props.errorMessage)) {
+            return this.props.errorMessage[0];
+        }
+        return this.props.errorMessage;
     }
 
     render() {
@@ -60,6 +69,8 @@ export default class Input extends Component {
             _className,
         );
 
+        const errMsg = this.getErrorMessage();
+
         return (
             <>
             <input
@@ -69,7 +80,7 @@ export default class Input extends Component {
                 {...otherProps}
             />
                 {hasInfo && <span className={styles.infoText}>{info}</span>}
-                {hasError && <span className={styles.errorText}>{errorMessage}</span>}
+                {hasError && <p className={styles.errorText}>{errMsg}</p>}
             </>
         );
     }

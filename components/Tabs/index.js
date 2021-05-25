@@ -11,10 +11,12 @@ import {scrollToElement} from '../../utils';
 
 import styles from './styles.module.scss';
 
+const noop = () => null;
+
 const getChildren = children => React.Children.toArray(children);
 const getDefaultActiveTab = children => children?.[0]?.props?.label;
 
-export const Tab = () => null;
+export const Tab = noop;
 
 const Tabs = (props) => {
     const {children} = props;
@@ -24,11 +26,15 @@ const Tabs = (props) => {
         onChange,
         defaultActiveTab = getDefaultActiveTab(_children),
         activeTab: controlledActiveTab,
+        className,
         renderHeader,
         headerClassName,
+        headerContainerClassName,
         tabItemClassName,
         activeTabItemClassName,
         contentContainerClassName,
+        renderPreHeaderComponent = noop,
+        renderPostHeaderComponent = noop,
         mode = 'switch',
     } = props;
 
@@ -77,28 +83,50 @@ const Tabs = (props) => {
 
         delete childProps.className;
 
-        return <TabHeader renderHeader={renderHeader} index={index} className={tabItemClassName} activeClassName={activeTabItemClassName} {...childProps} />;
+        return (
+            <TabHeader 
+                renderHeader={renderHeader} 
+                index={index} 
+                className={tabItemClassName} 
+                activeClassName={activeTabItemClassName} 
+                {...childProps} 
+            />
+        );
     }, [activeTabItemClassName, tabItemClassName, renderHeader]);
 
     const renderTabContent = useCallback(({item: child, index}) => {
         const {title, ...childProps} = child.props;
-        return <TabContent mode={mode} ref={el => tabsRef.current[index] = el} {...childProps} />;
+        return (
+            <TabContent 
+                mode={mode} 
+                ref={el => tabsRef.current[index] = el} 
+                {...childProps} 
+            />
+        );
     }, [mode]);
+
+    const PreHeader = renderPreHeaderComponent;
+    const PostHeader = renderPostHeaderComponent;
 
     return (
         <TabContext.Provider value={tabContext}>
-            <List
-                className={cs(headerClassName, styles.header)}
-                data={_children}
-                keyExtractor={item => item.label}
-                renderItem={renderTabHeader}
-            />
-            <List
-                className={contentContainerClassName}
-                data={_children}
-                keyExtractor={item => item.label}
-                renderItem={renderTabContent}
-            />
+            <div className={className}>
+                <List
+                    className={cs(headerClassName, styles.header)}
+                    data={_children}
+                    keyExtractor={item => item.label}
+                    renderItem={renderTabHeader}
+                    contentContainerClassName={headerContainerClassName}
+                    ListHeaderComponent={() => <PreHeader />}
+                    ListFooterComponent={() => <PostHeader />}
+                />
+                <List
+                    className={contentContainerClassName}
+                    data={_children}
+                    keyExtractor={item => item.label}
+                    renderItem={renderTabContent}
+                />
+            </div>
         </TabContext.Provider>
     );
 };

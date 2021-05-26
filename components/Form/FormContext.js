@@ -11,9 +11,10 @@ export function useFormContext(props) {
         formData, 
         setFormData,
         onChangeData,
+        emptyFields,
     } = context;
 
-    return {...props, error, warning, formData, setFormData, onChangeData};
+    return {...props, error, warning, formData, setFormData, onChangeData, emptyFields};
 }
 
 export default FormContext;

@@ -18,6 +18,10 @@ const getInputFields = (childComponents) => {
     }, {});
 };
 
+const getRequiredFields = (childComponents) => {
+    return childComponents.filter(child => child.type.name==='InputField' && child.props.required).map(el => el.props.name);
+}
+
 export const InputField = (props) => {
     const {
         error, 
@@ -30,6 +34,7 @@ export const InputField = (props) => {
         containerClassName,
         onChange,
         onChangeData,
+        emptyFields,
         ...inputProps
     } = useFormContext(props);
 
@@ -56,6 +61,7 @@ export const InputField = (props) => {
             <Component 
                 errorMessage={error?.[inputProps.name]}
                 warning={warning?.[inputProps.name]}
+                showRequired={emptyFields.some(field => field===inputProps.name)}
                 onChange={onChange ? onChange : handleChange}
                 {...inputProps} 
             />
@@ -76,11 +82,18 @@ const Form = (props) => {
 
     const _children = React.useMemo(() => getChildren(children), [children]);
     const initialData = React.useMemo(() => getInputFields(_children), [_children]);
+    const requiredFields = React.useMemo(() => getRequiredFields(_children), [_children]);
 
     const [formData, setFormData] = useState(initialData);
+    const [emptyFields, setEmptyFields] = useState([]);
 
     const handleSubmitForm = useCallback((event) => {
         event.preventDefault();
+        const emptyFields = requiredFields.filter(field => !formData[field]);
+        if(emptyFields.length!==0) {
+            return setEmptyFields(emptyFields);
+        }
+        setEmptyFields([]);
         onSubmit(formData);
     }, [onSubmit, formData]);
 
@@ -90,13 +103,14 @@ const Form = (props) => {
         formData,
         setFormData,
         onChangeData,
-    }), [error, warning, formData]);
+        emptyFields,
+    }), [error, warning, formData, emptyFields]);
 
     const hasFormError = useMemo(() => {
         if(!error) {
             return false;
         }
-        for(let key in Object.keys(initialData)) {
+        for(let key of Object.keys(initialData)) {
             if(error[key]) {
                 return false;
             }

@@ -5,11 +5,14 @@ import Input from '../Input';
 import Options from './Options';
 import Icon from '../../Icon';
 import cs from '../../../cs';
+import {isArray} from '../../../utils';
+
 import styles from './styles.module.scss';
 
 const noop = () => {};
 
 const propTypes = {
+    name: PropTypes.string,
     className: PropTypes.string,
     controlClassName: PropTypes.string,
     searchable: PropTypes.bool,
@@ -24,6 +27,7 @@ const propTypes = {
     valueExtractor: PropTypes.func,
     onChange: PropTypes.func,
     optionsDirection: PropTypes.string,
+    errorMessage: PropTypes.any,
 };
 
 const defaultProps = {
@@ -89,7 +93,7 @@ export default class Select extends PureComponent {
             selectedItem: null,
         });
         this.hideOption();
-        onChange && onChange(null);
+        onChange && onChange({name: this.props.name, option: null});
     };
 
     handleClickOutside = (event) => {
@@ -113,7 +117,7 @@ export default class Select extends PureComponent {
         this.setState({selectedItem: item});
         this.hideOption();
 
-        onChange && onChange(item);
+        onChange && onChange({name: this.props.name, option: item});
     };
 
     showOption = () => {
@@ -131,11 +135,18 @@ export default class Select extends PureComponent {
     filterOptions = (searchValue) => {
         return this.props.options.filter((d) =>
             this.props
-                .valueExtractor(d)
-                .toLowerCase()
-                .includes(searchValue.toLowerCase())
+            .valueExtractor(d)
+            .toLowerCase()
+            .includes(searchValue.toLowerCase())
         );
     };
+
+    getErrorMessage = () => {
+        if(isArray(this.props.errorMessage)) {
+            return this.props.errorMessage[0];
+        }
+        return this.props.errorMessage;
+    }
 
     render() {
         const {
@@ -165,60 +176,67 @@ export default class Select extends PureComponent {
             },
             _className
         );
+
+        const errMsg = this.getErrorMessage();
+
         return (
-            <div ref={this.wrapperRef} className={className}>
-                <div
-                    className={cs(styles.selectControl, 'select-control', controlClassName)}
-                    onClick={this.handleCaretClick}
-                >
-                    <div className={cs(styles.selectValue, 'select-value')}>
-                        {searchable && (
-                            <Input
-                                inputRef={this.inputRef}
-                                value={searchValue}
-                                className={styles.input}
-                                onChange={this.handleInputChange}
-                            />
-                        )}
-                        {showPlaceholder && (
-                            <div className={styles.placeholder}>{placeholder}</div>
-                        )}
-                        {showValue && (
-                            <div className={styles.value}>{valueExtractor(selectedItem)}</div>
-                        )}
-                    </div>
-                    <div className={cs(styles.selectIndicator, 'select-indicator')}>
-                        {loading && (
-                            <Icon name="fas fa-spinner fa-spin" className={styles.loading} />
-                        )}
-                        {showClose && (
+            <>
+                <div ref={this.wrapperRef} className={className}>
+                    <div
+                        className={cs(styles.selectControl, 'select-control', controlClassName)}
+                        onClick={this.handleCaretClick}
+                    >
+                        <div className={cs(styles.selectValue, 'select-value')}>
+                            {searchable && (
+                                <Input
+                                    inputRef={this.inputRef}
+                                    value={searchValue}
+                                    className={styles.input}
+                                    onChange={this.handleInputChange}
+                                />
+                            )}
+                            {showPlaceholder && (
+                                <div className={styles.placeholder}>{placeholder}</div>
+                            )}
+                            {showValue && (
+                                <div className={styles.value}>{valueExtractor(selectedItem)}</div>
+                            )}
+                        </div>
+                        <div className={cs(styles.selectIndicator, 'select-indicator')}>
+                            {loading && (
+                                <Icon name="fas fa-spinner fa-spin" className={styles.loading} />
+                            )}
+                            {showClose && (
+                                <Icon
+                                    name="ion-md-close"
+                                    className={styles.clear}
+                                    onClick={this.handleClearIconClick}
+                                />
+                            )}
                             <Icon
-                                name="ion-md-close"
-                                className={styles.clear}
-                                onClick={this.handleClearIconClick}
+                                name="ion-md-arrow-dropdown"
+                                onClick={this.handleCaretClick}
                             />
-                        )}
-                        <Icon
-                            name="ion-md-arrow-dropdown"
-                            onClick={this.handleCaretClick}
-                        />
+                        </div>
                     </div>
+                    {expanded && (
+                        <Options
+                            data={options}
+                            keyExtractor={keyExtractor}
+                            valueExtractor={valueExtractor}
+                            loading={loading}
+                            className={cs(styles.selectOptions, 'select_options', {
+                                [styles.selectOptionsUp]: optionsDirection==='up'
+                            })}
+                            classNameItem={styles.selectOption}
+                            selectedItem={selectedItem}
+                            onItemClick={this.handleOptionClick}
+                        />
+                    )}
                 </div>
-                {expanded && (
-                    <Options
-                        data={options}
-                        keyExtractor={keyExtractor}
-                        valueExtractor={valueExtractor}
-                        loading={loading}
-                        className={cs(styles.selectOptions, 'select_options', {
-                            [styles.selectOptionsUp]: optionsDirection==='up'
-                        })}
-                        classNameItem={styles.selectOption}
-                        selectedItem={selectedItem}
-                        onItemClick={this.handleOptionClick}
-                    />
-                )}
-            </div>
+                {!!errMsg && <span className={styles.errorText}>{errMsg}</span>}
+            </>
+
         );
     }
 }

@@ -8,6 +8,7 @@ import FormContext, {useFormContext} from './FormContext';
 const getChildren = children => React.Children.toArray(children);
 
 const noop = () => {};
+const defaultValueExtractor = item => item.value;
 
 const getInputFields = (childComponents) => {
     return childComponents.reduce((acc, curValue) => {
@@ -35,6 +36,7 @@ export const InputField = (props) => {
         onChange,
         onChangeData,
         emptyFields,
+        fieldValueExtractor = defaultValueExtractor,
         ...inputProps
     } = useFormContext(props);
 
@@ -45,7 +47,7 @@ export const InputField = (props) => {
             value = payload.target.value;
         } else {
             name = payload.name;
-            value = payload.value;
+            value = fieldValueExtractor(payload);
         }
         const updatedData = {
             ...formData,
@@ -55,16 +57,20 @@ export const InputField = (props) => {
         onChangeData(updatedData);
     }, [setFormData, formData]);
 
+    const fieldProps = {
+        onChange: onChange?onChange:handleChange,
+        ...inputProps
+    };
+    if (Component.prototype?.isReactComponent) {
+        fieldProps.errorMessage = error?.[inputProps.name];
+        fieldProps.warning = warning?.[inputProps.name];
+        fieldProps.showRequired = emptyFields.some(field => field===inputProps.name);
+    }
+
     return (
         <div className={containerClassName}>
             {!!label && <Label className={labelClassName}>{label}</Label>}
-            <Component 
-                errorMessage={error?.[inputProps.name]}
-                warning={warning?.[inputProps.name]}
-                showRequired={emptyFields.some(field => field===inputProps.name)}
-                onChange={onChange ? onChange : handleChange}
-                {...inputProps} 
-            />
+            <Component {...fieldProps} />
         </div>
     );
 };

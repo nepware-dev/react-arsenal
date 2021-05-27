@@ -79,3 +79,8 @@
     cursor: pointer;
   }
 }
+
+.errorText {
+  color: var(--color-danger);
+  font-size: 12px;
+}

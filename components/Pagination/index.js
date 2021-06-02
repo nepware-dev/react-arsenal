@@ -82,7 +82,7 @@ const Pagination = ({
     const pages = fetchPageNumbers(totalPages, currentPage, pageNeighbours);
 
     const gotoPage = useCallback(page => {
-        const currentPage = Math.max(0, Math.min(page, totalPages));
+        const currentPage = Math.max(1, Math.min(page, totalPages));
 
         setCurrentPage(currentPage);
         onChange({

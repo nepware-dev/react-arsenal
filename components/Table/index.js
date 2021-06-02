@@ -20,7 +20,7 @@ const Table = ({
 }) => {
     const visibleData = useMemo(() => {
         const initIndex = (page - 1) * maxRows;
-        return data.slice(initIndex, initIndex + maxRows)
+        return data.slice(initIndex, initIndex + maxRows);
     }, [data, maxRows, page]);
 
     const Header = useMemo(() => {

@@ -4,7 +4,7 @@ export const isObject = (obj) => {
     }
 
     return  typeof obj === 'object' &&
-    ['Array', 'Object'].includes(obj.constructor.name);
+        ['Array', 'Object'].includes(obj.constructor.name);
 };
 
 export const isArray = Array.isArray;
@@ -105,8 +105,19 @@ export const throttle = (fn, wait, options = {}) => {
     };
 };
 
+export const debounce = (fn, wait) => {
+    let timer = null;
+    return function (...args) {
+        const context = this;
+        timer && clearTimeout(timer);
+        timer = setTimeout(() => {
+            fn.apply(context, args);
+        }, wait);
+    };
+}
+
 export const sleep = (milliseconds) => {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 export const isIntersectionObserverAvailable = () => (

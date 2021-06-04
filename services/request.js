@@ -12,7 +12,7 @@ const request = (baseUrl, originalFetch, interceptors) => {
             originalFetch(request).then(async response => {
                 interceptors.response.forEach(f => f(response, request, controller));
                 let data;
-                if(/application\/json/.test(response.headers.get('Content-Type'))) {
+                if(/application\/.*json.*$/.test(response.headers.get('Content-Type'))) {
                     data = await response.json();
                 } else if(/text/.test(response.headers.get('Content-Type'))) {
                     data = await response.text();

@@ -12,7 +12,7 @@ const defaultValueExtractor = item => item.value;
 
 const getInputFields = (childComponents) => {
     return childComponents.reduce((acc, curValue) => {
-        if(curValue.type.name==='InputField') {
+        if(curValue.type===InputField) {
             return (acc[curValue.props.name]=curValue.props.defaultValue, acc);
         }
         return acc;
@@ -20,8 +20,8 @@ const getInputFields = (childComponents) => {
 };
 
 const getRequiredFields = (childComponents) => {
-    return childComponents.filter(child => child.type.name==='InputField' && child.props.required).map(el => el.props.name);
-}
+    return childComponents.filter(child => child.type===InputField && child.props.required).map(el => el.props.name);
+};
 
 export const InputField = (props) => {
     const {

@@ -1,7 +1,6 @@
 .selectContainer {
   display: flex;
   position: relative;
-  font-size: var(--font-size-normal);
 
   &.disabled {
     pointer-events: none;
@@ -12,10 +11,14 @@
     display: flex;
     flex: 1;
     flex-direction: row;
-    padding: 3px 8px;
+    padding: 0.5em 0.8em;
     background-color: var(--color-background);
-    border: 1px solid rgba(34,36,38,0.15);
+    border: 1px solid rgba(34, 36, 38, 0.15);
     border-radius: var(--border-radius-small);
+
+    &.selected {
+      border-color: var(--color-input-outline);
+    }
 
     .input {
       width: 100%;
@@ -65,7 +68,7 @@
     padding-top: 4px;
     padding-bottom: 4px;
     background-color: var(--color-background);
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 4px 11px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0 0 0 1px, rgba(0, 0, 0, 0.1) 0 4px 11px;
     border-radius: var(--border-radius-small);
     z-index: 1;
   }

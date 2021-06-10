@@ -183,7 +183,12 @@ export default class Select extends PureComponent {
             <>
                 <div ref={this.wrapperRef} className={className}>
                     <div
-                        className={cs(styles.selectControl, 'select-control', controlClassName)}
+                    className={cs(
+                        styles.selectControl,
+                        'select-control',
+                        controlClassName,
+                        [styles.selected, expanded],
+                    )}
                         onClick={this.handleCaretClick}
                     >
                         <div className={cs(styles.selectValue, 'select-value')}>

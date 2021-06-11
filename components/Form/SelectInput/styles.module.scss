@@ -12,10 +12,10 @@
     flex: 1;
     flex-direction: row;
     padding: 0.5em 0.8em;
-    background-color: var(--color-background);
     border: 1px solid rgba(34, 36, 38, 0.15);
     border-radius: var(--border-radius-small);
 
+    &:hover,
     &.selected {
       border-color: var(--color-input-outline);
     }

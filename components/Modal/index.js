@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import FocusTrap from 'focus-trap-react';
+import FocusLock from 'react-focus-lock';
 
 import Portal from '../Portal';
+import withVisibleCheck from '../WithVisibleCheck';
 import styles from './styles.module.scss';
 import cs from '../../cs';
 
@@ -30,7 +31,7 @@ const defaultProps = {
     onClose: noop,
 };
 
-export default class Modal extends React.PureComponent {
+class Modal extends React.PureComponent {
     static propTypes = propTypes;
     static defaultProps = defaultProps;
 
@@ -105,7 +106,7 @@ export default class Modal extends React.PureComponent {
 
         return (
             <Portal>
-                <FocusTrap>
+                <FocusLock>
                     <div className={overlayClassName}>
                         <div
                             ref={this.wrapperRef}
@@ -114,8 +115,10 @@ export default class Modal extends React.PureComponent {
                                 { children }
                         </div>
                     </div>
-                </FocusTrap>
+                </FocusLock>
             </Portal>
         );
     }
 }
+
+export default withVisibleCheck(Modal);

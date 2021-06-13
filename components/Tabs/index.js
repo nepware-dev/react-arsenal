@@ -45,7 +45,7 @@ const Tabs = (props) => {
 
     const onScroll = useCallback(() => {
         const scrollPos = document.body.scrollTop || document.documentElement.scrollTop;
-        tabsRef.current?.forEach(refElement => {
+        return tabsRef.current?.forEach(refElement => {
             const elOffset = refElement.offsetTop;
             const dims = refElement.getBoundingClientRect();
             if(scrollPos > elOffset - dims.height && scrollPos < elOffset) {

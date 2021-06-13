@@ -1,6 +1,8 @@
 import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
 
+import {FiChevronDown} from 'react-icons/fi';
+
 import Input from '../Input';
 import Options from './Options';
 import Icon from '../../Icon';
@@ -218,8 +220,8 @@ export default class Select extends PureComponent {
                                     onClick={this.handleClearIconClick}
                                 />
                             )}
-                            <Icon
-                                name="ion-md-arrow-dropdown"
+                            <FiChevronDown
+                                size={16}
                                 onClick={this.handleCaretClick}
                             />
                         </div>

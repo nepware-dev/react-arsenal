@@ -37,7 +37,8 @@ export default class Options extends PureComponent {
             keyExtractor,
         } = this.props;
 
-        const _onItemClick = () => {
+        const _onItemClick = (event) => {
+            event.stopPropagation();
             onItemClick({item});
         }
 

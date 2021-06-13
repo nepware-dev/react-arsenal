@@ -11,7 +11,10 @@ const noop = () => {};
 
 const propTypes = {
     className: PropTypes.string,
-    size: PropTypes.number,
+    size: PropTypes.oneOfType([
+        PropTypes.number,
+        PropTypes.string,
+    ]).isRequired,
     value: PropTypes.string,
     required: PropTypes.bool,
     disabled: PropTypes.bool,
@@ -25,7 +28,7 @@ const propTypes = {
 
 const defaultProps = {
     className: '',
-    size: 16,
+    size: '1em',
     required: false,
     disabled: false,
     onChange: noop,
@@ -76,7 +79,7 @@ const CheckboxInput = ({
 
     return (
         <>
-        <div className={className} style={{fontSize: `${size}px`}}>
+        <div className={className} style={{fontSize: size}}>
             <input
                 ref={inputRef}
                 type='checkbox'

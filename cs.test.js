@@ -17,7 +17,7 @@ it('remove false values from object', () => {
 });
 
 it('remove false values from array', () => {
-    const input = ['name', false, [ 'name1', true]];
+    const input = ['name', false, [ 'name1', true], [ 'name2', false]];
     const result = cs(...input);
     const expected = 'name name1';
 

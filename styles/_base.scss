@@ -6,7 +6,10 @@
 
 :root {
   --color-background: white;
+  --color-background-alt: #f8f8f8;
+
   --color-text: #505050;
+  --color-text-light: #8c8c8c;
 
   --color-border: #dadada;
   --color-input-outline: #b6def7;
@@ -22,9 +25,12 @@
   --color-warning-text: white;
   --color-danger: #d9534f;
   --color-danger-text: white;
+
+  --color-list-highlight: #ececec;
+  --color-list-highlight-alt: #e0e0e0;
   
   --font-size-small: 12px;
   --font-size-normal: 14px;
 
-  --font-size-input: 12px;
+  --font-size-input: 14px;
 }

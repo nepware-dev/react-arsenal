@@ -53,7 +53,8 @@
     }
   }
 
-  &:hover .checkbox {
+  &:hover,
+  &:focus .checkbox {
     border-color: var(--color-input-outline);
   }
 }

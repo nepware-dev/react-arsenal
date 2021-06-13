@@ -11,4 +11,7 @@
 html {
   font-family: "Nunito Sans", -apple-system, ".SFNSText-Regular", "San Francisco", BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
   -webkit-text-size-adjust: 100%;
+
+  /* smooth scroll */
+  scroll-behavior: smooth;
 }

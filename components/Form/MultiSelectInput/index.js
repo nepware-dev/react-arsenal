@@ -1,0 +1,194 @@
+import React, {useState, useMemo, useCallback} from 'react';
+import PropTypes from 'prop-types';
+
+import {IoSearchOutline} from 'react-icons/io5';
+import {FiChevronDown} from 'react-icons/fi';
+
+import Input from '../Input';
+import Popup from '../../Popup';
+import Modal from '../../Modal';
+import Options from './Options';
+import SelectControl from './SelectControl';
+import Icon from '../../Icon';
+import cs from '../../../cs';
+import {isArray} from '../../../utils';
+
+import styles from './styles.module.scss';
+
+const noop = () => {};
+
+const propTypes = {
+    name: PropTypes.string,
+    className: PropTypes.string,
+    controlClassName: PropTypes.string,
+    searchable: PropTypes.bool,
+    clearable: PropTypes.bool, //TODO
+    disabled: PropTypes.bool,
+    loading: PropTypes.bool,
+    value: PropTypes.string,
+    defaultValue: PropTypes.any,
+    placeholder: PropTypes.string,
+    options: PropTypes.array,
+    keyExtractor: PropTypes.func,
+    valueExtractor: PropTypes.func,
+    onChange: PropTypes.func,
+    optionsDirection: PropTypes.string,
+    errorMessage: PropTypes.any,
+    renderOptionLabel: PropTypes.func,
+    renderControlLabel: PropTypes.func,
+};
+
+const defaultProps = {
+    searchable: true,
+    clearable: true,
+    disabled: false,
+    loading: false,
+    placeholder: 'Select...',
+    keyExtractor: (item) => item.id,
+    valueExtractor: (item) => item.name,
+    options: [],
+    onChange: noop,
+    optionsDirection: 'down',
+};
+
+const MultiSelect = ({
+    className: _className,
+    controlClassName,
+    loading,
+    disabled,
+    clearable,
+    searchable,
+    placeholder,
+    keyExtractor,
+    valueExtractor,
+    options,
+    onChange,
+    optionsDirection,
+    renderOptionLabel,
+    renderControlLabel,
+}) => {
+
+    const [expanded, setExpanded] = useState(false);
+    const [searchValue, setSearchValue] = useState('');
+    const [selectedItems, setSelectedItems] = useState([]);
+
+    const wrapperRef = React.createRef();
+
+    const className = cs(
+        styles.selectContainer,
+        {
+            disabled,
+            [styles.disabled]: disabled,
+            [styles.expanded]: expanded,
+        },
+        _className
+    );
+
+    const handleCaretClick = useCallback((event) => {
+        event.stopPropagation();
+        setExpanded(!expanded);
+    });
+
+    const handleSearchValueChange = useCallback(({value}) => {
+        setSearchValue(value);
+    });
+
+    const filterOptions = useCallback((searchValue) => {
+        return options.filter((d) =>
+            valueExtractor(d)
+            .toLowerCase()
+            .includes(searchValue.toLowerCase())
+        );
+    });
+
+    const filteredOptions = useMemo(() => filterOptions(searchValue), [searchValue]);
+
+    const handleAddItem = ({item}) => {
+        const newSelectedItems = [...selectedItems, item];
+        setSelectedItems(newSelectedItems);
+        onChange(newSelectedItems);
+    };
+
+    const handleRemoveItem = ({item}) => {
+        const newSelectedItems = selectedItems.filter(i => keyExtractor(item) != keyExtractor(i));
+        setSelectedItems(newSelectedItems);
+        onChange(newSelectedItems);
+    };
+
+    const handleStateChangeItem = ({item}) => {
+        const index = selectedItems.findIndex(i => keyExtractor(item) === keyExtractor(i));
+        selectedItems.splice(index, 1, item);
+        const newSelectedItems = [...selectedItems];
+        setSelectedItems(newSelectedItems);
+        onChange(newSelectedItems);
+    };
+
+    return (
+        <>
+            <div ref={wrapperRef} className={className} tabIndex="0">
+                <SelectControl
+                    controlClassName={controlClassName}
+                    placeholder={placeholder}
+                    loading={loading}
+                    expanded={expanded}
+                    maxItems={5}
+                    handleCaretClick={handleCaretClick}
+                    selectedItems={selectedItems}
+                    keyExtractor={keyExtractor}
+                    valueExtractor={valueExtractor}
+                    renderControlLabel={renderControlLabel}
+                />
+                <Popup
+                    isVisible={expanded}
+                    className={styles.popup}
+                    anchor={wrapperRef}
+                    onClose={handleCaretClick}
+                >
+                    <SelectControl
+                        controlClassName={controlClassName}
+                        placeholder={placeholder}
+                        loading={loading}
+                        expanded={expanded}
+                        editable
+                        handleCaretClick={handleCaretClick}
+                        selectedItems={selectedItems}
+                        keyExtractor={keyExtractor}
+                        valueExtractor={valueExtractor}
+                        onItemRemove={handleRemoveItem}
+                        renderControlLabel={renderControlLabel}
+                    />
+                    <div className={styles.searchContainer}>
+                        <Input
+                            placeholder="Search"
+                            className={styles.search}
+                            value={searchValue}
+                            onChange={handleSearchValueChange}
+                        />
+                        <IoSearchOutline className={styles.icon}/>
+                    </div>
+                    <Options
+                        data={filteredOptions}
+                        keyExtractor={keyExtractor}
+                        valueExtractor={valueExtractor}
+                        anchor={wrapperRef}
+                        loading={loading}
+                        className={cs(styles.selectOptions, 'select_options', {
+                            [styles.selectOptionsUp]: optionsDirection==='up'
+                        })}
+                        classNameItem={styles.selectOption}
+                        selectedItems={selectedItems}
+                        onItemAdd={handleAddItem}
+                        onItemRemove={handleRemoveItem}
+                        onItemStateChange={handleStateChangeItem}
+                        renderItemLabel={renderOptionLabel}
+                    />
+                </Popup>
+            </div>
+        </>
+    );
+}
+
+MultiSelect.propTypes = propTypes;
+MultiSelect.defaultProps = defaultProps;
+
+export default MultiSelect;

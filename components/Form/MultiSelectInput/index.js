@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useCallback} from 'react';
+import React, {useState, useMemo, useCallback, useEffect} from 'react';
 import PropTypes from 'prop-types';
 
 import {IoSearchOutline} from 'react-icons/io5';
@@ -52,6 +52,7 @@ const defaultProps = {
 };
 
 const MultiSelect = ({
+    name,
     className: _className,
     controlClassName,
     loading,
@@ -63,6 +64,7 @@ const MultiSelect = ({
     valueExtractor,
     options,
     onChange,
+    defaultValue,
     optionsDirection,
     renderOptionLabel,
     renderControlLabel,
@@ -71,6 +73,13 @@ const MultiSelect = ({
     const [expanded, setExpanded] = useState(false);
     const [searchValue, setSearchValue] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
+
+    useEffect(async () => {
+        if(defaultValue.length) {
+            setSelectedItems(defaultValue);
+            onChange({name, value: defaultValue});
+        }
+    }, [defaultValue]);
 
     const wrapperRef = React.createRef();
 
@@ -94,25 +103,26 @@ const MultiSelect = ({
     });
 
     const filterOptions = useCallback((searchValue) => {
+    }, [options]);
+
+    const filteredOptions = useMemo(() => {
         return options.filter((d) =>
             valueExtractor(d)
             .toLowerCase()
             .includes(searchValue.toLowerCase())
         );
-    });
-
-    const filteredOptions = useMemo(() => filterOptions(searchValue), [searchValue]);
+    }, [searchValue, options, valueExtractor]);
 
     const handleAddItem = ({item}) => {
         const newSelectedItems = [...selectedItems, item];
         setSelectedItems(newSelectedItems);
-        onChange(newSelectedItems);
+        onChange({name, value: newSelectedItems});
     };
 
     const handleRemoveItem = ({item}) => {
         const newSelectedItems = selectedItems.filter(i => keyExtractor(item) != keyExtractor(i));
         setSelectedItems(newSelectedItems);
-        onChange(newSelectedItems);
+        onChange({name, value: newSelectedItems});
     };
 
     const handleStateChangeItem = ({item}) => {
@@ -120,7 +130,7 @@ const MultiSelect = ({
         selectedItems.splice(index, 1, item);
         const newSelectedItems = [...selectedItems];
         setSelectedItems(newSelectedItems);
-        onChange(newSelectedItems);
+        onChange({name, value: newSelectedItems});
     };
 
     return (

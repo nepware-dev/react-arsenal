@@ -1,28 +1,42 @@
-import {useState, useEffect} from 'react';
+import {useReducer, useCallback} from 'react';
 
-import fetcher from './fetcher';
+const initialState = {
+  loading: false,
+  error: false,
+  data: null, //TODO: add request too
+};
 
-const useRequest = (url, options) => {
-  const [state, setState] = useState({
-    loading: false,
-    error: false,
-    data: null,
-    request: null,
-  });
+const useRequest = (fn, options) => {
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setState({...state, loading: true});
-        const {error, data, response} = await fetcher(url, options);
-        setState({...state, loading: false, error, data, response});
-      } catch (error) {
-        setState({...state, loading: false, error});
-      }
-    };
-    fetchData();
-  }, []);
-  return state;
+  const [state, dispatch] = useReducer((state, action) => {
+    switch(action.type) {
+      case 'FETCHING':
+        return {...initialState, loading: true};
+      case 'FETCHED':
+        return {...initialState, data: action.data};
+      case 'FETCH_ERROR':
+        return {...initialState, error: action.error};
+      default:
+        return state;
+    }
+  }, initialState);
+
+  const callApi = useCallback(async (...args) => {
+
+    const context = this;
+
+    dispatch({type: 'FETCHING'});
+    try {
+      const data = await fn(...args);
+      dispatch({type: 'FETCHED', data});
+      return data;
+    } catch (err) {
+      dispatch({type: 'FETCH_ERROR', err});
+      throw err;
+    }
+  }, [fn, options]);
+
+  return [state, callApi];
 };
 
 export default useRequest;

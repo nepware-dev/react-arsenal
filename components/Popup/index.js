@@ -51,8 +51,8 @@ const Popup = ({
     const transformWrapperRect = useCallback((rect) => {
         //TODO: transform the position of wrapper to left, right and center in respect to horizontal and vertical position
         return {
-            top: rect.bottom,
-            left: rect.left,
+            top: rect.bottom + window.pageYOffset,
+            left: rect.left + window.pageXOffset,
             transform: 'translateY(-100%)',
         }
     });

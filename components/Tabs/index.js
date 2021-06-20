@@ -45,16 +45,17 @@ const Tabs = (props) => {
 
     const onScroll = useCallback(() => {
         const scrollPos = document.body.scrollTop || document.documentElement.scrollTop;
-        return tabsRef.current?.forEach(refElement => {
-            const elOffset = refElement.offsetTop;
-            const dims = refElement.getBoundingClientRect();
-            if(scrollPos > elOffset - dims.height && scrollPos < elOffset) {
-                const newActive = refElement.getAttribute('label');
-                if(activeTab!==newActive) {
-                    setActiveTab(newActive);
-                }
-            }
+        const clientHeight = document.documentElement.clientHeight;
+        const newActiveElement = tabsRef.current?.find(refElement => {
+            const elOffset = refElement?.offsetTop;
+            const height = refElement?.getBoundingClientRect()?.height;
+            const offsetHeight = height > clientHeight ? height/2 : height;
+            return scrollPos > elOffset - offsetHeight && scrollPos < elOffset;
         });
+        const newActiveTab = newActiveElement?.getAttribute('label');
+        if(newActiveTab && activeTab!==newActiveTab) {
+            setActiveTab(newActiveTab);
+        }
     }, [activeTab]);
 
     useEffect(() => {
@@ -69,13 +70,13 @@ const Tabs = (props) => {
             const selectedTab = e.currentTarget.getAttribute('label');
             onChange && onChange({activeTab: selectedTab, previousTab: tabContext.activeTab});
             if(!controlledActiveTab) {
-                setActiveTab(selectedTab);
                 if(mode === 'scroll' && tabsRef.current[index]) {
-                    scrollToElement(tabsRef.current[index]);
+                    return scrollToElement(tabsRef.current[index]);
                 }
+                setActiveTab(selectedTab);
             }
         },
-        activeTab: controlledActiveTab?controlledActiveTab:activeTab
+        activeTab: controlledActiveTab ? controlledActiveTab : activeTab
     }), [activeTab, mode, onChange, controlledActiveTab]);
 
     const renderTabHeader = useCallback(({item: child, index}) => {

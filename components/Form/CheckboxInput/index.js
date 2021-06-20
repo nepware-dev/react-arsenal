@@ -81,6 +81,7 @@ const CheckboxInput = ({
         <>
         <div className={className} style={{fontSize: size}}>
             <input
+                disabled={disabled}
                 ref={inputRef}
                 type='checkbox'
                 className={styles.input}

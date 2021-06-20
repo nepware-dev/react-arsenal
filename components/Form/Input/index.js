@@ -79,6 +79,7 @@ export default class Input extends Component {
             <>
                 <input
                     ref={inputRef}
+                    disabled={disabled}
                     className={className}
                     onChange={this.handleChange}
                     {...otherProps}

@@ -5,12 +5,34 @@ import List from '../List';
 import cs from '../../cs';
 import styles from './styles.module.scss';
 
+const Row = ({item, onClick, columns, className, renderDataItem}) => {
+    const handleClickRow = useCallback(() => {
+        onClick && onClick(item);
+    }, [onClick, item]);
+
+    return (
+            <tr 
+                className={cs(styles.row, className)} 
+                onClick={handleClickRow}
+            >
+                {columns.map(col => {
+                    return (
+                        <td key={col.accessor} className={styles.data}>
+                            {renderDataItem ? renderDataItem({item, column: col}) : item[col.accessor]}
+                        </td>
+                    );
+                })}
+            </tr>
+    );
+};
+
 const Table = ({
     className,
     headerClassName,
     headerRowClassName,
     bodyClassName,
     bodyRowClassName,
+    onRowClick,
     data,
     columns,
     renderHeaderItem,
@@ -39,19 +61,17 @@ const Table = ({
         );
     }, [columns, renderHeaderItem]);
 
-    const renderRow = useCallback(({item}) => {
+    const renderRow = useCallback(listProps => {
         return (
-            <tr className={cs(styles.row, bodyRowClassName)}>
-                {columns.map(col => {
-                    return (
-                        <td key={col.accessor} className={styles.data}>
-                            {renderDataItem ? renderDataItem({item, column: col}) : item[col.accessor]}
-                        </td>
-                    );
-                })}
-            </tr>
+            <Row 
+                {...listProps} 
+                onClick={onRowClick} 
+                columns={columns} 
+                renderDataItem={renderDataItem}
+                className={bodyRowClassName}
+            />
         );
-    }, [columns, renderDataItem]);
+    }, [columns, renderDataItem, bodyRowClassName, onRowClick]);
 
 
     const Body = useMemo(() => {

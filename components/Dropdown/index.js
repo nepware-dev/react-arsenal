@@ -47,7 +47,7 @@ export default class Dropdown extends React.Component {
     }
 
     onClick = () => {
-        this.state.isOpen?this.hideDropdown():this.showDropdown();
+        this.state.isOpen ? this.hideDropdown() : this.showDropdown();
     }
 
     showDropdown = () => {

@@ -1,8 +1,13 @@
 import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
 
-import {throttle} from '../../utils';
+import {throttle, transformToElement} from '../../utils';
 import styles from './styles.module.scss';
+
+const ElementOrElementType = PropTypes.oneOfType([
+    PropTypes.element,
+    PropTypes.elementType,
+]);
 
 const propTypes = {
     className: PropTypes.string,
@@ -10,20 +15,20 @@ const propTypes = {
     loading: PropTypes.bool,
     keyExtractor: PropTypes.func.isRequired,
     renderItem: PropTypes.func.isRequired,
-    emptyComponent: PropTypes.elementType,
-    loadingComponent: PropTypes.elementType,
     onEndReachedThreshold: PropTypes.number,
     onEndReached: PropTypes.func,
     component: PropTypes.any,
-    ListHeaderComponent: PropTypes.func,
-    ListFooterComponent: PropTypes.func
+    EmptyComponent: ElementOrElementType,
+    LoadingComponent: ElementOrElementType,
+    HeaderComponent: ElementOrElementType,
+    FooterComponent: ElementOrElementType,
 };
 
 const defaultProps = {
     className: '',
     loading: false,
     onEndReachedThreshold: 10,
-    component: "div",
+    component: 'div',
 };
 
 export default class List extends PureComponent {
@@ -65,7 +70,7 @@ export default class List extends PureComponent {
             emptyComponent: EmptyComponent,
         } = this.props;
         if(EmptyComponent) {
-            return EmptyComponent;
+            return transformToElement(EmptyComponent);
         } else {
             return (
                 <div className={styles.empty}>
@@ -80,7 +85,7 @@ export default class List extends PureComponent {
             loadingComponent: LoadingComponent,
         } = this.props;
         if(LoadingComponent) {
-            return <LoadingComponent />;
+            return transformToElement(LoadingComponent);
         } else {
             return (
                 <div className={styles.loading}>
@@ -113,8 +118,8 @@ export default class List extends PureComponent {
             keyExtractor,
             component: Component,
             contentContainerClassName,
-            ListHeaderComponent,
-            ListFooterComponent
+            HeaderComponent,
+            FooterComponent
         } = this.props;
 
         const Item = this.renderItem;
@@ -125,9 +130,9 @@ export default class List extends PureComponent {
         const children = [];
 
         if(loading) {
-            children.push(<LoadingComponent />);
+            children.push(<LoadingComponent key='loading' />);
         } else if(!data?.length) {
-            children.push(<EmptyComponent />);
+            children.push(<EmptyComponent key='empty' />);
         } else {
             data.forEach((item, index) => {
                 const key = keyExtractor(item, index);
@@ -144,12 +149,12 @@ export default class List extends PureComponent {
 
         const props = {};
         if(onEndReached) {
-            props.onScroll = this.onScroll
+            props.onScroll = this.onScroll;
         }
 
         return (
             <ContainerComponent {...containerProps}>
-                {ListHeaderComponent && <ListHeaderComponent />}
+                {HeaderComponent && transformToElement(HeaderComponent)}
                 <Component
                     ref={this.ref}
                     className={className}
@@ -157,7 +162,7 @@ export default class List extends PureComponent {
                 >
                     {children}            
                 </Component>
-               {ListFooterComponent && <ListFooterComponent />} 
+                {FooterComponent && transformToElement(FooterComponent)}
             </ContainerComponent>
         );
     }

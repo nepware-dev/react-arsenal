@@ -34,7 +34,7 @@ const request = (baseUrl, originalFetch, interceptors) => {
         }
         return url.toString();
     }
-}
+};
 
 const withRetry = (request, config) => {
     return (...args) => {
@@ -53,7 +53,7 @@ const withRetry = (request, config) => {
                         reject(error);
                     }
                 });
-            }
+            };
 
             const shouldRetry = (attempt, error, response) => {
                 if(
@@ -68,7 +68,7 @@ const withRetry = (request, config) => {
                 }
 
                 return false;
-            }
+            };
 
             const retry = async (attempt) => {
                 attempt+=1;
@@ -77,11 +77,11 @@ const withRetry = (request, config) => {
                 console.log(`[Retrying request attempt: ${attempt}, waiting for ${retryDelay}sec]`);
                 await sleep(retryDelay*1000);
                 wrappedRequest(attempt);
-            }
+            };
             wrappedRequest(0);
         });
     };
-}
+};
 
 
 class RequestBuilder {
@@ -97,7 +97,7 @@ class RequestBuilder {
             maxRetries: 5,
             statusForcelist: [429, 500, 502, 503, 504],
             backoffFactor: 0.5,
-            methodWhitelist: ["HEAD", "GET", "PUT", "PATCH","DELETE", "OPTIONS", "TRACE"],
+            methodWhitelist: ['HEAD', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'],
         };
     }
 

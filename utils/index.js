@@ -1,3 +1,5 @@
+import React from 'react';
+
 export const isObject = (obj) => {
     if(obj === null) {
         return false;
@@ -114,11 +116,11 @@ export const debounce = (fn, wait) => {
             fn.apply(context, args);
         }, wait);
     };
-}
+};
 
 export const sleep = (milliseconds) => {
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
+};
 
 export const isIntersectionObserverAvailable = () => (
     typeof window !== 'undefined' &&
@@ -130,12 +132,20 @@ export const scrollToElement = (element) => {
     if(!element) {
         return;
     }
-    const headerOffset = getComputedStyle(element).scrollMarginTop.replace('px','');
+    const headerOffset = getComputedStyle(element).scrollMarginTop.replace('px', '');
     const elementPosition = element.getBoundingClientRect().top;
     const offsetPosition = elementPosition - headerOffset;
 
     window.scrollBy({
         top: offsetPosition,
-        behavior: "smooth"
+        behavior: 'smooth'
     });
+};
+
+export const transformToElement = (Element) => {
+    return React.isValidElement(Element)? (
+        Element
+    ): (
+        <Element />
+    );
 };

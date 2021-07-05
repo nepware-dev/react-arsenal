@@ -16,6 +16,9 @@ const noop = () => null;
 const getChildren = children => React.Children.toArray(children);
 const getDefaultActiveTab = children => children?.[0]?.props?.label;
 
+const headerKeyExtractor = item => item.props.label;
+const contentKeyExtractor = item => item.props.label;
+
 export const Tab = noop;
 
 const Tabs = (props) => {
@@ -115,16 +118,16 @@ const Tabs = (props) => {
                 <List
                     className={cs(headerClassName, styles.header)}
                     data={_children}
-                    keyExtractor={item => item.label}
+                    keyExtractor={headerKeyExtractor}
                     renderItem={renderTabHeader}
                     contentContainerClassName={headerContainerClassName}
-                    ListHeaderComponent={() => <PreHeader />}
-                    ListFooterComponent={() => <PostHeader />}
+                    HeaderComponent={PreHeader}
+                    FooterComponent={PostHeader}
                 />
                 <List
                     className={contentContainerClassName}
                     data={_children}
-                    keyExtractor={item => item.label}
+                    keyExtractor={contentKeyExtractor}
                     renderItem={renderTabContent}
                 />
             </div>

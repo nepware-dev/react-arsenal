@@ -6,7 +6,7 @@ const initialState = {
     result: null,
 };
 
-const usePromise = (fn, {isLazy=True}, initialParams) => {
+const usePromise = (fn, options, initialParams=[]) => {
 
     const [state, dispatch] = useReducer((state, action) => {
         switch(action.type) {
@@ -32,10 +32,6 @@ const usePromise = (fn, {isLazy=True}, initialParams) => {
             throw err;
         }
     }, [fn, options]);
-
-    if(!isLazy) {
-        trigger(...initialParams);
-    }
 
     return [state, trigger];
 };

@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import cs from '../../../../cs';
 import Option from './Option';
 import List from '../../../List';
-import styles from './styles.module.scss';
 
 const noop = () => {};
 
@@ -40,7 +39,7 @@ export default class Options extends PureComponent {
         const _onItemClick = (event) => {
             event.stopPropagation();
             onItemClick({item});
-        }
+        };
 
         const label = valueExtractor(item);
         const selected = selectedItem && keyExtractor(item) === keyExtractor(selectedItem);
@@ -67,7 +66,7 @@ export default class Options extends PureComponent {
 
         return (
             <List
-                className={cs(styles.options, className)}
+                className={cs(className)}
                 data={data}
                 keyExtractor={keyExtractor}
                 onItemClick={onItemClick}

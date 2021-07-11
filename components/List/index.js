@@ -11,12 +11,16 @@ const ElementOrElementType = PropTypes.oneOfType([
 
 const propTypes = {
     className: PropTypes.string,
+    classNameItem: PropTypes.string,
+    contentContainerClassName: PropTypes.string,
     data: PropTypes.array.isRequired,
     loading: PropTypes.bool,
     keyExtractor: PropTypes.func.isRequired,
     renderItem: PropTypes.func.isRequired,
     onEndReachedThreshold: PropTypes.number,
     onEndReached: PropTypes.func,
+    onClick: PropTypes.func,
+    onItemClick: PropTypes.func,
     component: PropTypes.any,
     EmptyComponent: ElementOrElementType,
     LoadingComponent: ElementOrElementType,
@@ -42,11 +46,11 @@ export default class List extends PureComponent {
 
     renderItem = ({item, index}) => {
         const {
-            className: _className, // ignore
+            className: _className, // eslint-disable-line no-unused-vars
             classNameItem: className,
             renderItem: _renderItem,
-            data, // ignore
-            onClick: _onClick, // ignore
+            data, // eslint-disable-line no-unused-vars
+            onClick: _onClick, // eslint-disable-line no-unused-vars
             onItemClick: onClick,
             ...otherProps
         } = this.props;

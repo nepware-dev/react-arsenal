@@ -1,4 +1,5 @@
 import React, {useCallback, useMemo, useState} from 'react';
+import PropTypes from 'prop-types';
 
 import {getErrorMessage} from '../../utils/error';
 
@@ -55,7 +56,7 @@ export const InputField = (props) => {
         };
         setFormData(updatedData);
         onChangeData(updatedData);
-    }, [setFormData, formData]);
+    }, [setFormData, formData, onChangeData, fieldValueExtractor]);
 
     const fieldProps = {
         onChange: onChange?onChange:handleChange,
@@ -101,7 +102,7 @@ const Form = (props) => {
         }
         setEmptyFields([]);
         onSubmit(formData);
-    }, [onSubmit, formData]);
+    }, [onSubmit, formData, requiredFields]);
 
     const formContext = useMemo(() => ({
         error,
@@ -110,7 +111,7 @@ const Form = (props) => {
         setFormData,
         onChangeData,
         emptyFields,
-    }), [error, warning, formData, emptyFields]);
+    }), [error, warning, formData, emptyFields, onChangeData]);
 
     const hasFormError = useMemo(() => {
         if(!error) {
@@ -137,6 +138,18 @@ const Form = (props) => {
             </form>
         </FormContext.Provider>
     );
+};
+
+Form.propTypes = {
+    children: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.node),
+        PropTypes.node
+    ]).isRequired,
+    onSubmit: PropTypes.func.isRequired,
+    onChangeData: PropTypes.func,
+    error: PropTypes.any,
+    formErrorClassName: PropTypes.string,
+    warning: PropTypes.any,
 };
 
 export default Form;

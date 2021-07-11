@@ -1,7 +1,7 @@
 import React, {useCallback} from 'react';
-import {useTabContext} from './TabContext';
+import {useTabContext} from '../TabContext';
 
-import cs from '../../cs';
+import cs from '../../../cs';
 import styles from './styles.module.scss';
 
 const TabHeader = (props) => {

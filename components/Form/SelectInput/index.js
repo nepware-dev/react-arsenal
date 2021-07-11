@@ -146,9 +146,9 @@ export default class Select extends PureComponent {
     filterOptions = (searchValue) => {
         return this.props.options.filter((d) =>
             this.props
-            .valueExtractor(d)
-            .toLowerCase()
-            .includes(searchValue.toLowerCase())
+                .valueExtractor(d)
+                .toLowerCase()
+                .includes(searchValue.toLowerCase())
         );
     };
 
@@ -194,12 +194,12 @@ export default class Select extends PureComponent {
             <>
                 <div ref={this.wrapperRef} className={className}>
                     <div
-                    className={cs(
-                        styles.selectControl,
-                        'select-control',
-                        controlClassName,
-                        [styles.selected, expanded],
-                    )}
+                        className={cs(
+                            styles.selectControl,
+                            'select-control',
+                            controlClassName,
+                            [styles.selected, expanded],
+                        )}
                         onClick={this.handleCaretClick}
                     >
                         <div className={cs(styles.selectValue, 'select-value')}>

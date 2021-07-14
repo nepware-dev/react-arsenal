@@ -1,0 +1,30 @@
+.accordionSection {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-cards);
+    border-radius: 8px;
+    padding: 0.75em;
+
+    .accordion {
+        cursor: pointer;
+
+        .accordionTitle {
+            display: flex;
+            align-items: center;
+
+            .rightIcon {
+                margin-left: auto;
+                transition: 0.5s;
+            }
+
+            .rotateUp {
+                transform: rotate(90deg);
+            }
+        }
+    }
+
+    .accordionContent {
+        overflow: hidden;
+        transition: all 0.6s ease;
+    }
+}

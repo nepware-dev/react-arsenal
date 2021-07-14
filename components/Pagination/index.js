@@ -77,7 +77,7 @@ const Pagination = ({
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
 
-    const totalPages = Math.ceil(totalRecords / pageLimit);
+    const totalPages = Math.ceil(totalRecords / pageLimit) || 1;
 
     const pages = fetchPageNumbers(totalPages, currentPage, pageNeighbours);
 
@@ -91,17 +91,7 @@ const Pagination = ({
             pageLimit,
             totalRecords
         });
-    }, [onChange]);
-
-    useEffect(() => {
-        if(pageNum > totalPages) {
-            gotoPage(totalPages);
-        }
-    }, [pageNum, gotoPage, pageLimit]);
-
-    useEffect(() => {
-        gotoPage(1);
-    }, [gotoPage]);
+    }, [onChange, currentPage, totalPages]);
 
     const handleClick = useCallback(page => evt => {
         evt.preventDefault();

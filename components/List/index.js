@@ -67,7 +67,7 @@ export default class List extends PureComponent {
 
     renderEmptyComponent = () => {
         const {
-            emptyComponent: EmptyComponent,
+            EmptyComponent,
         } = this.props;
         if(EmptyComponent) {
             return transformToElement(EmptyComponent);
@@ -82,8 +82,9 @@ export default class List extends PureComponent {
 
     renderLoadingComponent = () => {
         const {
-            loadingComponent: LoadingComponent,
+            LoadingComponent,
         } = this.props;
+
         if(LoadingComponent) {
             return transformToElement(LoadingComponent);
         } else {

@@ -1,39 +1,39 @@
 .pagination {
-  display: inline-flex;
-  list-style-type: none;
-  margin: 0px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  padding: 0;
-  overflow: hidden;
+    display: inline-flex;
+    list-style-type: none;
+    margin: 0;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    padding: 0;
+    overflow: hidden;
 
-  .pageItem {
-    display: flex;
+    .pageItem {
+        display: flex;
 
-    .pageLink {
-      text-decoration: none;
-      min-width: 2rem;
-      min-height: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: none;
-      color: var(--color-text);
-      border-color: var(--color-primary);
-      font-weight: 500;
-      font-size: var(--font-size-small);
+        .pageLink {
+            text-decoration: none;
+            min-width: 2rem;
+            min-height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+            color: var(--color-text);
+            border-color: var(--color-primary);
+            font-weight: 500;
+            font-size: var(--font-size-small);
 
-      &.active {
-        pointer-events: none;
-        color: var(--color-primary-text);
-        background-color: var(--color-primary);
-      }
+            &.active {
+                pointer-events: none;
+                color: var(--color-primary-text);
+                background-color: var(--color-primary);
+            }
 
-      &:hover {
-        background-color: var(--color-primary);
-        color: var(--color-primary-text);
-        filter: brightness(120%);
-      }
+            &:hover {
+                background-color: var(--color-primary);
+                color: var(--color-primary-text);
+                filter: brightness(120%);
+            }
+        }
     }
-  }
 }

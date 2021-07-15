@@ -21,7 +21,7 @@ const propTypes = {
     clearable: PropTypes.bool,
     disabled: PropTypes.bool,
     loading: PropTypes.bool,
-    value: PropTypes.string,
+    value: PropTypes.any,
     defaultValue: PropTypes.any,
     placeholder: PropTypes.string,
     options: PropTypes.array,
@@ -54,7 +54,7 @@ export default class Select extends PureComponent {
         this.state = {
             expanded: false,
             searchValue: '',
-            selectedItem: props.defaultValue,
+            selectedItem: props.value ?? props.defaultValue,
             options: props.options,
         };
         this.wrapperRef = React.createRef();

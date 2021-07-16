@@ -8,6 +8,7 @@ const noop = () => {};
 
 const propTypes = {
     children: PropTypes.any,
+    style: PropTypes.object,
     className: PropTypes.string,
     onClick: PropTypes.func,
     success: PropTypes.bool,
@@ -15,6 +16,8 @@ const propTypes = {
     danger: PropTypes.bool,
     outline: PropTypes.bool,
     disabled: PropTypes.bool,
+    onMouseEnter: PropTypes.func,
+    onMouseLeave: PropTypes.func
 };
 
 const defaultProps = {
@@ -28,6 +31,7 @@ export default class Button extends Component {
 
     render() {
         const {
+            style,
             className,
             onClick,
             children,
@@ -37,10 +41,13 @@ export default class Button extends Component {
             outline,
             disabled,
             type,
+            onMouseEnter,
+            onMouseLeave
         } = this.props;
 
         return (
             <button
+                style={style}
                 className={cs(
                     styles.button,
                     className,
@@ -54,6 +61,8 @@ export default class Button extends Component {
                     }
                 )}
                 onClick={onClick}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
                 type={type}
             >
                     {children}

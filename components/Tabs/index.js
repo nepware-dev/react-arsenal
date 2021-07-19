@@ -36,8 +36,8 @@ const Tabs = (props) => {
         tabItemClassName,
         activeTabItemClassName,
         contentContainerClassName,
-        renderPreHeaderComponent = noop,
-        renderPostHeaderComponent = noop,
+        PreHeaderComponent = noop,
+        PostHeaderComponent = noop,
         mode = 'switch',
     } = props;
 
@@ -66,7 +66,7 @@ const Tabs = (props) => {
             document.addEventListener('scroll', onScroll);
         }
         return () => document.removeEventListener('scroll', onScroll);
-    }, [onScroll]);
+    }, [onScroll, mode]);
 
     const tabContext = useMemo(() => ({
         selectTab: (e, index) => {
@@ -99,7 +99,7 @@ const Tabs = (props) => {
     }, [activeTabItemClassName, tabItemClassName, renderHeader]);
 
     const renderTabContent = useCallback(({item: child, index}) => {
-        const {title, ...childProps} = child.props;
+        const {title, ...childProps} = child.props; //eslint-disable-line no-unused-vars
         return (
             <TabContent 
                 mode={mode} 
@@ -108,9 +108,6 @@ const Tabs = (props) => {
             />
         );
     }, [mode]);
-
-    const PreHeader = renderPreHeaderComponent;
-    const PostHeader = renderPostHeaderComponent;
 
     return (
         <TabContext.Provider value={tabContext}>
@@ -121,8 +118,8 @@ const Tabs = (props) => {
                     keyExtractor={headerKeyExtractor}
                     renderItem={renderTabHeader}
                     contentContainerClassName={headerContainerClassName}
-                    HeaderComponent={PreHeader}
-                    FooterComponent={PostHeader}
+                    HeaderComponent={PreHeaderComponent}
+                    FooterComponent={PostHeaderComponent}
                 />
                 <List
                     className={contentContainerClassName}
@@ -137,7 +134,16 @@ const Tabs = (props) => {
 
 export default Tabs;
 
+const ElementOrElementType = PropTypes.oneOfType([
+    PropTypes.element,
+    PropTypes.elementType,
+]);
+
 Tabs.propTypes = {
+    /**
+     * Classname for tabs container
+     */
+    className: PropTypes.string,
     /**
      * Callback called when tab is changed. Called with activeTab and previousTab values
      */
@@ -151,13 +157,24 @@ Tabs.propTypes = {
      */
     activeTab: PropTypes.string,
     /**
-     * Render callback for header item.
-     */
+     * Render callback for header item.  */
     renderHeader: PropTypes.any,
+    /**
+     * Classname for headers container
+     */
+    headerContainerClassName: PropTypes.string,
     /**
      * Classname for header
      */
     headerClassName: PropTypes.string,
+    /**
+     * Component before the header component
+     */
+    PreHeaderComponent: ElementOrElementType,
+    /**
+     * Component after the header component
+     */
+    PostHeaderComponent: ElementOrElementType,
     /**
      * Classname for each header item
      */
@@ -176,4 +193,8 @@ Tabs.propTypes = {
      * When using scroll mode, the scroll-margin-top property on Tab will be used to calculate scroll offset.
      */
     mode: PropTypes.string,
-}
+    /**
+     * Children components
+     */
+    children: PropTypes.node,
+};

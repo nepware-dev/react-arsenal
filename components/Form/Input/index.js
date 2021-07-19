@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import cs from '../../../cs';
-import {isArray} from '../../../utils'
+import {isArray} from '../../../utils';
 
 import styles from './styles.module.scss';
 
@@ -18,6 +18,8 @@ const propTypes = {
     }),
     onChange: PropTypes.func,
     errorMessage: PropTypes.any,
+    warning: PropTypes.string,
+    showRequired: PropTypes.bool,
     info: PropTypes.string,
 };
 
@@ -50,7 +52,6 @@ export default class Input extends Component {
             inputRef,
             disabled,
             required,
-            onChange,
             errorMessage,
             warning,
             showRequired,

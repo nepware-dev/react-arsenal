@@ -28,7 +28,6 @@ export const isEqual = (obj1, obj2, depth=1) => {
         return false;
     }
 
-
     // for array compare length first
     if(isArray(obj1)) {
         if(obj1.length !== obj2.length) {
@@ -152,6 +151,6 @@ export const transformToElement = (Element) => {
 
 export const uuidv4 = () => {
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> c / 4))).toString(16)
     );
 };

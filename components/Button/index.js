@@ -16,8 +16,6 @@ const propTypes = {
     danger: PropTypes.bool,
     outline: PropTypes.bool,
     disabled: PropTypes.bool,
-    onMouseEnter: PropTypes.func,
-    onMouseLeave: PropTypes.func
 };
 
 const defaultProps = {
@@ -40,9 +38,7 @@ export default class Button extends Component {
             danger,
             outline,
             disabled,
-            type,
-            onMouseEnter,
-            onMouseLeave
+            ...otherProps
         } = this.props;
 
         return (
@@ -61,11 +57,9 @@ export default class Button extends Component {
                     }
                 )}
                 onClick={onClick}
-                onMouseEnter={onMouseEnter}
-                onMouseLeave={onMouseLeave}
-                type={type}
+                {...otherProps}
             >
-                    {children}
+                {children}
             </button>
         );
     }

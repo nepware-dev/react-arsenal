@@ -1,5 +1,5 @@
 import React from 'react';
-import {useTabContext} from './TabContext';
+import {useTabContext} from '../TabContext';
 
 const TabContent = React.forwardRef((props, ref) => {
     const {active, mode} = useTabContext(props);
@@ -10,5 +10,7 @@ const TabContent = React.forwardRef((props, ref) => {
 
     return <div ref={ref} {...props} />;
 });
+
+TabContent.displayName = 'TabContent';
 
 export default TabContent;

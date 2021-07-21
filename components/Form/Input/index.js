@@ -82,8 +82,8 @@ export default class Input extends Component {
                     ref={inputRef}
                     disabled={disabled}
                     className={className}
-                    onChange={this.handleChange}
                     {...otherProps}
+                    onChange={this.handleChange}
                 />
                 {hasInfo && <span className={styles.infoText}>{info}</span>}
                 {hasError && <span className={styles.errorText}>{errMsg}</span>}

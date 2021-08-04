@@ -70,7 +70,7 @@ export default class Select extends PureComponent {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const {onChange} = this.props;
+        const {onChange, valueExtractor} = this.props;
 
         if(
             this.props.options !== prevProps.options ||
@@ -82,7 +82,7 @@ export default class Select extends PureComponent {
             });
         }
 
-        if(this.props.defaultValue !== prevProps.defaultValue) {
+        if(valueExtractor(this.props.defaultValue) !== valueExtractor(prevProps.defaultValue)) {
             this.setState({
                 selectedItem: this.props.defaultValue,
             });

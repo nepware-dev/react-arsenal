@@ -21,7 +21,7 @@ const contentKeyExtractor = item => item.props.label;
 
 export const Tab = noop;
 
-const Tabs = (props) => {
+const Tabs = React.forwardRef((props, ref) => {
     const {children} = props;
     const _children = getChildren(children);
 
@@ -111,7 +111,7 @@ const Tabs = (props) => {
 
     return (
         <TabContext.Provider value={tabContext}>
-            <div className={className}>
+            <div ref={ref} className={className}>
                 <List
                     className={cs(headerClassName, styles.header)}
                     data={_children}
@@ -130,7 +130,7 @@ const Tabs = (props) => {
             </div>
         </TabContext.Provider>
     );
-};
+});
 
 export default Tabs;
 

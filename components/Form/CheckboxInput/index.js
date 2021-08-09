@@ -1,7 +1,6 @@
 import React, {useCallback} from 'react';
 import PropTypes from 'prop-types';
 
-import Input from '../Input';
 import cs from '../../../cs';
 import {isArray} from '../../../utils'
 
@@ -65,14 +64,14 @@ const CheckboxInput = ({
 
     const handleChange = useCallback(event => {
         onChange(event.target);
-    });
+    }, [onChange]);
 
     const getErrorMessage = useCallback(() => {
         if(isArray(errorMessage)) {
             return errorMessage[0];
         }
         return errorMessage;
-    });
+    }, [errorMessage]);
 
 
     const errMsg = getErrorMessage();

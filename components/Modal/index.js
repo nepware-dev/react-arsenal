@@ -20,6 +20,7 @@ const propTypes = {
     overlayClassName: PropTypes.string,
     closeOnEscape: PropTypes.bool,
     closeOnOutsideClick: PropTypes.bool,
+    disableFocusLock: PropTypes.bool,
     onClose: PropTypes.func,
 };
 
@@ -28,6 +29,7 @@ const defaultProps = {
     overlayClassName: '',
     closeOnEscape: false,
     closeOnOutsideClick: false,
+    disableFocusLock: false,
     onClose: noop,
 };
 
@@ -88,6 +90,7 @@ class Modal extends React.PureComponent {
     render() {
         const {
             children,
+            disableFocusLock,
             className: classNameFromProps,
             overlayClassName: overlayClassNameFromProps,
         } = this.props;
@@ -106,7 +109,7 @@ class Modal extends React.PureComponent {
 
         return (
             <Portal>
-                <FocusLock>
+                <FocusLock disabled={disableFocusLock}>
                     <div className={overlayClassName}>
                         <div
                             ref={this.wrapperRef}

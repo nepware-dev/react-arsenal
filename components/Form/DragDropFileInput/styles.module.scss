@@ -1,0 +1,19 @@
+.dropZone {
+    border: 2px dashed var(--color-border);
+    padding: 0.5rem;
+    cursor: pointer;
+    display: inline-block;
+
+    &Disabled {
+        pointer-events: none;
+    }
+
+    &:hover {
+        border: 2px dashed var(--color-input-outline);
+        outline-color: var(--color-input-outline);
+    }
+
+    .fileInput {
+        display: none;
+    }
+}

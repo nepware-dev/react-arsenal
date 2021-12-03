@@ -5,7 +5,7 @@ import {I18nContext, useI18nContext, defaultTranslator} from './i18nContext';
 import Localize from './Localize';
 
 const propTypes = {
-   children: PropTypes.oneOfType([
+    children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.element),
         PropTypes.element,
     ]).isRequired,

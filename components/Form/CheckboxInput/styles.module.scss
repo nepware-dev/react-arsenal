@@ -5,11 +5,15 @@
   cursor: pointer;
   user-select: none;
 
-  &.disabled .checkbox {
-    background-color: var(--color-background);
+  .inputError {
+    border: 1px solid var(--color-danger);
   }
 
-  input {
+  .inputWarning {
+    border: 1px solid var(--color-warning);
+  }
+
+  .input {
     font-size: 1em;
     position: absolute;
     opacity: 0;

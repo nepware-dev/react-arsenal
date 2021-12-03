@@ -2,10 +2,10 @@ export const eventHasFiles = (event) => {
     return event.dataTransfer?.types?.some(type => type === 'Files');
 };
 
-export const FILE_INVALID_TYPE = 'file-invalid-type'
-export const FILE_TOO_LARGE = 'file-too-large'
-export const FILE_TOO_SMALL = 'file-too-small'
-export const TOO_MANY_FILES = 'too-many-files'
+export const FILE_INVALID_TYPE = 'file-invalid-type';
+export const FILE_TOO_LARGE = 'file-too-large';
+export const FILE_TOO_SMALL = 'file-too-small';
+export const TOO_MANY_FILES = 'too-many-files';
 
 export function accepts(file, acceptedFiles) {
     if (file && acceptedFiles) {
@@ -27,43 +27,43 @@ export function accepts(file, acceptedFiles) {
         });
     }
     return true;
-};
+}
 
 export const getInvalidTypeRejectionErr = accept => {
-    accept = Array.isArray(accept) && accept.length === 1 ? accept[0] : accept
-    const messageSuffix = Array.isArray(accept) ? `one of ${accept.join(', ')}` : accept
+    accept = Array.isArray(accept) && accept.length === 1 ? accept[0] : accept;
+    const messageSuffix = Array.isArray(accept) ? `one of ${accept.join(', ')}` : accept;
     return {
         code: FILE_INVALID_TYPE,
         message: `File type must be ${messageSuffix}`,
-    }
-}
+    };
+};
 
 export const getTooLargeRejectionErr = maxSize => {
     return {
         code: FILE_TOO_LARGE,
         message: `File is larger than ${maxSize} kilobytes`,
-    }
-}
+    };
+};
 
 export const getTooSmallRejectionErr = minSize => {
     return {
         code: FILE_TOO_SMALL,
         message: `File is smaller than ${minSize} kilobytes`,
-    }
-}
+    };
+};
 
 export const TOO_MANY_FILES_REJECTION = {
     code: TOO_MANY_FILES,
     message: 'Too many files',
-}
+};
 
 function isDefined(value) {
     return value !== undefined && value !== null;
 }
 
 export function fileAccepted(file, accept) {
-  const isAcceptable = accepts(file, accept);
-  return [isAcceptable, isAcceptable ? null : getInvalidTypeRejectionErr(accept)];
+    const isAcceptable = accepts(file, accept);
+    return [isAcceptable, isAcceptable ? null : getInvalidTypeRejectionErr(accept)];
 }
 
 export function fileMatchSize(file, minSize, maxSize) {

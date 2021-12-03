@@ -6,8 +6,8 @@ import styles from './styles.module.scss';
 
 const propTypes = {
     children: PropTypes.oneOfType([
-      PropTypes.arrayOf(PropTypes.node),
-      PropTypes.node
+        PropTypes.arrayOf(PropTypes.node),
+        PropTypes.node
     ]),
     label: PropTypes.string,
     renderLabel: PropTypes.func,
@@ -53,13 +53,13 @@ export default class Dropdown extends React.Component {
     showDropdown = () => {
         this.setState({ isOpen: true });
         setTimeout(() => {
-            document.addEventListener("click", this.hideDropdown);
+            document.addEventListener('click', this.hideDropdown);
         }, 50);
     };
 
     hideDropdown = () => {
         this.setState({ isOpen: false });
-        document.removeEventListener("click", this.hideDropdown);
+        document.removeEventListener('click', this.hideDropdown);
     };
 
     render () {
@@ -90,9 +90,9 @@ export default class Dropdown extends React.Component {
                         [styles.alignLeft]: align==='left',
                         [styles.alignRight]: align==='right',
                     })}>
-                {children}
+                    {children}
+                </div>
             </div>
-            </div>
-        )
+        );
     }
 }

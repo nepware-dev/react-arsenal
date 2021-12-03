@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import cs from '../../cs';
@@ -37,26 +37,26 @@ const fetchPageNumbers = (totalPages, currentPage, pageNeighbours) => {
         const spillOffset = totalNumbers - (pages.length + 1);
 
         switch (true) {
-            case hasLeftSpill && !hasRightSpill: {
-                const extraPages = range(
-                    startPage - spillOffset,
-                    startPage - 1
-                );
-                pages = [LEFT_PAGE, ...extraPages, ...pages];
-                break;
-            }
+        case hasLeftSpill && !hasRightSpill: {
+            const extraPages = range(
+                startPage - spillOffset,
+                startPage - 1
+            );
+            pages = [LEFT_PAGE, ...extraPages, ...pages];
+            break;
+        }
 
-            case !hasLeftSpill && hasRightSpill: {
-                const extraPages = range(endPage + 1, endPage + spillOffset);
-                pages = [...pages, ...extraPages, RIGHT_PAGE];
-                break;
-            }
+        case !hasLeftSpill && hasRightSpill: {
+            const extraPages = range(endPage + 1, endPage + spillOffset);
+            pages = [...pages, ...extraPages, RIGHT_PAGE];
+            break;
+        }
 
-            case hasLeftSpill && hasRightSpill:
-            default: {
-                pages = [LEFT_PAGE, ...pages, RIGHT_PAGE];
-                break;
-            }
+        case hasLeftSpill && hasRightSpill:
+        default: {
+            pages = [LEFT_PAGE, ...pages, RIGHT_PAGE];
+            break;
+        }
         }
 
         return [1, ...pages, totalPages];

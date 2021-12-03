@@ -132,6 +132,8 @@ const Tabs = React.forwardRef((props, ref) => {
     );
 });
 
+Tabs.displayName = 'Tabs';
+
 export default Tabs;
 
 const ElementOrElementType = PropTypes.oneOfType([

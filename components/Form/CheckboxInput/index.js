@@ -2,7 +2,7 @@ import React, {useCallback} from 'react';
 import PropTypes from 'prop-types';
 
 import cs from '../../../cs';
-import {isArray} from '../../../utils'
+import {isArray} from '../../../utils';
 
 import styles from './styles.module.scss';
 
@@ -16,9 +16,11 @@ const propTypes = {
     ]).isRequired,
     value: PropTypes.string,
     required: PropTypes.bool,
+    warning: PropTypes.bool,
+    showRequired: PropTypes.bool,
     disabled: PropTypes.bool,
-    inputRef: PropTypes.shape({ 
-        current: PropTypes.elementType 
+    inputRef: PropTypes.shape({
+        current: PropTypes.elementType
     }),
     onChange: PropTypes.func,
     errorMessage: PropTypes.any,
@@ -78,25 +80,25 @@ const CheckboxInput = ({
 
     return (
         <>
-        <div className={className} style={{fontSize: size}}>
-            <input
-                disabled={disabled}
-                ref={inputRef}
-                type='checkbox'
-                className={styles.input}
-                onChange={handleChange}
-                {...otherProps}
-            />
-            <span className={styles.checkbox} />
-        </div>
-        {hasInfo && <span className={styles.infoText}>{info}</span>}
-        {hasError && <span className={styles.errorText}>{errMsg}</span>}
-        {hasWarning && <span className={styles.warningText}>{warning || 'Required'}</span>}
+            <div className={className} style={{fontSize: size}}>
+                <input
+                    disabled={disabled}
+                    ref={inputRef}
+                    type='checkbox'
+                    className={styles.input}
+                    onChange={handleChange}
+                    {...otherProps}
+                />
+                <span className={styles.checkbox} />
+            </div>
+            {hasInfo && <span className={styles.infoText}>{info}</span>}
+            {hasError && <span className={styles.errorText}>{errMsg}</span>}
+            {hasWarning && <span className={styles.warningText}>{warning || 'Required'}</span>}
         </>
-    )
+    );
 };
 
 CheckboxInput.propTypes = propTypes;
-CheckboxInput.defaultProps = defaultProps;;
+CheckboxInput.defaultProps = defaultProps;
 
 export default CheckboxInput;

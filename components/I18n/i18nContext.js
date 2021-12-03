@@ -12,7 +12,7 @@ export function useI18nContext(props) {
 }
 
 export const defaultTranslator = (key, selectedLanguage, translations) => {
-    return translations?.[selectedLanguage]?.[key] || key
+    return translations?.[selectedLanguage]?.[key] || key;
 };
 
 export const defaultKeyTranslator = (object, currentLng, key) => {

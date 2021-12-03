@@ -6,7 +6,6 @@ import FileInput from '../FileInput';
 import cs from '../../../cs';
 import {transformToElement} from '../../../utils';
 import {
-    accepts, 
     eventHasFiles, 
     fileAccepted, 
     fileMatchSize, 
@@ -43,7 +42,7 @@ const propTypes = {
     /**
      * Indicates whether the input should be disabled.
      */
-     disabled: PropTypes.bool,
+    disabled: PropTypes.bool,
 
     /**
      * Minimum size (IN KILOBYTES) of files to accept.
@@ -149,7 +148,6 @@ const DragDropFileInput = props => {
         containerClassName,
         dropZoneClassName,
         activeDropZoneClassName,
-        errorDropZoneClassName,
         dragOverFrameClassName,
         DropZoneComponent,
         ...inputProps
@@ -181,7 +179,7 @@ const DragDropFileInput = props => {
             onFrameDragLeave && onFrameDragLeave(event);
             return;
         }
-    }, [onFrameDragEnter, onFrameDragLeave, disabled, isDragOverTarget]);
+    }, [onFrameDragEnter, onFrameDragLeave, disabled]);
 
     const handleFrameDrop = useCallback(event => {
         if(isDragOverTarget) {
@@ -213,7 +211,7 @@ const DragDropFileInput = props => {
             stopFrameListeners();
             window.removeEventListener('dragover', handleWindowDragOverOrDrop);
             window.removeEventListener('drop', handleWindowDragOverOrDrop);
-        }
+        };
     }, [frame, handleWindowDragOverOrDrop, startFrameListeners, stopFrameListeners]);
 
     const handleDragOver = useCallback(event => {
@@ -254,7 +252,7 @@ const DragDropFileInput = props => {
             if ((!multiple && acceptedFiles.length > 1) || (multiple && maxFiles >= 1 &&  acceptedFiles.length > maxFiles)) {
                 acceptedFiles.forEach(file => {
                     fileRejections.push({ file, errors: [TOO_MANY_FILES_REJECTION] });
-                })
+                });
                 acceptedFiles.splice(0);
             }
             onChange({name, files: acceptedFiles, rejections: fileRejections});
@@ -298,15 +296,11 @@ const DragDropFileInput = props => {
         if (multiple && maxFiles >= 1 && acceptedFiles.length > maxFiles) {
             acceptedFiles.forEach(file => {
                 fileRejections.push({ file, errors: [TOO_MANY_FILES_REJECTION] });
-            })
+            });
             acceptedFiles.splice(0);
         }
         onChange({name: target.name, files: acceptedFiles, rejections: fileRejections});
-    }, [onChange, multiple, maxFiles, minSize, maxSize, validator]);
-
-    const handleTargetClick = useCallback(event => {
-        resetDragging();
-    }, [resetDragging]);
+    }, [disabled, onChange, multiple, maxFiles, minSize, maxSize, validator]);
 
     return (
         <div

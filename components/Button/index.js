@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import cs from '../../cs';
@@ -23,44 +23,44 @@ const defaultProps = {
     disabled: false,
 };
 
-export default class Button extends Component {
-    static propTypes = propTypes;
-    static defaultProps = defaultProps;
+const Button = React.forwardRef(({
+    style,
+    className,
+    onClick,
+    children,
+    success,
+    warning,
+    danger,
+    outline,
+    disabled,
+    ...otherProps
+}, ref) => {
 
-    render() {
-        const {
-            style,
-            className,
-            onClick,
-            children,
-            success,
-            warning,
-            danger,
-            outline,
-            disabled,
-            ...otherProps
-        } = this.props;
+    return (
+        <button
+            ref={ref}
+            style={style}
+            className={cs(
+                styles.button,
+                className,
+                'button',
+                {
+                    [styles.success]: success,
+                    [styles.warning]: warning,
+                    [styles.danger]: danger,
+                    [styles.outline]: outline,
+                    [styles.disabled]: disabled,
+                }
+            )}
+            onClick={onClick}
+            {...otherProps}
+        >
+            {children}
+        </button>
+    );
+});
 
-        return (
-            <button
-                style={style}
-                className={cs(
-                    styles.button,
-                    className,
-                    'button',
-                    {
-                        [styles.success]: success,
-                        [styles.warning]: warning,
-                        [styles.danger]: danger,
-                        [styles.outline]: outline,
-                        [styles.disabled]: disabled,
-                    }
-                )}
-                onClick={onClick}
-                {...otherProps}
-            >
-                {children}
-            </button>
-        );
-    }
-}
+Button.propTypes = propTypes;
+Button.defaultProps = defaultProps;
+
+export default Button;

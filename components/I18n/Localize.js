@@ -11,6 +11,7 @@ const propTypes = {
     children: PropTypes.oneOfType([
         PropTypes.object,
         PropTypes.element,
+        PropTypes.string,
     ]).isRequired,
     /**
      * Denotes the key of the object (passed to children) to be displayed.
@@ -31,6 +32,20 @@ const propTypes = {
      */
     translator: PropTypes.function,
 };
+
+export function localizeFn(text) {
+    const {
+        i18nTranslator,
+        selectedLanguage,
+        translator,
+        translations,
+    }= useI18nContext();
+
+    if(translator) {
+        return translator(text, selectedLanguage, translations);
+    }
+    return i18nTranslator(text, selectedLanguage, translations); 
+}
 
 const Localize = ({children, ...otherProps}) => {
     const {

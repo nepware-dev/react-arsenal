@@ -2,7 +2,7 @@ import React, {useMemo, useState} from 'react';
 import PropTypes from 'prop-types';
 
 import {I18nContext, useI18nContext, defaultTranslator} from './i18nContext';
-import Localize from './Localize';
+import Localize, {localizeFn} from './Localize';
 
 const propTypes = {
     children: PropTypes.oneOfType([
@@ -65,6 +65,6 @@ const I18nProvider = props => {
 };
 I18nProvider.propTypes = propTypes;
 
-export {useI18nContext, Localize};
+export {useI18nContext, Localize, localizeFn};
 
 export default I18nProvider;

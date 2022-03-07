@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import cs from '../../cs';
@@ -75,11 +75,11 @@ const Pagination = ({
     activePageItemClassName,
     pageNum,
 }) => {
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(pageNum ?? 1);
 
-    const totalPages = Math.ceil(totalRecords / pageLimit) || 1;
+    const totalPages = useMemo(() => Math.ceil(totalRecords / pageLimit) || 1, [totalRecords, pageLimit]);
 
-    const pages = fetchPageNumbers(totalPages, currentPage, pageNeighbours);
+    const pages = useMemo(() => fetchPageNumbers(totalPages, currentPage, pageNeighbours), [totalPages, currentPage, pageNeighbours]);
 
     const gotoPage = useCallback(page => {
         const currentPage = Math.max(1, Math.min(page, totalPages));

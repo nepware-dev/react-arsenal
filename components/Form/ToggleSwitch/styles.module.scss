@@ -1,0 +1,87 @@
+.container {
+    text-align: center;
+
+    .toggleSwitch {
+        position: relative;
+        width: var(--track-length);
+        --track-length: 56px;
+
+        .checkbox {
+            position: absolute;
+            opacity: 0;
+            width: var(--track-length);
+            cursor: pointer;
+            left: 0;
+            z-index: 2;
+            height: 100%;
+
+            &:hover:not([disabled]) + .label {
+                border: 1px solid var(--color-input-outline);
+            }
+
+            &:disabled {
+                cursor: auto;
+            }
+        }
+
+        .label {
+            display: block;
+            overflow: hidden;
+            border-radius: calc(var(--track-length) / 2);
+            border: 1px solid var(--color-border);
+            transition: all 0.2s ease;
+
+            .inner {
+                display: block;
+                width: 200%;
+                margin-left: -100%;
+                transition: margin 0.2s ease-out 0s;
+            }
+
+            .inner:before,
+            .inner:after {
+                float: left;
+                width: 50%;
+                height: calc(0.6 * var(--track-length));
+                line-height: calc(0.6 * var(--track-length));
+                box-sizing: border-box;
+            }
+
+            .inner:before {
+                content: "";
+                background-color: var(--color-primary);
+                border-top-right-radius: calc(var(--track-length) / 2);
+                border-bottom-right-radius: calc(var(--track-length) / 2);
+            }
+
+            .inner:after {
+                content: "";
+                background-color: var(--color-border);
+                text-align: right;
+            }
+
+            .thumb {
+                display: block;
+                width: calc(var(--track-length) / 2);
+                height: calc(var(--track-length) / 2);
+                margin: auto 0;
+                background: var(--color-white);
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                right: calc(var(--track-length) * 0.45);
+                border: 0 solid var(--color-border);
+                border-radius: calc(var(--track-length) / 2);
+                transition: all 0.2s ease-out;
+            }
+        }
+
+        .checkbox:checked + .label .inner {
+            margin-left: 0;
+        }
+
+        .checkbox:checked + .label .thumb {
+            right: calc(var(--track-length) * 0.05);
+        }
+    }
+}

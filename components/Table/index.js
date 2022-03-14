@@ -6,7 +6,7 @@ import cs from '../../cs';
 import styles from './styles.module.scss';
 
 const propTypes = {
-    /* 
+    /*
      * Class Applied to table element.
      */
     className: PropTypes.string,
@@ -46,6 +46,11 @@ const propTypes = {
      */
     renderDataItem: PropTypes.any,
     /*
+     * Renderer for row component.
+     * @param {{columns: array, ...listProps}} payload - Contains the columns array of table and list props for rendering rows.
+     */
+    rowRenderer: PropTypes.func,
+    /*
      * Current page of data to display.
      * Does not take affect if table is controlled.
      */
@@ -58,7 +63,7 @@ const propTypes = {
     /*
      * Boolean describing whether data is currently loading.
      */
-    loading: PropTypes.boolean,
+    loading: PropTypes.bool,
     /*
      * Component to use when data is loading
      */
@@ -70,10 +75,10 @@ const propTypes = {
      * Boolean describing if the table is controlled.
      * If controlled, all data passed to table will be visible regardless of props passed for page or maxRows.
      */
-    controlled: PropTypes.boolean,
+    controlled: PropTypes.bool,
 };
 
-const Row = ({item, onClick, columns, className, renderDataItem}) => {
+const Row = ({item, index, onClick, columns, className, renderDataItem}) => {
     const handleClickRow = useCallback(() => {
         onClick && onClick(item);
     }, [onClick, item]);
@@ -86,7 +91,7 @@ const Row = ({item, onClick, columns, className, renderDataItem}) => {
             {columns.map(col => {
                 return (
                     <td key={col.accessor} className={styles.data}>
-                        {renderDataItem ? renderDataItem({item, column: col}) : item[col.accessor]}
+                        {renderDataItem ? renderDataItem({item, index, column: col}) : item[col.accessor]}
                     </td>
                 );
             })}
@@ -110,6 +115,7 @@ const Table = ({
     page=1,
     maxRows=10,
     controlled,
+    rowRenderer,
 }) => {
     const visibleData = useMemo(() => {
         if(controlled) {
@@ -136,6 +142,9 @@ const Table = ({
     }, [columns, renderHeaderItem]);
 
     const renderRow = useCallback(listProps => {
+        if(rowRenderer) {
+            return rowRenderer({...listProps, columns});
+        }
         return (
             <Row 
                 {...listProps} 
@@ -145,7 +154,7 @@ const Table = ({
                 className={bodyRowClassName}
             />
         );
-    }, [columns, renderDataItem, bodyRowClassName, onRowClick]);
+    }, [columns, renderDataItem, bodyRowClassName, onRowClick, rowRenderer]);
 
 
     const Body = useMemo(() => {

@@ -62,7 +62,7 @@ export const InputField = (props) => {
         onChange: onChange?onChange:handleChange,
         ...inputProps
     };
-    if (Component.prototype?.isReactComponent) {
+    if (typeof Component!=='string') {
         fieldProps.errorMessage = error?.[inputProps.name];
         fieldProps.warning = warning?.[inputProps.name];
         fieldProps.showRequired = emptyFields.some(field => field===inputProps.name);

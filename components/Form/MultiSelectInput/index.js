@@ -32,10 +32,36 @@ const propTypes = {
     keyExtractor: PropTypes.func,
     valueExtractor: PropTypes.func,
     onChange: PropTypes.func,
+    /*
+     * Called when the search input is changed
+     * Passing this value will disable the internal filtering
+     */
+    onInputChange: PropTypes.func,
     optionsDirection: PropTypes.string,
     errorMessage: PropTypes.any,
     renderOptionLabel: PropTypes.func,
     renderControlLabel: PropTypes.func,
+    /*
+     * Component to use when data is loading
+     */
+    LoadingComponent: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.elementType
+    ]),
+    /*
+     * Component to use when filtered data is empty
+     */
+    FilterEmptyComponent: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.elementType
+    ]),
+    /*
+     * Component to use when data is empty
+     */
+    EmptyComponent: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.elementType
+    ]),
 };
 
 const defaultProps = {
@@ -64,10 +90,14 @@ const MultiSelect = ({
     valueExtractor,
     options,
     onChange,
+    onInputChange,
     defaultValue,
     optionsDirection,
     renderOptionLabel,
     renderControlLabel,
+    LoadingComponent,
+    FilterEmptyComponent,
+    EmptyComponent,
 }) => {
 
     const [expanded, setExpanded] = useState(false);
@@ -99,18 +129,19 @@ const MultiSelect = ({
     });
 
     const handleSearchValueChange = useCallback(({value}) => {
+        onInputChange && onInputChange(value);
         setSearchValue(value);
     });
 
-    const filterOptions = useCallback((searchValue) => {
-    }, [options]);
-
     const filteredOptions = useMemo(() => {
-        return options.filter((d) =>
-            valueExtractor(d)
-            .toLowerCase()
-            .includes(searchValue.toLowerCase())
-        );
+        if(!onInputChange) {
+            return options.filter((d) =>
+                valueExtractor(d)
+                .toLowerCase()
+                .includes(searchValue.toLowerCase())
+            );
+        }
+        return options;
     }, [searchValue, options, valueExtractor]);
 
     const handleAddItem = ({item}) => {
@@ -191,6 +222,8 @@ const MultiSelect = ({
                         onItemRemove={handleRemoveItem}
                         onItemStateChange={handleStateChangeItem}
                         renderItemLabel={renderOptionLabel}
+                        LoadingComponent={LoadingComponent}
+                        EmptyComponent={searchValue?FilterEmptyComponent:EmptyComponent}
                     />
                 </Popup>
             </div>

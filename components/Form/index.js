@@ -42,6 +42,8 @@ export const InputField = (props) => {
     } = useFormContext(props);
 
     const handleChange = useCallback((payload) => {
+        onChange && onChange(payload);
+
         let name, value;
         if(payload?.nativeEvent instanceof Event) {
             name = payload.target.name;
@@ -59,7 +61,7 @@ export const InputField = (props) => {
     }, [setFormData, formData, onChangeData, fieldValueExtractor]);
 
     const fieldProps = {
-        onChange: onChange?onChange:handleChange,
+        onChange: handleChange,
         ...inputProps
     };
     if (typeof Component!=='string') {

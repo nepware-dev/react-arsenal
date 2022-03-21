@@ -19,6 +19,9 @@ const propTypes = {
     onItemRemove: PropTypes.func.isRequired,
     onItemStateChange: PropTypes.func.isRequired,
     renderItemLabel: PropTypes.func,
+    LoadingComponent: PropTypes.any,
+    FilterEmptyComponent: PropTypes.any,
+    EmptyComponent: PropTypes.any,
 };
 
 const defaultProps = {

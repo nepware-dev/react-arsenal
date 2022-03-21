@@ -2,6 +2,7 @@ import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
 
 import {FiChevronDown} from 'react-icons/fi';
+import {FaSpinner} from 'react-icons/fa';
 
 import Input from '../Input';
 import Options from './Options';
@@ -28,8 +29,34 @@ const propTypes = {
     keyExtractor: PropTypes.func,
     valueExtractor: PropTypes.func,
     onChange: PropTypes.func,
+    /*
+     * Called when the search input is changed
+     * Passing this value will disable the internal filtering
+     */
+    onInputChange: PropTypes.func,
     optionsDirection: PropTypes.string,
     errorMessage: PropTypes.any,
+    /*
+     * Component to use when data is loading
+     */
+    LoadingComponent: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.elementType
+    ]),
+    /*
+     * Component to use when filtered data is empty
+     */
+    FilterEmptyComponent: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.elementType
+    ]),
+    /*
+     * Component to use when data is empty
+     */
+    EmptyComponent: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.elementType
+    ]),
 };
 
 const defaultProps = {
@@ -73,8 +100,9 @@ export default class Select extends PureComponent {
         const {onChange, valueExtractor} = this.props;
 
         if(
-            this.props.options !== prevProps.options ||
-            this.state.searchValue !== prevState.searchValue
+            (this.props.options !== prevProps.options ||
+                this.state.searchValue !== prevState.searchValue) &&
+            !this.props.onInputChange
         ) {
             const options = this.filterOptions(this.state.searchValue);
             this.setState({
@@ -91,6 +119,7 @@ export default class Select extends PureComponent {
     }
 
     handleInputChange = ({value}) => {
+        this.props.onInputChange && this.props.onInputChange(value);
         this.setState({
             searchValue: value,
         });
@@ -171,6 +200,9 @@ export default class Select extends PureComponent {
             keyExtractor,
             valueExtractor,
             optionsDirection,
+            LoadingComponent,
+            FilterEmptyComponent,
+            EmptyComponent,
         } = this.props;
 
         const {expanded, searchValue, selectedItem, options} = this.state;
@@ -220,7 +252,8 @@ export default class Select extends PureComponent {
                         </div>
                         <div className={cs(styles.selectIndicator, 'select-indicator')}>
                             {loading && (
-                                <Icon name="fas fa-spinner fa-spin" className={styles.loading} />
+
+                                <FaSpinner className={styles.loading} />
                             )}
                             {showClose && (
                                 <Icon
@@ -247,6 +280,8 @@ export default class Select extends PureComponent {
                             classNameItem={styles.selectOption}
                             selectedItem={selectedItem}
                             onItemClick={this.handleOptionClick}
+                            LoadingComponent={LoadingComponent}
+                            EmptyComponent={searchValue?FilterEmptyComponent:EmptyComponent}
                         />
                     )}
                 </div>

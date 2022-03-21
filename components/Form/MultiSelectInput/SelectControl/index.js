@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import {IoClose} from 'react-icons/io5';
 import {IoSearchOutline} from 'react-icons/io5';
 import {FiChevronDown} from 'react-icons/fi';
+import {FaSpinner} from 'react-icons/fa';
 
 import Icon from '../../../Icon';
 import List from '../../../List';
@@ -103,7 +104,7 @@ const SelectControl = ({
             </div>
             <div className={cs(styles.selectIndicator, 'select-indicator')}>
                 {loading && (
-                    <Icon name="fas fa-spinner fa-spin" className={styles.loading} />
+                    <FaSpinner className={styles.loading} />
                 )}
                 <FiChevronDown size={16} onClick={handleCaretClick} />
             </div>

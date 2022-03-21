@@ -102,6 +102,7 @@ export default class List extends PureComponent {
 
     onScroll = throttle((event) => {
         const {
+            loading,
             onEndReached,
             onEndReachedThreshold,
         } = this.props;
@@ -110,7 +111,7 @@ export default class List extends PureComponent {
         const distanceFromEnd = element.scrollHeight - element.scrollTop - element.offsetHeight;
 
         if(onEndReachedThreshold > distanceFromEnd) {
-            onEndReached();
+            !loading && onEndReached();
         }
     }, 200, {leading: false, trailing: true});
 

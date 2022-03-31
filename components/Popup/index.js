@@ -2,6 +2,8 @@ import React, {useCallback, useState, useEffect, useRef} from 'react';
 import PropTypes from 'prop-types';
 import FocusLock from 'react-focus-lock';
 
+import useRect from '../../hooks/useRect';
+
 import Portal from '../Portal';
 import withVisibleCheck from '../WithVisibleCheck';
 import styles from './styles.module.scss';
@@ -62,8 +64,8 @@ const defaultProps = {
     className: '',
     closeOnOutsideClick: true,
     onClose: noop,
-    anchorOrigin: 'bottom center',
-    transformOrigin: 'bottom center',
+    anchorOrigin: 'bottom right',
+    transformOrigin: 'bottom right',
 };
 
 const Popup = ({
@@ -77,6 +79,7 @@ const Popup = ({
 }) => {
     const wrapperRef = useRef(null);
     const [wrapperRect, setWrapperRect] = useState();
+    const anchorRect = useRect(anchor.current);
 
     const handleClickOutside = useCallback((event) => {
         const { current: wrapper } = wrapperRef;
@@ -111,14 +114,14 @@ const Popup = ({
         };
 
         const vertTransform = {
-            'top': '100%',
-            'center': '0%',
+            'top': '0',
+            'center': '-50%',
             'bottom': '-100%',
         };
 
         const horiTranform = {
-            'left': '100%',
-            'center': '0%',
+            'left': '0',
+            'center': '-50%',
             'right': '-100%',
         };
 
@@ -130,9 +133,8 @@ const Popup = ({
     }, [anchorOrigin, transformOrigin]);
 
     useEffect(() => {
-        let rect = anchor.current.getBoundingClientRect();
-        setWrapperRect(transformWrapperRect(rect));
-    }, [anchor, transformWrapperRect]);
+        setWrapperRect(transformWrapperRect(anchorRect));
+    }, [anchorRect, transformWrapperRect]);
 
     const className = cs(
         styles.popup,

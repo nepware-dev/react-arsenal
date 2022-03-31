@@ -49,7 +49,10 @@
         .selectIndicator {
             margin-left: 0.5em;
 
-            .clear,
+            .clear {
+                margin: 0 0.5em;
+            }
+
             .loading {
                 animation: spin infinite 2s linear;
                 margin: 0 0.5em;

@@ -72,6 +72,7 @@ const SelectControl = ({
                 [styles.editable, editable],
                 ['select-control-editable', editable],
             )}
+            tabIndex={-1}
             onClick={handleCaretClick}
         >
             <div

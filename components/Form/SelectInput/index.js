@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 
 import {FiChevronDown} from 'react-icons/fi';
 import {FaSpinner} from 'react-icons/fa';
+import {IoMdClose} from 'react-icons/io';
 
 import Input from '../Input';
 import Options from './Options';
-import Icon from '../../Icon';
 import cs from '../../../cs';
 import {isArray} from '../../../utils';
 
@@ -256,8 +256,7 @@ export default class Select extends PureComponent {
                                 <FaSpinner className={styles.loading} />
                             )}
                             {showClose && (
-                                <Icon
-                                    name="ion-md-close"
+                                <IoMdClose
                                     className={styles.clear}
                                     onClick={this.handleClearIconClick}
                                 />

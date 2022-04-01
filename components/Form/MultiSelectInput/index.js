@@ -31,6 +31,20 @@ const propTypes = {
     options: PropTypes.array,
     keyExtractor: PropTypes.func,
     valueExtractor: PropTypes.func,
+    /**
+     * Anchor position the popup in vertical and horizontal position in respect to the anchor
+     * The first position defines the vertical position of the anchor and the second position defines the horizontal position
+     * for anchor position reference check https://mui.com/components/popover/
+     * @param {('top left'|'top right'|'bottom right'|'bottom left'|'right center'|'left center'|'top center'|'bottom center'|'center center')
+     */
+    anchorOrigin: PropTypes.string,
+    /**
+     * Tranform position the popup in vertical and horizontal position in respect to the anchor
+     * The first position defines the vertical position of the anchor and the second position defines the horizontal position
+     * for transform position reference check https://mui.com/components/popover/
+     * @param {('top left'|'top right'|'bottom right'|'bottom left'|'right center'|'left center'|'top center'|'bottom center'|'center center')
+     */
+    transformOrigin: PropTypes.string,
     onChange: PropTypes.func,
     /*
      * Called when the search input is changed
@@ -90,6 +104,8 @@ const MultiSelect = ({
     valueExtractor,
     options,
     onChange,
+    anchorOrigin,
+    transformOrigin,
     onInputChange,
     defaultValue,
     optionsDirection,
@@ -183,6 +199,8 @@ const MultiSelect = ({
                     isVisible={expanded}
                     className={styles.popup}
                     anchor={wrapperRef}
+                    anchorOrigin={anchorOrigin}
+                    transformOrigin={transformOrigin}
                     onClose={handleCaretClick}
                 >
                     <SelectControl

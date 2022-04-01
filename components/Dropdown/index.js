@@ -53,13 +53,13 @@ export default class Dropdown extends React.Component {
     showDropdown = () => {
         this.setState({ isOpen: true });
         setTimeout(() => {
-            document.addEventListener('click', this.hideDropdown);
+            document.addEventListener('click', this.hideDropdown, true);
         }, 50);
     };
 
     hideDropdown = () => {
         this.setState({ isOpen: false });
-        document.removeEventListener('click', this.hideDropdown);
+        document.removeEventListener('click', this.hideDropdown, true);
     };
 
     render () {

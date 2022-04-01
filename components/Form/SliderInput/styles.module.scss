@@ -1,0 +1,80 @@
+.container {
+    position: relative;
+
+    &Disabled {
+        filter: opacity(80%);
+        pointer-events: none;
+    }
+
+    .track {
+        position: absolute;
+        background-color: var(--color-border);
+        border-radius: 0.75em;
+
+        &X {
+            height: 0.5em;
+            width: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        &Y {
+            width: 0.5em;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 100%;
+        }
+
+        .trackActive {
+            background-color: var(--color-primary);
+            border-radius: 0.75em;
+        }
+    }
+
+    .thumb {
+        position: absolute;
+        border-radius: 50%;
+        background-color: var(--color-primary);
+        box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.16);
+        z-index: 2;
+        cursor: pointer;
+        border: 2px solid var(--color-white);
+        touch-action: none;
+        height: 1em;
+        width: 1em;
+        outline-color: var(--color-primary);
+
+        .hiddenInput {
+            visibility: hidden;
+        }
+
+        &X {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        &Y {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    }
+
+    .marks {
+        position: absolute;
+        display: flex;
+        justify-content: space-between;
+
+        &X {
+            width: 100%;
+            top: 50%;
+            transform: translateY(100%);
+        }
+
+        &Y {
+            flex-direction: column;
+            height: 100%;
+            left: 50%;
+            transform: translateX(100%);
+        }
+    }
+}

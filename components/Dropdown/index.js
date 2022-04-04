@@ -9,15 +9,47 @@ const propTypes = {
         PropTypes.arrayOf(PropTypes.node),
         PropTypes.node
     ]),
+
+    /**
+     * Label to be used for dropdown.
+     */
     label: PropTypes.string,
+
+    /**
+     * Custom renderer for the dropdown label component.
+     */
     renderLabel: PropTypes.func,
+    
+    /**
+     * Classname for the dropdown content.
+     */
     className: PropTypes.string,
+    
+    /**
+     * Classname for the label container.
+     */
     labelContainerClassName: PropTypes.string,
+
+    /**
+     * (left | right) - Decides which way the dropdown content is aligned compared to the label.
+     */
     align: PropTypes.string,
+
+    /**
+     * Whether or not the dropdown content is displayed on hovering the label.
+     */
     showOnHover: PropTypes.bool,
+    /**
+     * Change the behavior of the dropdown to hide on document click.
+     * Setting this to false will capture the event from bubbling, and does not hide the dropdown on clicking within it.
+     *    true (default) - Dropdown event handler is executed in the capturing phase.
+     *    false - Dropdown event handler is executed in the bubbling phase.
+     */
+    useCapture: PropTypes.bool,
 };
 
 const defaultProps = {
+    useCapture: true,
     align: 'left',
 };
 
@@ -53,13 +85,13 @@ export default class Dropdown extends React.Component {
     showDropdown = () => {
         this.setState({ isOpen: true });
         setTimeout(() => {
-            document.addEventListener('click', this.hideDropdown, true);
+            document.addEventListener('click', this.hideDropdown, this.props.useCapture);
         }, 50);
     };
 
     hideDropdown = () => {
         this.setState({ isOpen: false });
-        document.removeEventListener('click', this.hideDropdown, true);
+        document.removeEventListener('click', this.hideDropdown, this.props.useCapture);
     };
 
     render () {

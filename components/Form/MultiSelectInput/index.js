@@ -127,6 +127,9 @@ const MultiSelect = ({
     const [selectedItems, setSelectedItems] = useState([]);
 
     useEffect(() => {
+        if(defaultValue?.length === 0) {
+            setSelectedItems([]);
+        }
         if(defaultValue?.length) {
             setSelectedItems(defaultValue);
             onChange({name, value: defaultValue});
@@ -135,7 +138,7 @@ const MultiSelect = ({
 
     const wrapperRef = React.createRef();
 
-    const className = cs(
+    const className = useMemo(() => cs(
         styles.selectContainer,
         {
             disabled,
@@ -143,7 +146,7 @@ const MultiSelect = ({
             [styles.expanded]: expanded,
         },
         _className
-    );
+    ), [disabled, expanded, _className]);
 
     const handleCaretClick = useCallback((event) => {
         event.stopPropagation();

@@ -1,6 +1,11 @@
 import * as React from 'react';
 
-export type FilInputChangeCallback = (payload: {name: string; files: File[]; rejections: File[]}) => void;
+export type FileInputChangeCallback = (payload: {
+    name: string;
+    files: FileList;
+    rejections: {errors: any[]; file: File}[];
+}) => void;
+
 export type FileValidator = (file: File) => string | Error | Error[];
 
 export interface DragDropFileInputProps {

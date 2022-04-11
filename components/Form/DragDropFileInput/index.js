@@ -156,8 +156,26 @@ const DragDropFileInput = props => {
         activeDropZoneClassName,
         dragOverFrameClassName,
         DropZoneComponent,
+        onInvalid,
         ...inputProps
     } = props;
+
+    const [meta, setMeta] = useState({
+        error: null,
+        warning: null,
+    });
+
+    useEffect(() => {
+        if(inputProps.showRequired) {
+            setMeta(prevMeta => ({...prevMeta, warning: 'Required'}));
+        }
+        if(inputProps.errorMessage) {
+            setMeta(prevMeta => ({
+                ...prevMeta,
+                error: 'Error',
+            }));
+        }
+    }, [inputProps.showRequired, inputProps.errorMessage]);
 
     const [isDragOverTarget, setDragOverTarget] = useState(false);
     const [isDragOverFrame, setDragOverFrame] = useState(false);
@@ -305,8 +323,13 @@ const DragDropFileInput = props => {
             });
             acceptedFiles.splice(0);
         }
+        if(acceptedFiles.length) {
+            setMeta(prevMeta => ({...prevMeta, warning: null, error: null}));
+        } else if(required) {
+            setMeta(prevMeta => ({...prevMeta, warning: 'Required'}));
+        }
         onChange({name: target.name, files: acceptedFiles, rejections: fileRejections});
-    }, [disabled, onChange, multiple, maxFiles, minSize, maxSize, validator]);
+    }, [disabled, onChange, multiple, maxFiles, minSize, maxSize, validator, required]);
 
     return (
         <div
@@ -315,11 +338,14 @@ const DragDropFileInput = props => {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
         >
-            <label className={cs(styles.dropZone, dropZoneClassName, {
-                [styles.dropZoneDisabled]: disabled,
-                [dragOverFrameClassName]: !isDragOverTarget && isDragOverFrame && !disabled,
-                [activeDropZoneClassName]: isDragOverTarget && !disabled,
-            })}>
+            <label
+                className={cs(styles.dropZone, dropZoneClassName, {
+                    [styles.dropZoneDisabled]: disabled,
+                    [dragOverFrameClassName]: !isDragOverTarget && isDragOverFrame && !disabled,
+                    [activeDropZoneClassName]: isDragOverTarget && !disabled,
+                    [styles.dropZoneWarning]: meta.warning,
+                    [styles.dropZoneError]: meta.error
+                })}>
                 <FileInput 
                     className={styles.fileInput} 
                     name={name}
@@ -328,7 +354,7 @@ const DragDropFileInput = props => {
                     accept={accept}
                     disabled={disabled}
                     required={required}
-                    {...inputProps} 
+                    {...inputProps}
                 />
                 {DropZoneComponent
                     ? transformToElement(DropZoneComponent) 

@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useCallback, useRef} from 'react';
 
 const FormContext = React.createContext(null);
 
@@ -9,12 +9,24 @@ export function useFormContext(props) {
         error, 
         warning, 
         formData, 
+        setFormData, 
+        onChangeData, 
+        emptyFields, 
+        eventEmitter,
+        register,
+    } = context;
+
+    return {
+        ...props,
+        error,
+        warning,
+        formData,
         setFormData,
         onChangeData,
         emptyFields,
-    } = context;
-
-    return {...props, error, warning, formData, setFormData, onChangeData, emptyFields};
+        registerField: register,
+        eventEmitter,
+    };
 }
 
 export default FormContext;

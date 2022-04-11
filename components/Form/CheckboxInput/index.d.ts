@@ -9,7 +9,7 @@ export interface CheckboxInputProps {
     showRequired?: boolean;
     disabled?: boolean;
     inputRef?: React.RefObject<HTMLInputElement>;
-    onChange?: (payload: {name: string; value?: string}) => void;
+    onChange?: (HTMLInputElement) => void;
     errorMessage?: any;
     info?: string;
 }

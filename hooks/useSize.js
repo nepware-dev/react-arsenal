@@ -18,7 +18,7 @@ export default (node=window) => {
         handleResize();
         return () => node.removeEventListener('resize', handleResize);
 
-    }, [node]);
+    }, [!!node]);
 
     return nodeSize;
 };

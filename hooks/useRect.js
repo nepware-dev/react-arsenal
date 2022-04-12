@@ -14,7 +14,7 @@ export default (node) => {
             //true at last catches the event in dispatch so it is captured even if it doesn't bubble
             window.removeEventListener('scroll', calculate, true);
         };
-    }, [node]);
+    }, [!!node]);
 
   return rect;
 };

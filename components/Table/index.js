@@ -69,7 +69,14 @@ const propTypes = {
      */
     LoadingComponent: PropTypes.oneOfType([
         PropTypes.element, 
-        PropTypes.elementType
+        PropTypes.elementType,
+    ]),
+    /*
+     * Component to use when data is empty
+     */
+    EmptyComponent: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.elementType,
     ]),
     /*
      * Boolean describing if the table is controlled.
@@ -108,6 +115,7 @@ const Table = ({
     onRowClick,
     loading,
     LoadingComponent,
+    EmptyComponent,
     data,
     columns,
     renderHeaderItem,
@@ -123,7 +131,7 @@ const Table = ({
         }
         const initIndex = (page - 1) * maxRows;
         return data.slice(initIndex, initIndex + maxRows);
-    }, [data, maxRows, page]);
+    }, [data, maxRows, page, controlled]);
 
     const Header = useMemo(() => {
         return (
@@ -139,7 +147,7 @@ const Table = ({
                 </tr>
             </thead>
         );
-    }, [columns, renderHeaderItem]);
+    }, [columns, renderHeaderItem, headerClassName, headerRowClassName]);
 
     const renderRow = useCallback(listProps => {
         if(rowRenderer) {
@@ -162,6 +170,7 @@ const Table = ({
             <List
                 loading={loading}
                 LoadingComponent={LoadingComponent}
+                EmptyComponent={EmptyComponent}
                 className={cs(styles.body, bodyClassName)}
                 data={visibleData}
                 renderItem={renderRow}
@@ -169,7 +178,7 @@ const Table = ({
                 component="tbody"
             />
         );
-    }, [visibleData, loading, renderRow, LoadingComponent]);
+    }, [visibleData, loading, renderRow, LoadingComponent, bodyClassName, EmptyComponent]);
 
     return (
         <table className={cs(styles.table, className)}>

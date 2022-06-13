@@ -94,7 +94,7 @@ const propTypes = {
     /**
      * Name of the input.
      */
-    name: PropTypes.String,
+    name: PropTypes.string,
 };
 
 const noop = () => {};

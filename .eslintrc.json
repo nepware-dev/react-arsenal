@@ -1,58 +1,58 @@
 {
-  "root": true,
-  "env": {
-    "commonjs": true,
-    "es2020": true,
-    "node": true,
-    "browser": true
-  },
-  "plugins": ["react", "css-modules"],
-  "extends": [
-    "react-app",
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:css-modules/recommended"
-  ],
-  "parser": "babel-eslint",
-  "parserOptions": {
-    "sourceType": "module",
-    "allowImportExportEveryWhere": true,
-    "ecmaVersion": 11
-  },
-  "rules": {
-    "no-var": "error",
-    "no-unused-vars": [
-      "error",
-      {
-        "args": "none"
-      }
+    "root": true,
+    "env": {
+        "commonjs": true,
+        "es2020": true,
+        "node": true,
+        "browser": true
+    },
+    "plugins": ["react", "css-modules"],
+    "extends": [
+        "react-app",
+        "eslint:recommended",
+        "plugin:react/recommended",
+        "plugin:css-modules/recommended"
     ],
-    "eqeqeq": [
-      "error",
-      "always",
-      {
-        "null": "ignore"
-      }
-    ],
-    "strict": "off",
-    "indent": ["error", 4],
-    "quotes": ["error", "single"],
-    "semi": ["error", "always"],
-    "comma-style": ["error", "last"],
-    "key-spacing": [
-      "error",
-      {
-        "beforeColon": false,
-        "afterColon": true
-      }
-    ],
-    "linebreak-style": ["error", "unix"],
-    "comma-spacing": [
-      "error",
-      {
-        "before": false,
-        "after": true
-      }
-    ]
-  }
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "sourceType": "module",
+        "allowImportExportEveryWhere": true,
+        "ecmaVersion": 11
+    },
+    "rules": {
+        "no-var": "error",
+        "no-unused-vars": [
+            "error",
+            {
+                "args": "none"
+            }
+        ],
+        "eqeqeq": [
+            "error",
+            "always",
+            {
+                "null": "ignore"
+            }
+        ],
+        "strict": "off",
+        "indent": ["error", 4],
+        "quotes": ["error", "single"],
+        "semi": ["error", "always"],
+        "comma-style": ["error", "last"],
+        "key-spacing": [
+            "error",
+            {
+                "beforeColon": false,
+                "afterColon": true
+            }
+        ],
+        "linebreak-style": ["error", "unix"],
+        "comma-spacing": [
+            "error",
+            {
+                "before": false,
+                "after": true
+            }
+        ]
+    }
 }

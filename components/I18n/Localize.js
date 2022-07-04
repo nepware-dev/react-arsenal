@@ -30,7 +30,7 @@ const propTypes = {
      * @param {string} currentLng- Current language selected.
      * @param {string} key - Contains the dataKey value.
      */
-    translator: PropTypes.function,
+    translator: PropTypes.func,
 };
 
 export function localizeFn(text) {

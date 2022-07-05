@@ -95,9 +95,9 @@ const Row = ({item, index, onClick, columns, className, renderDataItem}) => {
             className={cs(styles.row, className)} 
             onClick={handleClickRow}
         >
-            {columns.map(col => {
+            {columns.map((col, idx) => {
                 return (
-                    <td key={col.accessor} className={styles.data}>
+                    <td key={idx} className={styles.data}>
                         {renderDataItem ? renderDataItem({item, index, column: col}) : item[col.accessor]}
                     </td>
                 );
@@ -137,9 +137,9 @@ const Table = ({
         return (
             <thead className={cs(styles.head, headerClassName)}>
                 <tr className={cs(styles.headerRow, headerRowClassName)}>
-                    {columns.map(col => {
+                    {columns.map((col, idx) => {
                         return (
-                            <th key={col.accessor} className={styles.data}>
+                            <th key={idx} className={styles.data}>
                                 {renderHeaderItem ? renderHeaderItem({column: col}) : col.Header}
                             </th>
                         );

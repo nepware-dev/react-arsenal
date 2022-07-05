@@ -1,4 +1,4 @@
-import React, {PureComponent} from 'react';
+import React, {PureComponent, forwardRef} from 'react';
 import PropTypes from 'prop-types';
 
 import {throttle, transformToElement} from '../../utils';
@@ -35,13 +35,13 @@ const defaultProps = {
     component: 'div',
 };
 
-export default class List extends PureComponent {
+class List extends PureComponent {
     static propTypes = propTypes;
     static defaultProps = defaultProps;
 
     constructor(props) {
         super(props);
-        this.ref = React.createRef();
+        this.ref = this.props.forwardRef || React.createRef();
     }
 
     renderItem = ({item, index}) => {
@@ -173,3 +173,5 @@ export default class List extends PureComponent {
         );
     }
 }
+
+export default forwardRef((props, ref) => <List {...props} forwardRef={ref} />);

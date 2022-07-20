@@ -125,6 +125,11 @@ const propTypes = {
         PropTypes.element,
         PropTypes.elementType,
     ]),
+
+    /**
+     * Whether or not the component is required.
+     */
+    required: PropTypes.bool,
 };
 
 const DragDropFileInput = props => {
@@ -135,6 +140,7 @@ const DragDropFileInput = props => {
         onChange,
         multiple,
         accept,
+        required,
         disabled,
         minSize,
         maxSize,
@@ -321,6 +327,7 @@ const DragDropFileInput = props => {
                     onChange={handleChange}
                     accept={accept}
                     disabled={disabled}
+                    required={required}
                     {...inputProps} 
                 />
                 {DropZoneComponent

@@ -56,6 +56,7 @@ export default class Input extends Component {
             warning,
             showRequired,
             info,
+            textClassName,
             ...otherProps
         } = this.props;
 
@@ -66,7 +67,7 @@ export default class Input extends Component {
         const className = cs(
             styles.input,
             {[styles.inputError]: hasError},
-            {[styles.inputWarning]: hasWarning},
+            {[styles.inputWarning]: hasWarning && !hasError},
             {
                 required,
                 disabled,
@@ -82,12 +83,13 @@ export default class Input extends Component {
                     ref={inputRef}
                     disabled={disabled}
                     className={className}
+                    required={required}
                     {...otherProps}
                     onChange={this.handleChange}
                 />
-                {hasInfo && <span className={styles.infoText}>{info}</span>}
-                {hasError && <span className={styles.errorText}>{errMsg}</span>}
-                {hasWarning && <span className={styles.warningText}>{warning || 'Required'}</span>}
+                {hasInfo && <span className={cs(textClassName, styles.infoText, 'input-info')}>{info}</span>}
+                {hasError && <span className={cs(textClassName, styles.errorText, 'input-error')}>{errMsg}</span>}
+                {hasWarning && <span className={cs(textClassName, styles.warningText, 'input-warning')}>{warning || 'Required'}</span>}
             </>
         );
     }

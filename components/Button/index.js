@@ -23,18 +23,19 @@ const defaultProps = {
     disabled: false,
 };
 
-const Button = React.forwardRef(({
-    style,
-    className,
-    onClick,
-    children,
-    success,
-    warning,
-    danger,
-    outline,
-    disabled,
-    ...otherProps
-}, ref) => {
+const Button = React.forwardRef((props, ref) => {
+    const {
+        style,
+        className,
+        onClick,
+        children,
+        success,
+        warning,
+        danger,
+        outline,
+        disabled,
+        ...otherProps
+    } = props;
 
     return (
         <button

@@ -159,7 +159,8 @@ Tabs.propTypes = {
      */
     activeTab: PropTypes.string,
     /**
-     * Render callback for header item.  */
+     * Render callback for header item.
+     */
     renderHeader: PropTypes.any,
     /**
      * Classname for headers container

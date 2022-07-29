@@ -28,13 +28,15 @@ const propTypes = {
     children: PropTypes.any,
 };
 
-const Accordion = ({
-    title, 
-    children, 
-    className, 
-    renderHeader,
-    titleClassName,
-}) => {
+const Accordion = (props) => {
+    const {
+        title, 
+        children, 
+        className, 
+        renderHeader,
+        titleClassName,
+    } = props;
+
     const [active, setActive] = useState(false);
     const [height, setHeight] = useState('0px');
 

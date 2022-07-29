@@ -35,19 +35,20 @@ const defaultProps = {
     onChange: noop,
 };
 
-const CheckboxInput = ({
-    className: _className,
-    size,
-    inputRef,
-    disabled,
-    required,
-    onChange,
-    errorMessage,
-    warning,
-    showRequired,
-    info,
-    ...otherProps
-}) => {
+const CheckboxInput = (props) => {
+    const {
+        className: _className,
+        size,
+        inputRef,
+        disabled,
+        required,
+        onChange,
+        errorMessage,
+        warning,
+        showRequired,
+        info,
+        ...otherProps
+    } = props;
 
     const hasError = !!errorMessage;
     const hasInfo = !!info;

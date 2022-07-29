@@ -65,16 +65,18 @@ const fetchPageNumbers = (totalPages, currentPage, pageNeighbours) => {
     return range(1, totalPages);
 };
 
-const Pagination = ({
-    totalRecords,
-    pageLimit,
-    pageNeighbours,
-    onChange,
-    className,
-    pageItemClassName,
-    activePageItemClassName,
-    pageNum,
-}) => {
+const Pagination = (props) => {
+    const {
+        totalRecords,
+        pageLimit,
+        pageNeighbours,
+        onChange,
+        className,
+        pageItemClassName,
+        activePageItemClassName,
+        pageNum,
+    } = props;
+
     const [currentPage, setCurrentPage] = useState(pageNum ?? 1);
 
     const totalPages = useMemo(() => Math.ceil(totalRecords / pageLimit) || 1, [totalRecords, pageLimit]);

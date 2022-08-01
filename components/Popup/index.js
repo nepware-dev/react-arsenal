@@ -68,15 +68,17 @@ const defaultProps = {
     transformOrigin: 'bottom right',
 };
 
-const Popup = ({
-    anchor,
-    children,
-    anchorOrigin,
-    transformOrigin,
-    className: _className,
-    closeOnOutsideClick,
-    onClose,
-}) => {
+const Popup = (props) => {
+    const {
+        anchor,
+        children,
+        anchorOrigin,
+        transformOrigin,
+        className: _className,
+        closeOnOutsideClick,
+        onClose,
+    } = props;
+
     const wrapperRef = useRef(null);
     const [wrapperRect, setWrapperRect] = useState();
     const anchorRect = useRect(anchor.current);
@@ -144,7 +146,7 @@ const Popup = ({
 
     return (
         <Portal>
-            <FocusLock>
+            <FocusLock returnFocus>
                 {wrapperRect &&
                     <div
                         ref={wrapperRef}

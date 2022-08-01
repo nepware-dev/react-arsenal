@@ -27,7 +27,7 @@ const propTypes = {
      * @param {string} selectedLanguage - Current language selected.
      * @param {object} translations - Contains the translations object.
      */
-    translator: PropTypes.function,
+    translator: PropTypes.func,
     /**
      * Language to be used as default.
      */

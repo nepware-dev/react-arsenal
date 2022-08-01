@@ -106,25 +106,27 @@ const Row = ({item, index, onClick, columns, className, renderDataItem}) => {
     );
 };
 
-const Table = ({
-    className,
-    headerClassName,
-    headerRowClassName,
-    bodyClassName,
-    bodyRowClassName,
-    onRowClick,
-    loading,
-    LoadingComponent,
-    EmptyComponent,
-    data,
-    columns,
-    renderHeaderItem,
-    renderDataItem,
-    page=1,
-    maxRows=10,
-    controlled,
-    rowRenderer,
-}) => {
+const Table = (props) => {
+    const {
+        className,
+        headerClassName,
+        headerRowClassName,
+        bodyClassName,
+        bodyRowClassName,
+        onRowClick,
+        loading,
+        LoadingComponent,
+        EmptyComponent,
+        data,
+        columns,
+        renderHeaderItem,
+        renderDataItem,
+        page=1,
+        maxRows=10,
+        controlled,
+        rowRenderer,
+    } = props;
+
     const visibleData = useMemo(() => {
         if(controlled) {
             return data;

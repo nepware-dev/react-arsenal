@@ -8,6 +8,8 @@ export type PageChangeCallback = (payload: {
 }) => void;
 
 export interface PaginationProps {
+    showControlIcons?: boolean;
+    controlIconClassName?: string;
     className?: string,
     totalRecords?: number,
     pageLimit?: number,

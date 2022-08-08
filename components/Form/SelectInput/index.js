@@ -279,15 +279,15 @@ export default class Select extends PureComponent {
                         </div>
                     </div>
                     {expanded && (
-                        <div className={cs(styles.selectOptionsWrapper, optionsWrapperClassName)}>
+                        <div className={cs(styles.selectOptionsWrapper, {
+                            [styles.selectOptionsUp]: optionsDirection==='up'
+                        }, optionsWrapperClassName)}>
                             <Options
                                 data={options}
                                 keyExtractor={keyExtractor}
                                 valueExtractor={valueExtractor}
                                 loading={loading}
-                                className={cs(styles.selectOptions, 'select_options', {
-                                    [styles.selectOptionsUp]: optionsDirection==='up'
-                                }, selectOptionClassName)}
+                                className={cs(styles.selectOptions, 'select_options', selectOptionClassName)}
                                 classNameItem={cs(styles.selectOption, optionItemClassName)}
                                 selectedItem={selectedItem}
                                 onItemClick={this.handleOptionClick}

@@ -17,6 +17,9 @@ const noop = () => {};
 const propTypes = {
     name: PropTypes.string,
     className: PropTypes.string,
+    optionsWrapperClassName: PropTypes.string,
+    selectOptionClassName: PropTypes.string,
+    optionItemClassName: PropTypes.string,
     controlClassName: PropTypes.string,
     searchable: PropTypes.bool,
     clearable: PropTypes.bool,
@@ -54,6 +57,10 @@ const propTypes = {
      * Component to use when data is empty
      */
     EmptyComponent: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.elementType
+    ]),
+    FooterComponent: PropTypes.oneOfType([
         PropTypes.element,
         PropTypes.elementType
     ]),
@@ -191,6 +198,9 @@ export default class Select extends PureComponent {
     render() {
         const {
             className: _className,
+            optionsWrapperClassName,
+            selectOptionClassName,
+            optionItemClassName,
             controlClassName,
             loading,
             disabled,
@@ -203,6 +213,7 @@ export default class Select extends PureComponent {
             LoadingComponent,
             FilterEmptyComponent,
             EmptyComponent,
+            FooterComponent,
         } = this.props;
 
         const {expanded, searchValue, selectedItem, options} = this.state;
@@ -268,20 +279,23 @@ export default class Select extends PureComponent {
                         </div>
                     </div>
                     {expanded && (
-                        <Options
-                            data={options}
-                            keyExtractor={keyExtractor}
-                            valueExtractor={valueExtractor}
-                            loading={loading}
-                            className={cs(styles.selectOptions, 'select_options', {
-                                [styles.selectOptionsUp]: optionsDirection==='up'
-                            })}
-                            classNameItem={styles.selectOption}
-                            selectedItem={selectedItem}
-                            onItemClick={this.handleOptionClick}
-                            LoadingComponent={LoadingComponent}
-                            EmptyComponent={searchValue?FilterEmptyComponent:EmptyComponent}
-                        />
+                        <div className={cs(styles.selectOptionsWrapper, optionsWrapperClassName)}>
+                            <Options
+                                data={options}
+                                keyExtractor={keyExtractor}
+                                valueExtractor={valueExtractor}
+                                loading={loading}
+                                className={cs(styles.selectOptions, 'select_options', {
+                                    [styles.selectOptionsUp]: optionsDirection==='up'
+                                }, selectOptionClassName)}
+                                classNameItem={cs(styles.selectOption, optionItemClassName)}
+                                selectedItem={selectedItem}
+                                onItemClick={this.handleOptionClick}
+                                LoadingComponent={LoadingComponent}
+                                EmptyComponent={searchValue?FilterEmptyComponent:EmptyComponent} 
+                                FooterComponent={FooterComponent}
+                            />
+                        </div>
                     )}
                 </div>
                 {!!errMsg && <span className={styles.errorText}>{errMsg}</span>}

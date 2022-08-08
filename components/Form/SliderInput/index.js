@@ -43,6 +43,10 @@ const propTypes = {
      */
     defaultValue: PropTypes.number,
     /**
+     * Value for controlled input.
+     */
+    value: PropTypes.number,
+    /**
      * Style applied to the input thumb.
      * If function is used, it should return a style object.
      */
@@ -58,6 +62,17 @@ const propTypes = {
      * Class applied to the input container element.
      */
     containerClassName: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.func,
+    ]),
+    /**
+     * Whether or not to show tooltip with value.
+     * */
+    showTooltip: PropTypes.bool,
+    /**
+     * Class applied to the tooltip element.
+     */
+    tooltipClassName: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.func,
     ]),
@@ -199,7 +214,9 @@ const SliderInput = props => {
         defaultValue,
         thumbStyle,
         trackSize,
+        showTooltip,
         containerClassName,
+        tooltipClassName,
         marks,
         markKeyExtractor,
         marksContainerClassName,
@@ -374,6 +391,14 @@ const SliderInput = props => {
                 role="slider"
                 tabIndex={disabled ? null : 0}
             />
+            {showTooltip && (
+                <div className={cs(styles.tooltip, tooltipClassName, {
+                    [styles.tooltipX]: axis==='x',
+                    [styles.tooltipY]: axis==='y',
+                })} style={positionStyle}>
+                    {controlledValue}
+                </div>
+            )}
             <List
                 className={cs(styles.marks, marksContainerClassName, {
                     [styles.marksX]: axis === 'x',

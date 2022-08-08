@@ -59,10 +59,24 @@
         }
     }
 
+    .tooltip {
+        position: absolute;
+        pointer-events: none;
+
+        &X {
+            bottom: 0;
+        }
+
+        &Y {
+            right: 0;
+        }
+    }
+
     .marks {
         position: absolute;
         display: flex;
         justify-content: space-between;
+        pointer-events: none;
 
         &X {
             width: 100%;

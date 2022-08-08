@@ -48,6 +48,8 @@
 
         .selectIndicator {
             margin-left: 0.5em;
+            display: flex;
+            align-items: center;
 
             .clear {
                 margin: 0 0.5em;

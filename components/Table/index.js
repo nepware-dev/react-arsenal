@@ -11,6 +11,10 @@ const propTypes = {
      */
     className: PropTypes.string,
     /*
+     * Style applied to table.
+     */
+    style: PropTypes.object,
+    /*
      * Class Applied to thead element.
      */
     headerClassName: PropTypes.string,
@@ -26,6 +30,10 @@ const propTypes = {
      * Class applied to every tr element of tbody.
      */
     bodyRowClassName: PropTypes.string,
+    /*
+     * Class applied to td element of table.
+     */
+    dataClassName: PropTypes.string,
     /*
      * Array of data to render in the table.
      */
@@ -85,7 +93,7 @@ const propTypes = {
     controlled: PropTypes.bool,
 };
 
-const Row = ({item, index, onClick, columns, className, renderDataItem}) => {
+const Row = ({item, index, onClick, columns, className, dataClassName, renderDataItem}) => {
     const handleClickRow = useCallback(() => {
         onClick && onClick(item);
     }, [onClick, item]);
@@ -97,7 +105,7 @@ const Row = ({item, index, onClick, columns, className, renderDataItem}) => {
         >
             {columns.map((col, idx) => {
                 return (
-                    <td key={idx} className={styles.data}>
+                    <td key={idx} className={cs(styles.data, dataClassName)}>
                         {renderDataItem ? renderDataItem({item, index, column: col}) : item[col.accessor]}
                     </td>
                 );
@@ -109,10 +117,12 @@ const Row = ({item, index, onClick, columns, className, renderDataItem}) => {
 const Table = (props) => {
     const {
         className,
+        style,
         headerClassName,
         headerRowClassName,
         bodyClassName,
         bodyRowClassName,
+        dataClassName,
         onRowClick,
         loading,
         LoadingComponent,
@@ -162,9 +172,10 @@ const Table = (props) => {
                 columns={columns} 
                 renderDataItem={renderDataItem}
                 className={bodyRowClassName}
+                dataClassName={dataClassName}
             />
         );
-    }, [columns, renderDataItem, bodyRowClassName, onRowClick, rowRenderer]);
+    }, [columns, renderDataItem, bodyRowClassName, onRowClick, rowRenderer, dataClassName]);
 
 
     const Body = useMemo(() => {
@@ -183,7 +194,7 @@ const Table = (props) => {
     }, [visibleData, loading, renderRow, LoadingComponent, bodyClassName, EmptyComponent]);
 
     return (
-        <table className={cs(styles.table, className)}>
+        <table style={style} className={cs(styles.table, className)}>
             {Header}
             {Body}
         </table>

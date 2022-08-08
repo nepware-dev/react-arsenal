@@ -67,6 +67,8 @@ const fetchPageNumbers = (totalPages, currentPage, pageNeighbours) => {
 
 const Pagination = (props) => {
     const {
+        showControlIcons,
+        controlIconClassName,
         totalRecords,
         pageLimit,
         pageNeighbours,
@@ -100,6 +102,20 @@ const Pagination = (props) => {
         gotoPage(page);
     }, [gotoPage]);
 
+    const handleLeftControlClick = useCallback((evt) => {
+        evt.preventDefault();
+        if(currentPage !== 1) {
+            gotoPage(currentPage - 1);
+        }
+    }, [gotoPage, currentPage]);
+
+    const handleRightControlClick = useCallback((evt) => {
+        evt.preventDefault();
+        if(currentPage !== totalPages) {
+            gotoPage(currentPage + 1);
+        }
+    }, [gotoPage, currentPage, totalPages]);
+
     const handleMoveLeft = useCallback(evt => {
         evt.preventDefault();
         gotoPage(currentPage - pageNeighbours * 2 - 1);
@@ -115,6 +131,13 @@ const Pagination = (props) => {
     return (
         <>
             <ul className={cs(styles.pagination, className)}>
+                {showControlIcons && (
+                    <li key="left_control" className={styles.pageItem}>
+                        <a href="#" className={cs(styles.pageLink, controlIconClassName)} aria-label="Previous" onClick={handleLeftControlClick}>
+                            <span aria-hidden="true">&lt;</span>
+                        </a>
+                    </li>
+                )}
                 {pages.map((page) => {
                     if (page === LEFT_PAGE)
                         return (
@@ -162,12 +185,21 @@ const Pagination = (props) => {
                         </li>
                     );
                 })}
+                {showControlIcons && (
+                    <li key="right_control" className={styles.pageItem}>
+                        <a href="#" className={cs(styles.pageLink, controlIconClassName)} aria-label="Next" onClick={handleRightControlClick}>
+                            <span aria-hidden="true">&gt;</span>
+                        </a>
+                    </li>
+                )}
             </ul>
         </>
     );
 };
 
 Pagination.propTypes = {
+    showControlIcons: PropTypes.bool,
+    controlIconClassName: PropTypes.string,
     className: PropTypes.string,
     totalRecords: PropTypes.number.isRequired,
     pageLimit: PropTypes.number.isRequired,

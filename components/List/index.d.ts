@@ -7,6 +7,7 @@ export type ListRenderItem<T> = (props: ListRenderItemProps<T>) => React.ReactNo
 
 export interface ListProps<T> {
     className?: string;
+    style?: React.CSSProperties;
     classNameItem?: string;
     contentContainerClassName?: string;
     data: T[];

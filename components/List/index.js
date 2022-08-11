@@ -11,6 +11,7 @@ const ElementOrElementType = PropTypes.oneOfType([
 
 const propTypes = {
     className: PropTypes.string,
+    style: PropTypes.object,
     classNameItem: PropTypes.string,
     contentContainerClassName: PropTypes.string,
     data: PropTypes.array.isRequired,
@@ -26,6 +27,10 @@ const propTypes = {
     LoadingComponent: ElementOrElementType,
     HeaderComponent: ElementOrElementType,
     FooterComponent: ElementOrElementType,
+    forwardRef: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.element),
+        PropTypes.element,
+    ]),
 };
 
 const defaultProps = {
@@ -119,6 +124,7 @@ class List extends PureComponent {
         const {
             data,
             className,
+            style,
             loading,
             onEndReached,
             keyExtractor,
@@ -164,6 +170,7 @@ class List extends PureComponent {
                 <Component
                     ref={this.ref}
                     className={className}
+                    style={style}
                     {...props}
                 >
                     {children}            

@@ -32,6 +32,7 @@ const Tabs = React.forwardRef((props, ref) => {
         className,
         renderHeader,
         headerClassName,
+        headerStyle,
         headerContainerClassName,
         tabItemClassName,
         activeTabItemClassName,
@@ -49,6 +50,21 @@ const Tabs = React.forwardRef((props, ref) => {
     const onScroll = useCallback(() => {
         const scrollPos = document.body.scrollTop || document.documentElement.scrollTop;
         const clientHeight = document.documentElement.clientHeight;
+        if(document.documentElement.scrollHeight - scrollPos - clientHeight < 5) {
+            const newActiveElement = tabsRef.current?.[tabsRef.current?.length - 1];
+            const newActiveTab = newActiveElement?.getAttribute('label');
+            if(newActiveTab && activeTab!==newActiveTab) {
+                return setActiveTab(newActiveTab);
+            }
+        }
+        const firstElement = tabsRef.current?.[0];
+        const firstElementHeight = firstElement?.getBoundingClientRect()?.height;
+        if(scrollPos < firstElementHeight) {
+            const newActiveTab = firstElement?.getAttribute('label');
+            if(newActiveTab && activeTab!==newActiveTab) {
+                return setActiveTab(newActiveTab);
+            }
+        }
         const newActiveElement = tabsRef.current?.find(refElement => {
             const elOffset = refElement?.offsetTop;
             const height = refElement?.getBoundingClientRect()?.height;
@@ -114,6 +130,7 @@ const Tabs = React.forwardRef((props, ref) => {
             <div ref={ref} className={className}>
                 <List
                     className={cs(headerClassName, styles.header)}
+                    style={headerStyle}
                     data={_children}
                     keyExtractor={headerKeyExtractor}
                     renderItem={renderTabHeader}
@@ -170,6 +187,10 @@ Tabs.propTypes = {
      * Classname for header
      */
     headerClassName: PropTypes.string,
+    /**
+     * Style for header
+     */
+    headerStyle: PropTypes.object,
     /**
      * Component before the header component
      */

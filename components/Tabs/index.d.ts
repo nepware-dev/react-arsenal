@@ -20,6 +20,7 @@ export interface TabsProps {
     renderHeader?: TabRenderHeader;
     headerContainerClassName?: string;
     headerClassName?: string;
+    headerStyle?: React.CSSProperties;
     PreHeaderComponent?: React.ReactNode;
     PostHeaderComponent?: React.ReactNode;
     tabItemClassName?: string;

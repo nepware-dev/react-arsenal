@@ -86,7 +86,7 @@ const Popup = (props) => {
     const handleClickOutside = useCallback((event) => {
         const { current: wrapper } = wrapperRef;
 
-        if (closeOnOutsideClick && !wrapper.contains(event.target)) {
+        if (closeOnOutsideClick && !wrapper.contains(event.target) && !anchor?.current?.contains(event.target)) {
             event.stopPropagation();
             onClose(event);
         }

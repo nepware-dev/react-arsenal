@@ -168,7 +168,7 @@ const Table = (props) => {
         return (
             <Row 
                 {...listProps} 
-                onClick={onRowClick} 
+                onClick={onRowClick}
                 columns={columns} 
                 renderDataItem={renderDataItem}
                 className={bodyRowClassName}

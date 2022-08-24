@@ -21,6 +21,8 @@ const propTypes = {
     name: PropTypes.string,
     className: PropTypes.string,
     controlClassName: PropTypes.string,
+    optionsWrapperClassName: PropTypes.string,
+    selectOptionClassName: PropTypes.string,
     searchable: PropTypes.bool,
     clearable: PropTypes.bool, //TODO
     disabled: PropTypes.bool,
@@ -54,6 +56,7 @@ const propTypes = {
     optionsDirection: PropTypes.string,
     errorMessage: PropTypes.any,
     renderOptionLabel: PropTypes.func,
+    renderControl: PropTypes.func,
     renderControlLabel: PropTypes.func,
     /*
      * Component to use when data is loading
@@ -95,6 +98,8 @@ const MultiSelect = ({
     name,
     className: _className,
     controlClassName,
+    optionsWrapperClassName,
+    selectOptionClassName,
     loading,
     disabled,
     clearable,
@@ -110,6 +115,7 @@ const MultiSelect = ({
     defaultValue,
     optionsDirection,
     renderOptionLabel,
+    renderControl,
     renderControlLabel,
     LoadingComponent,
     FilterEmptyComponent,
@@ -120,8 +126,8 @@ const MultiSelect = ({
     const [searchValue, setSearchValue] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
 
-    useEffect(async () => {
-        if(defaultValue.length) {
+    useEffect(() => {
+        if(defaultValue?.length) {
             setSelectedItems(defaultValue);
             onChange({name, value: defaultValue});
         }
@@ -180,10 +186,14 @@ const MultiSelect = ({
         onChange({name, value: newSelectedItems});
     };
 
+    const ControlComponent = useMemo(() => {
+        return renderControl || SelectControl;
+    }, [renderControl]);
+
     return (
         <>
             <div ref={wrapperRef} className={className} tabIndex="0">
-                <SelectControl
+                <ControlComponent
                     controlClassName={controlClassName}
                     placeholder={placeholder}
                     loading={loading}
@@ -203,7 +213,7 @@ const MultiSelect = ({
                     transformOrigin={transformOrigin}
                     onClose={handleCaretClick}
                 >
-                    <SelectControl
+                    <ControlComponent
                         controlClassName={controlClassName}
                         placeholder={placeholder}
                         loading={loading}
@@ -233,8 +243,8 @@ const MultiSelect = ({
                         loading={loading}
                         className={cs(styles.selectOptions, 'select_options', {
                             [styles.selectOptionsUp]: optionsDirection==='up'
-                        })}
-                        classNameItem={styles.selectOption}
+                        }, optionsWrapperClassName)}
+                        classNameItem={cs(styles.selectOption, selectOptionClassName)}
                         selectedItems={selectedItems}
                         onItemAdd={handleAddItem}
                         onItemRemove={handleRemoveItem}

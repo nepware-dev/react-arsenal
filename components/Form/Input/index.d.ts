@@ -8,7 +8,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
     showRequired?: boolean;
     disabled?: boolean;
     inputRef?: React.RefObject<HTMLInputElement>;
-    onChange?: HTMLInputElement;
+    onChange?: (target: HTMLInputElement) => void;
     errorMessage?: any;
     info?: string;
 }

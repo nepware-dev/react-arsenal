@@ -1,9 +1,11 @@
 import React from 'react';
 
+export type OriginPosition = 'top left'|'top right'|'bottom right'|'bottom left'|'right center'|'left center'|'top center'|'bottom center'|'center center';
+
 export interface PopupProps<T> {
     anchor: React.RefObject<T>;
-    anchorOrigin?: 'top left'|'top right'|'bottom right'|'bottom left'|'right center'|'left center'|'top center'|'bottom center'|'center center';
-transformOrigin?: 'top left'|'top right'|'bottom right'|'bottom left'|'right center'|'left center'|'top center'|'bottom center'|'center center';
+    anchorOrigin?: OriginPosition;
+    transformOrigin?: OriginPosition;
     children?: React.ReactNode;
     className?: string,
     closeOnOutsideClick?: boolean;

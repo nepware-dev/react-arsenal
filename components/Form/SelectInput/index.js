@@ -117,7 +117,11 @@ export default class Select extends PureComponent {
             });
         }
 
-        if(valueExtractor(this.props.defaultValue) !== valueExtractor(prevProps.defaultValue)) {
+        if(
+            (this.props.defaultValue && !prevProps.defaultValue) || 
+            (this.props.defaultValue && prevProps.defaultValue && 
+                valueExtractor(this.props.defaultValue) !== valueExtractor(prevProps.defaultValue)
+            )) {
             this.setState({
                 selectedItem: this.props.defaultValue,
             });

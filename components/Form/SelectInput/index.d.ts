@@ -1,9 +1,11 @@
 import * as React from 'react';
 
-export type {KeyExtractor} from '../List';
+import type {KeyExtractor} from '../../List';
+export type {KeyExtractor};
+
 export type ValueExtractor<T, V> = (item: T) => V;
 
-export type SelectInputChangeCallback<T> = (payload: {name?: string, option: T}) => void;
+export type SelectInputChangeCallback<T> = (payload: {name?: string, option: T | null}) => void;
 
 export interface SelectInputProps<T, V> {
     name?: string;
@@ -23,7 +25,7 @@ export interface SelectInputProps<T, V> {
     keyExtractor: KeyExtractor<T>;
     valueExtractor: ValueExtractor<T, V>;
     onChange?: SelectInputChangeCallback<T>;
-    onInputChange?: React.RefObject<HTMLInputElement>;
+    onInputChange?: (target: React.RefObject<HTMLInputElement>) => void;
     optionsDirection?: 'up' | 'down';
     errorMessage?: any;
     LoadingComponent?: React.ReactNode;

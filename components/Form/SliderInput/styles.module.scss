@@ -26,6 +26,7 @@
         }
 
         .trackActive {
+            position: absolute;
             background-color: var(--color-primary);
             border-radius: 0.75em;
         }

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import List from '../../List';
 import cs from '../../../cs';
-import {isObject} from '../../../utils';
+import {isObject, isArray} from '../../../utils';
 import useControlledState from '../../../hooks/useControlledState';
 
 import useDrag from './useDrag';
@@ -41,11 +41,11 @@ const propTypes = {
     /**
      * Initial value of the input.
      */
-    defaultValue: PropTypes.number,
+    defaultValue: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
     /**
      * Value for controlled input.
      */
-    value: PropTypes.number,
+    value: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
     /**
      * Style applied to the input thumb.
      * If function is used, it should return a style object.
@@ -66,6 +66,13 @@ const propTypes = {
         PropTypes.func,
     ]),
     /**
+     * Style of the input container element.
+     */
+    containerStyle: PropTypes.oneOfType([
+        PropTypes.object,
+        PropTypes.func,
+    ]),
+    /**
      * Whether or not to show tooltip with value.
      * */
     showTooltip: PropTypes.bool,
@@ -76,6 +83,11 @@ const propTypes = {
         PropTypes.string,
         PropTypes.func,
     ]),
+    /**
+     * Value extractor for tooltip content.
+     * @param {number} value - Value of a slider thumb.
+     */
+    tooltipValueExtractor: PropTypes.func,
     /**
      * Class applied to track labels container.
      */
@@ -110,6 +122,10 @@ const propTypes = {
      * Name of the input.
      */
     name: PropTypes.string,
+    /**
+     * Whether or not to allow range input
+     */
+    isRangeInput: PropTypes.bool
 };
 
 const noop = () => {};
@@ -123,6 +139,7 @@ const defaultProps = {
     marks: [0, 5, 10],
     onChange: noop,
     defaultValue: 5,
+    tooltipValueExtractor: value => value,
 };
 
 const KeyCodes = {
@@ -156,17 +173,34 @@ function getOffset(value, min, max) {
 }
 
 function getActiveTrackStyle(direction, value, min, max) {
-   const offset = getOffset(value, min, max);
+    let val = value;
+    if(!isArray(value)) {
+        val = [min, value]
+    }
 
-   const style = {};
+    const startOffset = getOffset(val[0], min, max);
+    const offset = getOffset(val[1] - val[0], min, max);
+
+    const style = {};
 
     switch(direction) {
         case 'rtl':
-        case 'ltr':
+            style.right = `${startOffset * 100}%`;
             style.width = `${offset * 100}%`;
             style.height = '100%';
             break;
+        case 'ltr':
+            style.left = `${startOffset * 100}%`;
+            style.width = `${offset * 100}%`;
+            style.height = '100%';
+            break;
+        case 'ttb':
+            style.top = `${startOffset * 100}%`;
+            style.height = `${offset * 100}%`;
+            style.width = '100%';
+            break;
         default:
+            style.bottom = `${startOffset * 100}%`;
             style.height = `${offset * 100}%`;
             style.width = '100%';
             break;
@@ -201,118 +235,42 @@ function getDirectionStyle(direction, value, min, max) {
     return positionStyle;
 }
 
-const SliderInput = props => {
+const ThumbComponent = React.forwardRef((props, ref) => {
     const {
-        name,
-        value,
-        disabled,
-        inputRange,
-        onChange,
-        axis,
-        reverse,
+        triggerChange,
+        containerRef,
+        minValue,
+        maxValue,
         step,
-        defaultValue,
-        thumbStyle,
-        trackSize,
+        controlledValue,
+        direction,
+        style,
+        index,
+        disabled,
         showTooltip,
-        containerClassName,
         tooltipClassName,
-        marks,
-        markKeyExtractor,
-        marksContainerClassName,
-        renderMark,
-        activeTrackColor,
+        tooltipValueExtractor,
+        ...otherProps
     } = props;
 
-    const containerRef = useRef();
-    const handle = useRef(null);
-    const start = useRef({});
-    const offset = useRef({});
-    const inputRef = useRef();
-
-    const direction = useMemo(() => {
-        if(axis==='y') {
-            return reverse ? 'ttb' : 'btt';
-        }
-        return reverse ? 'rtl' : 'ltr';
-    }, [axis, reverse]);
-
-    const [minValue, maxValue] = useMemo(() => inputRange, [inputRange]);
-
-    const handleChange = useCallback(val => {
-        onChange && onChange({name, value: val});
-    }, [onChange]);
-
-    const [controlledValue, setValue] = useControlledState(defaultValue, {
-        value,
-        onChange: handleChange,
-    });
-
-    const triggerChangeValue = useCallback(val => {
-        if(val > maxValue) {
-            return setValue(maxValue);
-        }
-        if(val < minValue) {
-            return setValue(minValue);
-        }
-        setValue(val);
-    }, []);
-
-    const handleDragChange = useCallback(dragOffset => {
-        const nextValue = controlledValue + dragOffset * (maxValue - minValue);
-        const newVal = (nextValue !== 0 ? Math.round(nextValue / step) * step : 0);
-        triggerChangeValue(newVal); 
-    }, [controlledValue, triggerChangeValue, minValue, maxValue, step]);
-
-    const {isDragging, onStartMove} = useDrag(containerRef, direction, handleDragChange);
-
-    const handleSliderMouseDown = useCallback(e => {
-        e.preventDefault();
-
-        const {
-            width,
-            height,
-            left,
-            top,
-            bottom,
-            right,
-        } = containerRef.current.getBoundingClientRect();
-        const {clientX, clientY} = e;
-
-        let percent;
-        switch(direction) {
-            case 'btt':
-                percent = (bottom - clientY) / height;
-                break;
-            case 'ttb':
-                percent = (clientY - top) / height;
-                break;
-            case 'rtl':
-                percent = (right - clientX) / width;
-                break;
-            default:
-                percent = (clientX - left) / width;
-        }
-        const nextValue = minValue + percent * (maxValue - minValue);
-        const newVal = (nextValue !== 0 ? Math.round(nextValue / step) * step : 0); 
-
-        triggerChangeValue(newVal);
-    }, [direction, inputRange, step, triggerChangeValue]);
+    const positionStyle = useMemo(() => {
+        return getDirectionStyle(direction, controlledValue, minValue, maxValue);
+    }, [direction, controlledValue, minValue, maxValue]);
 
     const handleOffsetChange = useCallback(offset => {
         if(!disabled) {
             if(offset === 'min') {
-                return triggerChangeValue(minValue);
+                return triggerChange(minValue, index);
             }
             if(offset === 'max') {
-                return triggerChangeValue(maxValue);
+                return triggerChange(maxValue, index);
             }
             if(offset === -1) {
-                return triggerChangeValue(controlledValue - step < minValue ? minValue : controlledValue - step);
+                return triggerChange(controlledValue - step < minValue ? minValue : controlledValue - step, index);
             }
-            return triggerChangeValue(controlledValue + step > maxValue ? maxValue : controlledValue + step); 
+            return triggerChange(controlledValue + step > maxValue ? maxValue : controlledValue + step, index);
         }
-    }, [triggerChangeValue, minValue, maxValue, step, controlledValue]);
+    }, [triggerChange, minValue, maxValue, step, controlledValue, index]);
 
     const handleKeyDown = useCallback(e => {
         if(!disabled) {
@@ -344,33 +302,170 @@ const SliderInput = props => {
         }
     }, [disabled, direction, handleOffsetChange]);
 
+    const handleDragChange = useCallback((dragOffset) => {
+        const nextValue = controlledValue + dragOffset * (maxValue - minValue);
+        const newVal = Math.round(nextValue / step) * step;
+        triggerChange(newVal, index);
+    }, [controlledValue, triggerChange, minValue, maxValue, step, index]);
+
+    const {isDragging, onStartMove} = useDrag(containerRef, direction, handleDragChange);
+
+    return (
+        <>
+            <div
+                ref={ref}
+                onMouseDown={onStartMove}
+                onTouchStart={onStartMove}
+                role="slider"
+                style={{...style, ...positionStyle}}
+                onKeyDown={handleKeyDown}
+                {...otherProps}
+            />
+            {showTooltip && (
+                <div className={cs(styles.tooltip, tooltipClassName, {
+                    [styles.tooltipX]: ['rtl', 'ltr'].includes(direction),
+                    [styles.tooltipY]: ['ttb', 'btt'].includes(direction),
+                })} style={positionStyle}>
+                    {tooltipValueExtractor(controlledValue)}
+                </div>
+            )}
+        </>
+    );
+});
+
+const SliderInput = props => {
+    const {
+        name,
+        value,
+        disabled,
+        inputRange,
+        onChange,
+        axis,
+        reverse,
+        step,
+        defaultValue,
+        thumbStyle,
+        trackSize,
+        showTooltip,
+        containerStyle,
+        containerClassName,
+        tooltipClassName,
+        marks,
+        markKeyExtractor,
+        marksContainerClassName,
+        renderMark,
+        activeTrackColor,
+        isRangeInput,
+        tooltipValueExtractor,
+    } = props;
+
+    const containerRef = useRef();
+    const handle = useRef(null);
+    const start = useRef({});
+    const offset = useRef({});
+    const inputRef = useRef();
+
+    const direction = useMemo(() => {
+        if(axis==='y') {
+            return reverse ? 'ttb' : 'btt';
+        }
+        return reverse ? 'rtl' : 'ltr';
+    }, [axis, reverse]);
+
+    const [minValue, maxValue] = useMemo(() => inputRange.sort((a,b) => a-b), [inputRange]);
+
+    const handleChange = useCallback(val => {
+        onChange && onChange({name, value: val});
+    }, [onChange]);
+
+    const [controlledValue, setValue] = useControlledState(
+        isRangeInput && !isArray(defaultValue) ? [minValue, defaultValue] : defaultValue,
+        {
+            value,
+            onChange: handleChange,
+        }
+    );
+
+    const triggerChangeValue = useCallback((val, idx) => {
+        let newValue = Math.max(minValue, Math.min(maxValue, val));
+        if(isRangeInput) {
+            if(idx === 0 && newValue > controlledValue[1] - step) {
+                return;
+            }
+            if(idx === 1 && newValue < controlledValue[0] + step) {
+                return;
+            }
+            const newRangeValues = [...controlledValue];
+            newRangeValues[idx] = newValue;
+            newValue = newRangeValues;
+        }
+        setValue(newValue);
+    }, [isRangeInput, minValue, maxValue, controlledValue, step]);
+
+    const handleSliderMouseDown = useCallback(e => {
+        e.preventDefault();
+
+        const {
+            width,
+            height,
+            left,
+            top,
+            bottom,
+            right,
+        } = containerRef.current.getBoundingClientRect();
+        const {clientX, clientY} = e;
+
+        let percent;
+        switch(direction) {
+            case 'btt':
+                percent = (bottom - clientY) / height;
+                break;
+            case 'ttb':
+                percent = (clientY - top) / height;
+                break;
+            case 'rtl':
+                percent = (right - clientX) / width;
+                break;
+            default:
+                percent = (clientX - left) / width;
+        }
+        const nextValue = minValue + percent * (maxValue - minValue);
+        const newVal = (nextValue !== 0 ? Math.round(nextValue / step) * step : 0);
+
+        let changeIdx = 0;
+        if(isRangeInput) {
+            const differences = controlledValue.map(val => Math.abs(newVal - val));
+            changeIdx = differences.indexOf(Math.min(...differences));
+        }
+        triggerChangeValue(newVal, changeIdx);
+    }, [direction, inputRange, step, triggerChangeValue, isRangeInput, controlledValue]);
+
     const renderLabel = useCallback(({item: label}) => (
         <span className={styles.trackLabel}>{label}</span>
     ), []);
-
-    const positionStyle = useMemo(() => {
-        return getDirectionStyle(direction, controlledValue, minValue, maxValue);
-    }, [direction, controlledValue, minValue, maxValue]);
 
     const activeTrackStyle = useMemo(() => {
         return getActiveTrackStyle(direction, controlledValue, minValue, maxValue);
     }, [direction, controlledValue, minValue, maxValue]);
 
     const markList = useMemo(() => {
-        if(direction === 'btt' || direction ===  'rtl') {
-            return marks.reverse();
+        if(reverse) {
+            return [...marks.reverse()];
         }
         return marks;
-    }, [marks, direction]);
+    }, [marks, reverse]);
 
     return (
-        <div ref={containerRef} className={cs(styles.container, containerClassName, {
+        <div ref={containerRef} style={containerStyle} className={cs(styles.container, containerClassName, {
             [styles.containerDisabled]: disabled,
-        })} onMouseDown={handleSliderMouseDown}>
+        })}
+            onMouseDown={handleSliderMouseDown}
+        >
             <div
                 className={cs(styles.track, {
                     [styles.trackX]: axis === 'x',
                     [styles.trackY]: axis === 'y',
+                    [styles.trackReverse]: reverse,
                 })}
             >
                 <div
@@ -378,26 +473,49 @@ const SliderInput = props => {
                     style={{...activeTrackStyle, backgroundColor: activeTrackColor}}
                 />
             </div>
-            <div
+            <ThumbComponent
                 ref={handle}
                 className={cs(styles.thumb, {
                     [styles.thumbX]: axis === 'x',
                     [styles.thumbY]: axis === 'y',
                 })}
-                style={{...positionStyle, ...thumbStyle}}
-                onMouseDown={onStartMove}
-                onTouchStart={onStartMove}
-                onKeyDown={handleKeyDown}
-                role="slider"
+                style={thumbStyle}
+                triggerChange={triggerChangeValue}
+                containerRef={containerRef}
+                minValue={minValue}
+                maxValue={maxValue}
+                step={step}
                 tabIndex={disabled ? null : 0}
+                index={0}
+                controlledValue={controlledValue?.[0] ?? controlledValue}
+                direction={direction}
+                disabled={disabled}
+                showTooltip={showTooltip}
+                tooltipClassName={tooltipClassName}
+                tooltipValueExtractor={tooltipValueExtractor}
             />
-            {showTooltip && (
-                <div className={cs(styles.tooltip, tooltipClassName, {
-                    [styles.tooltipX]: axis==='x',
-                    [styles.tooltipY]: axis==='y',
-                })} style={positionStyle}>
-                    {controlledValue}
-                </div>
+            {isRangeInput && (
+                <ThumbComponent
+                    ref={handle}
+                    className={cs(styles.thumb, {
+                        [styles.thumbX]: axis === 'x',
+                        [styles.thumbY]: axis === 'y',
+                    })}
+                    style={thumbStyle}
+                    triggerChange={triggerChangeValue}
+                    containerRef={containerRef}
+                    minValue={minValue}
+                    maxValue={maxValue}
+                    step={step}
+                    tabIndex={disabled ? null : 0}
+                    index={1}
+                    controlledValue={controlledValue?.[1] ?? controlledValue}
+                    direction={direction}
+                    disabled={disabled}
+                    showTooltip={showTooltip}
+                    tooltipClassName={tooltipClassName}
+                    tooltipValueExtractor={tooltipValueExtractor}
+                />
             )}
             <List
                 className={cs(styles.marks, marksContainerClassName, {

@@ -65,16 +65,13 @@
     .placeholder {
         color: lightgray;
     }
+}
 
+.popup {
     .selectOptionsWrapper {
-        position: absolute;
-        top: calc(100% + 2px);
-        right: 0;
-        left: 0;
-        background-color: var(--color-background-alt);
+        background-color: var(--color-background);
         box-shadow: rgba(0, 0, 0, 0.1) 0 0 0 1px, rgba(0, 0, 0, 0.1) 0 4px 11px;
         border-radius: var(--border-radius-small);
-        z-index: 1;
 
         .selectOptions {
             max-height: 12em;
@@ -82,11 +79,6 @@
             padding-top: 4px;
             padding-bottom: 4px;
         }
-    }
-
-    .selectOptionsUp {
-        top: unset;
-        bottom: calc(100% + 2px);
     }
 
     .selectOption {

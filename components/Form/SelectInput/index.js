@@ -6,6 +6,7 @@ import {FaSpinner} from 'react-icons/fa';
 import {IoMdClose} from 'react-icons/io';
 
 import Input from '../Input';
+import Popup from '../../Popup';
 import Options from './Options';
 import cs from '../../../cs';
 import {isArray} from '../../../utils';
@@ -31,6 +32,20 @@ const propTypes = {
     options: PropTypes.array,
     keyExtractor: PropTypes.func,
     valueExtractor: PropTypes.func,
+    /**
+     * Anchor position the popup in vertical and horizontal position in respect to the anchor
+     * The first position defines the vertical position of the anchor and the second position defines the horizontal position
+     * for anchor position reference check https://mui.com/components/popover/
+     * @param {('top left'|'top right'|'bottom right'|'bottom left'|'right center'|'left center'|'top center'|'bottom center'|'center center')
+     */
+    anchorOrigin: PropTypes.string,
+    /**
+     * Tranform position the popup in vertical and horizontal position in respect to the anchor
+     * The first position defines the vertical position of the anchor and the second position defines the horizontal position
+     * for transform position reference check https://mui.com/components/popover/
+     * @param {('top left'|'top right'|'bottom right'|'bottom left'|'right center'|'left center'|'top center'|'bottom center'|'center center')
+     */
+    transformOrigin: PropTypes.string,
     onChange: PropTypes.func,
     /*
      * Called when the search input is changed
@@ -60,6 +75,10 @@ const propTypes = {
         PropTypes.element,
         PropTypes.elementType
     ]),
+    /*
+     * Footer of the select options
+     * IMPORTANT: Elements that lock focus (such as links, buttons, inputs) should not be used here without proper focus handling when searchable prop enabled. Doing so causes focus to shift from search input to the focusable element, causing erroneous behavior when searching.
+     */
     FooterComponent: PropTypes.oneOfType([
         PropTypes.element,
         PropTypes.elementType
@@ -77,6 +96,8 @@ const defaultProps = {
     options: [],
     onChange: noop,
     optionsDirection: 'down',
+    anchorOrigin: 'bottom left',
+    transformOrigin: 'top left'
 };
 
 export default class Select extends PureComponent {
@@ -93,14 +114,6 @@ export default class Select extends PureComponent {
         };
         this.wrapperRef = React.createRef();
         this.inputRef = React.createRef();
-    }
-
-    componentDidMount() {
-        document.addEventListener('mousedown', this.handleClickOutside);
-    }
-
-    componentWillUnmount() {
-        document.removeEventListener('mousedown', this.handleClickOutside);
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -146,20 +159,16 @@ export default class Select extends PureComponent {
         this.hideOption();
         onChange && onChange({name: this.props.name, option: null});
     };
-
-    handleClickOutside = (event) => {
-        const {current: wrapper} = this.wrapperRef;
-
-        if(!wrapper.contains(event.target)) {
-            this.hideOption();
-        }
-    };
-
+    
     handleCaretClick = (event) => {
         event.stopPropagation();
         const {expanded} = this.state;
-        if(expanded) this.hideOption();
-        else this.showOption();
+        if(expanded) {
+            this.hideOption();
+        }
+        else {
+            this.showOption();
+        }
     };
 
     handleOptionClick = ({item}) => {
@@ -208,6 +217,8 @@ export default class Select extends PureComponent {
             controlClassName,
             loading,
             disabled,
+            anchorOrigin,
+            transformOrigin,
             clearable,
             searchable,
             placeholder,
@@ -239,7 +250,7 @@ export default class Select extends PureComponent {
 
         return (
             <>
-                <div ref={this.wrapperRef} className={className}>
+                <div ref={this.wrapperRef} className={className} tabIndex="0">
                     <div
                         className={cs(
                             styles.selectControl,
@@ -267,7 +278,6 @@ export default class Select extends PureComponent {
                         </div>
                         <div className={cs(styles.selectIndicator, 'select-indicator')}>
                             {loading && (
-
                                 <FaSpinner className={styles.loading} />
                             )}
                             {showClose && (
@@ -282,10 +292,15 @@ export default class Select extends PureComponent {
                             />
                         </div>
                     </div>
-                    {expanded && (
-                        <div className={cs(styles.selectOptionsWrapper, {
-                            [styles.selectOptionsUp]: optionsDirection==='up'
-                        }, optionsWrapperClassName)}>
+                    <Popup
+                        isVisible={expanded}
+                        className={styles.popup}
+                        anchor={this.wrapperRef}
+                        anchorOrigin={optionsDirection==='up' ? 'top right' : anchorOrigin}
+                        transformOrigin={optionsDirection==='up' ? 'bottom right' : transformOrigin}
+                        onClose={this.handleCaretClick}
+                    >
+                        <div className={cs(styles.selectOptionsWrapper, optionsWrapperClassName)}>
                             <Options
                                 data={options}
                                 keyExtractor={keyExtractor}
@@ -296,15 +311,14 @@ export default class Select extends PureComponent {
                                 selectedItem={selectedItem}
                                 onItemClick={this.handleOptionClick}
                                 LoadingComponent={LoadingComponent}
-                                EmptyComponent={searchValue?FilterEmptyComponent:EmptyComponent} 
+                                EmptyComponent={searchValue ? FilterEmptyComponent : EmptyComponent} 
                                 FooterComponent={FooterComponent}
                             />
                         </div>
-                    )}
+                    </Popup>
                 </div>
                 {!!errMsg && <span className={styles.errorText}>{errMsg}</span>}
             </>
-
         );
     }
 }

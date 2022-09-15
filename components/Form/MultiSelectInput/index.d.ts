@@ -9,7 +9,7 @@ export type {OriginPosition};
 
 export type ValueExtractor<T, V> = (item: T) => V;
 
-export type MultiSelectInputChangeCallback<T> = (payload: {name?: string, option: T[]}) => void;
+export type MultiSelectInputChangeCallback<T> = (payload: {name?: string, value: T[]}) => void;
 
 export type RenderOptionLabelCallback<T> = (props: {
     selected?: boolean;

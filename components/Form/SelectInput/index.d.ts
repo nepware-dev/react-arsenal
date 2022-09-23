@@ -26,6 +26,8 @@ export interface SelectInputProps<T, V> {
     valueExtractor: ValueExtractor<T, V>;
     onChange?: SelectInputChangeCallback<T>;
     onInputChange?: (target: React.RefObject<HTMLInputElement>) => void;
+    anchorOrigin?: OriginPosition;
+    transformOrigin?: OriginPosition;
     optionsDirection?: 'up' | 'down';
     errorMessage?: any;
     LoadingComponent?: React.ReactNode;

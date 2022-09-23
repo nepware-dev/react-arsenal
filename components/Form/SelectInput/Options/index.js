@@ -59,17 +59,14 @@ export default class Options extends PureComponent {
             className,
             data,
             keyExtractor,
-            onItemClick,
             ...otherProps
         } = this.props;
-
 
         return (
             <List
                 className={cs(className)}
                 data={data}
                 keyExtractor={keyExtractor}
-                onItemClick={onItemClick}
                 renderItem={this.renderItem}
                 {...otherProps}
             />

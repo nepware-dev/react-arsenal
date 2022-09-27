@@ -154,3 +154,23 @@ export const uuidv4 = () => {
         (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> c / 4))).toString(16)
     );
 };
+
+export const getNestedKey = (obj, ...args) => {
+    return args.reduce((obj, level) => obj && obj[level], obj);
+};
+
+export const associateObjectPath = (path, val, obj) => {
+    if(path.length === 0) {
+        return val;
+    }
+    let idx = path[0];
+    if (path.length > 1) {
+        let nextObj = !!obj?.[idx] ? obj[idx] : {};
+        val = associateObjectPath(Array.prototype.slice.call(path, 1), val, nextObj);
+    }
+    return associateObjectPath(idx, val, obj);
+};
+
+export const camelize = (...args) => {
+    return args.join('-').replacce(/-(,)/g, (_, char) => char.toUpperCase());
+};

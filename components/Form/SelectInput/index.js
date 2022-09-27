@@ -111,13 +111,21 @@ export default class Select extends PureComponent {
             searchValue: '',
             selectedItem: props.value ?? props.defaultValue,
             options: props.options,
+            meta: {
+                warning: null,
+                touched: false,
+            },
         };
         this.wrapperRef = React.createRef();
         this.inputRef = React.createRef();
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const {onChange, valueExtractor} = this.props;
+        const {valueExtractor, showRequired} = this.props;
+
+        if(showRequired !== prevProps.showRequired) {
+            this.setState({meta: {...this.state.meta, warning: showRequired ? 'Required' : null}});
+        }
 
         if(
             (this.props.options !== prevProps.options ||
@@ -138,9 +146,18 @@ export default class Select extends PureComponent {
             this.setState({
                 selectedItem: this.props.defaultValue,
             });
-            onChange && onChange({name: this.props.name, option: this.props.defaultValue});
+            this.handleChangeCallback({name: this.props.name, option: this.props.defaultValue});
         }
     }
+
+    handleChangeCallback = (payload) => {
+        if(this.props.required && !payload.option) {
+            this.setState({meta: {...this.state.meta, touched: true, warning: 'Required'}});
+            return this.props.onChange?.(payload);
+        }
+        this.setState({meta: {...this.state.meta, touched: true, warning: null}});
+        this.props.onChange?.(payload);
+    };
 
     handleInputChange = ({value}) => {
         this.props.onInputChange && this.props.onInputChange(value);
@@ -157,9 +174,9 @@ export default class Select extends PureComponent {
             selectedItem: null,
         });
         this.hideOption();
-        onChange && onChange({name: this.props.name, option: null});
+        this.handleChangeCallback({name: this.props.name, option: null});
     };
-    
+
     handleCaretClick = (event) => {
         event.stopPropagation();
         const {expanded} = this.state;
@@ -177,7 +194,7 @@ export default class Select extends PureComponent {
         this.setState({selectedItem: item});
         this.hideOption();
 
-        onChange && onChange({name: this.props.name, option: item});
+        this.handleChangeCallback({name: this.props.name, option: item});
     };
 
     showOption = () => {
@@ -198,7 +215,7 @@ export default class Select extends PureComponent {
                 .valueExtractor(d)
                 .toLowerCase()
                 .includes(searchValue.toLowerCase())
-        );
+    );
     };
 
     getErrorMessage = () => {
@@ -244,7 +261,7 @@ export default class Select extends PureComponent {
                 [styles.disabled]: disabled,
             },
             _className
-        );
+    );
 
         const errMsg = this.getErrorMessage();
 
@@ -257,6 +274,8 @@ export default class Select extends PureComponent {
                             'select-control',
                             controlClassName,
                             [styles.selected, expanded],
+                            [styles.warning, this.state.meta.warning],
+                            [styles.error, !!errMsg],
                         )}
                         onClick={this.handleCaretClick}
                     >
@@ -318,6 +337,7 @@ export default class Select extends PureComponent {
                     </Popup>
                 </div>
                 {!!errMsg && <span className={styles.errorText}>{errMsg}</span>}
+                {this.state.meta.warning && <span className={styles.warningText}>{this.state.meta.warning}</span>}
             </>
         );
     }

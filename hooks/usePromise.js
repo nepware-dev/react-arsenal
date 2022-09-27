@@ -1,5 +1,7 @@
 import {useReducer, useCallback} from 'react';
 
+const noop = () => {};
+
 const initialState = {
     loading: false,
     error: false,
@@ -22,6 +24,9 @@ const usePromise = (fn, options, initialParams=[]) => {
     }, initialState);
 
     const trigger = useCallback(async (...args) => {
+        if(!fn) {
+            return noop;
+        }
         dispatch({type: 'PENDING'});
         try {
             const result = await fn(...args);

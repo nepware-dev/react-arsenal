@@ -29,6 +29,17 @@
         display: block;
       }
     }
+
+    &:indeterminate ~ .checkbox {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+
+      &::after {
+        display: block;
+        width: 0;
+        transform: rotate(90deg);
+      }
+    }
   }
 
   .checkbox {

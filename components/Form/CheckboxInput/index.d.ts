@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export interface CheckboxInputProps {
+export interface CheckboxInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     className?: string;
     size?: number | string;
     value?: string;
@@ -12,6 +12,7 @@ export interface CheckboxInputProps {
     onChange?: (HTMLInputElement) => void;
     errorMessage?: any;
     info?: string;
+    indeterminate?: boolean;
 }
 
 declare const CheckboxInput;

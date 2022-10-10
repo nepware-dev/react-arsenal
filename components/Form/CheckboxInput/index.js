@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import PropTypes from 'prop-types';
 
 import cs from '../../../cs';
@@ -25,6 +25,7 @@ const propTypes = {
     onChange: PropTypes.func,
     errorMessage: PropTypes.any,
     info: PropTypes.string,
+    indeterminate: PropTypes.bool // Requires inputRef to be sent
 };
 
 const defaultProps = {
@@ -47,6 +48,7 @@ const CheckboxInput = (props) => {
         warning,
         showRequired,
         info,
+        indeterminate,
         ...otherProps
     } = props;
 
@@ -76,6 +78,15 @@ const CheckboxInput = (props) => {
         return errorMessage;
     }, [errorMessage]);
 
+    useEffect(() => {
+        if(inputRef?.current) {
+            if(indeterminate) {
+                inputRef.current.indeterminate = true;
+            } else {
+                inputRef.current.indeterminate = false;
+            }
+        }
+    }, [indeterminate]);
 
     const errMsg = getErrorMessage();
 

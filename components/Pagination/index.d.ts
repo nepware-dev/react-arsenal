@@ -18,6 +18,8 @@ export interface PaginationProps {
     pageItemClassName?: string,
     activePageItemClassName?: string,
     pageNum?: number,
+    renderLeftControl?: PropTypes.func,
+    renderRightControl?: PropTypes.func,
 }
 
 declare const Pagination;

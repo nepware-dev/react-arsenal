@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import cs from '../../cs';
+import { transformToElement } from '../../utils';
 
 import styles from './styles.module.scss';
 
@@ -77,6 +78,8 @@ const Pagination = (props) => {
         pageItemClassName,
         activePageItemClassName,
         pageNum,
+        renderLeftControl,
+        renderRightControl,
     } = props;
 
     const [currentPage, setCurrentPage] = useState(pageNum ?? 1);
@@ -132,9 +135,11 @@ const Pagination = (props) => {
         <>
             <ul className={cs(styles.pagination, className)}>
                 {showControlIcons && (
-                    <li key="left_control" className={styles.pageItem}>
+                    <li key="left_control" className={cs(styles.pageItem, {
+                        [styles.disabled]: currentPage === 1
+                    })}>
                         <a href="#" className={cs(styles.pageLink, controlIconClassName)} aria-label="Previous" onClick={handleLeftControlClick}>
-                            <span aria-hidden="true">&lt;</span>
+                            {renderLeftControl ? transformToElement(renderLeftControl): <span aria-hidden="true">&lt;</span>}
                         </a>
                     </li>
                 )}
@@ -186,9 +191,11 @@ const Pagination = (props) => {
                     );
                 })}
                 {showControlIcons && (
-                    <li key="right_control" className={styles.pageItem}>
+                    <li key="right_control" className={cs(styles.pageItem, {
+                        [styles.disabled]: currentPage === totalPages
+                    })}>
                         <a href="#" className={cs(styles.pageLink, controlIconClassName)} aria-label="Next" onClick={handleRightControlClick}>
-                            <span aria-hidden="true">&gt;</span>
+                            {renderRightControl ? transformToElement(renderRightControl): <span aria-hidden="true">&gt;</span>}
                         </a>
                     </li>
                 )}
@@ -208,6 +215,8 @@ Pagination.propTypes = {
     pageItemClassName: PropTypes.string,
     activePageItemClassName: PropTypes.string,
     pageNum: PropTypes.number,
+    renderLeftControl: PropTypes.func,
+    renderRightControl: PropTypes.func,
 };
 
 Pagination.defaultProps = {

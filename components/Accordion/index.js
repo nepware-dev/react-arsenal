@@ -22,6 +22,10 @@ const propTypes = {
      */
     className: PropTypes.string,
     /*
+     * Class applied to the expanded accordion.
+     */
+    activeClassName: PropTypes.string,
+    /*
      * Class applied to the title of the accordion when not custom rendered.
      */
     titleClassName: PropTypes.string,
@@ -33,6 +37,7 @@ const Accordion = (props) => {
         title, 
         children, 
         className, 
+        activeClassName,
         renderHeader,
         titleClassName,
     } = props;
@@ -48,7 +53,7 @@ const Accordion = (props) => {
     }, [active]);
 
     return (
-        <div className={cs(styles.accordionSection, className)}>
+        <div className={cs(styles.accordionSection, className, active && activeClassName)}>
             <div className={styles.accordion} onClick={toggleAccordion}>
                 {renderHeader ? renderHeader({isExpanded: active}) : (
                     <div className={cs(styles.accordionTitle, titleClassName)}>

@@ -1,9 +1,10 @@
-import React, {useRef, useCallback, useState} from 'react';
+import React, {useRef, useMemo} from 'react';
 import PropTypes from 'prop-types';
-
 import {FiChevronRight} from 'react-icons/fi';
 
+import useToggle from '../../hooks/useToggle';
 import cs from '../../cs';
+
 import styles from './styles.module.scss';
 
 const propTypes = {
@@ -42,19 +43,16 @@ const Accordion = (props) => {
         titleClassName,
     } = props;
 
-    const [active, setActive] = useState(false);
-    const [height, setHeight] = useState('0px');
-
     const content = useRef();
+    const [active, setActive] = useToggle();
 
-    const toggleAccordion = useCallback(() => {
-        setHeight(active ? '0px' : `${content.current.scrollHeight}px`);
-        setActive(!active);
+    const contentHeight = useMemo(() => {
+        return active ? '0px' : `${content.current.scrollHeight}px`;
     }, [active]);
 
     return (
         <div className={cs(styles.accordionSection, className, active && activeClassName)}>
-            <div className={styles.accordion} onClick={toggleAccordion}>
+            <div className={styles.accordion} onClick={setActive}>
                 {renderHeader ? renderHeader({isExpanded: active}) : (
                     <div className={cs(styles.accordionTitle, titleClassName)}>
                         {title}
@@ -66,7 +64,7 @@ const Accordion = (props) => {
             </div>
             <div
                 ref={content}
-                style={{maxHeight: height}}
+                style={{maxHeight: contentHeight}}
                 className={cs(styles.accordionContent, {
                     [styles.accordionContentActive]: active
                 })}

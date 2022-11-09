@@ -47,7 +47,7 @@ const Accordion = (props) => {
     const [active, setActive] = useToggle();
 
     const contentHeight = useMemo(() => {
-        return active ? '0px' : `${content.current.scrollHeight}px`;
+        return active ? `${content.current?.scrollHeight}px` : '0px';
     }, [active]);
 
     return (

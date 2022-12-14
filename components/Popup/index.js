@@ -135,7 +135,9 @@ const Popup = (props) => {
     }, [anchorOrigin, transformOrigin]);
 
     useEffect(() => {
-        setWrapperRect(transformWrapperRect(anchorRect));
+        if(anchorRect?.top) {
+            setWrapperRect(transformWrapperRect(anchorRect));
+        }
     }, [anchorRect, transformWrapperRect]);
 
     const className = cs(

@@ -40,6 +40,7 @@ const Tabs = React.forwardRef((props, ref) => {
         PreHeaderComponent = noop,
         PostHeaderComponent = noop,
         mode = 'switch',
+        disableUnmount
     } = props;
 
     const tabsRef = useRef();
@@ -120,10 +121,11 @@ const Tabs = React.forwardRef((props, ref) => {
             <TabContent 
                 mode={mode} 
                 ref={el => tabsRef.current[index] = el} 
-                {...childProps} 
+                disableUnmount={disableUnmount}
+                {...childProps}
             />
         );
-    }, [mode]);
+    }, [mode, disableUnmount]);
 
     return (
         <TabContext.Provider value={tabContext}>

@@ -346,8 +346,8 @@ const DragDropFileInput = props => {
                     [styles.dropZoneWarning]: meta.warning,
                     [styles.dropZoneError]: meta.error
                 })}>
-                <FileInput 
-                    className={styles.fileInput} 
+                <FileInput
+                    className={styles.fileInput}
                     name={name}
                     multiple={multiple} 
                     onChange={handleChange}

@@ -60,7 +60,16 @@
   }
 }
 
+.controlWarning {
+  border-color: var(--color-warning);
+}
+
 .errorText {
   color: var(--color-danger);
   font-size: 12px;
+}
+
+.warningText {
+    color: var(--color-warning);
+    font-size: 12px;
 }

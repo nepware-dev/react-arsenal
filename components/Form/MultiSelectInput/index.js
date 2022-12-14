@@ -120,11 +120,17 @@ const MultiSelect = ({
     LoadingComponent,
     FilterEmptyComponent,
     EmptyComponent,
+    showRequired,
 }) => {
 
     const [expanded, setExpanded] = useState(false);
     const [searchValue, setSearchValue] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
+
+    const [meta, setMeta] = useState({
+        warning: null,
+        touched: false
+    });
 
     useEffect(() => {
         if(defaultValue?.length === 0) {
@@ -135,6 +141,10 @@ const MultiSelect = ({
             onChange({name, value: defaultValue});
         }
     }, [defaultValue]);
+
+    useEffect(() => {
+        setMeta(prevMeta => ({...prevMeta, warning: showRequired ? 'Required' : null}));
+    }, [showRequired]);
 
     const wrapperRef = React.createRef();
 
@@ -171,6 +181,7 @@ const MultiSelect = ({
 
     const handleAddItem = ({item}) => {
         const newSelectedItems = [...selectedItems, item];
+        setMeta(prevMeta => ({...prevMeta, touched: true, warning: null}));
         setSelectedItems(newSelectedItems);
         onChange({name, value: newSelectedItems});
     };
@@ -178,6 +189,7 @@ const MultiSelect = ({
     const handleRemoveItem = ({item}) => {
         const newSelectedItems = selectedItems.filter(i => keyExtractor(item) != keyExtractor(i));
         setSelectedItems(newSelectedItems);
+        setMeta(prevMeta => ({...prevMeta, touched: true, warning: newSelectedItems.length ? null : showRequired && 'Required'}));
         onChange({name, value: newSelectedItems});
     };
 
@@ -197,7 +209,7 @@ const MultiSelect = ({
         <>
             <div ref={wrapperRef} className={className} tabIndex="0">
                 <ControlComponent
-                    controlClassName={controlClassName}
+                    controlClassName={cs(controlClassName,{[styles.controlWarning]: meta.warning})}
                     placeholder={placeholder}
                     loading={loading}
                     expanded={expanded}
@@ -258,6 +270,7 @@ const MultiSelect = ({
                     />
                 </Popup>
             </div>
+            {Boolean(meta.warning) && <span className={styles.warningText}>{meta.warning}</span>}
         </>
     );
 }

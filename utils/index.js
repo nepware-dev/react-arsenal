@@ -172,5 +172,5 @@ export const associateObjectPath = (path, val, obj) => {
 };
 
 export const camelize = (...args) => {
-    return args.join('-').replacce(/-(,)/g, (_, char) => char.toUpperCase());
+    return args.join('-').replace(/-(,)/g, (_, char) => char.toUpperCase());
 };

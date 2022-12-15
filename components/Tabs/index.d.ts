@@ -28,6 +28,7 @@ export interface TabsProps {
     contentContainerClassName?: string;
     mode?: 'switch' | 'scroll';
     children: React.ReactNode;
+    disableUnmount?: boolean;
 }
 
 export interface TabProps {

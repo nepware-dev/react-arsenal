@@ -12,6 +12,7 @@ const propTypes = {
     top: PropTypes.number,
     left: PropTypes.number,
     onClose: PropTypes.func,
+    backgroundColor: PropTypes.string
 };
 
 const defaultProps = {
@@ -53,11 +54,12 @@ export default class WindowPortal extends React.PureComponent {
     }
 
     componentDidMount() {
-        const { width, height, left, top, onClose } = this.props;
+        const { width, height, left, top, onClose, backgroundColor } = this.props;
         this.externalWindow = window.open('', '', `width=${width},height=${height},left=${left},top=${top}`);
 
         // append the container  to the body of the new window
         this.externalWindow.document.body.appendChild(this.containerEl);
+        this.externalWindow.document.body.style.backgroundColor = backgroundColor;
 
         this.externalWindow.addEventListener('beforeunload', () => {
             onClose();

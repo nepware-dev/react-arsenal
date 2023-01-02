@@ -28,6 +28,7 @@ const Input = (props) => {
         component: Component,
         formData,
         onChange,
+        formValueExtractor,
         fieldValueExtractor,
         containerClassName,
         inputContainerClassName,
@@ -66,7 +67,9 @@ const Input = (props) => {
     useEffect(() => {
         if(standaloneName) {
             let value = inputProps.value ?? inputProps.defaultValue ?? null;
-            if(inputProps.valueExtractor) {
+            if(formValueExtractor) {
+                value = value ? formValueExtractor(value) : value;
+            } else if(inputProps.valueExtractor) {
                 value = value ? inputProps.valueExtractor(value) : value;
             };
             addField({
@@ -90,6 +93,7 @@ const Input = (props) => {
         inputProps.value,
         inputProps.defaultValue,
         inputProps.valueExtractor,
+        formValueExtractor,
         standaloneName,
     ]);
 
@@ -152,6 +156,7 @@ const Form = React.forwardRef((props, ref) => {
                 const newFields = {...fs, [fieldObj.name]: fieldObj.field};
                 return {...newFields};
             }
+            return fs;
         });
     }, []);
 
@@ -162,6 +167,7 @@ const Form = React.forwardRef((props, ref) => {
                 delete newFields[fieldName];
                 return {...newFields};
             }
+            return fs;
         });
     }, []);
 
@@ -188,7 +194,7 @@ const Form = React.forwardRef((props, ref) => {
             addField,
             removeField,
             showRequiredFields,
-            error
+            error,
         };
     }, [formData, fields, addField, removeField, showRequiredFields, error]);
 

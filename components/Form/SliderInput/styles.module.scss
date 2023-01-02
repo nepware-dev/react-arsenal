@@ -71,6 +71,10 @@
         &Y {
             right: 0;
         }
+
+        &Active {
+            z-index: 2;
+        }
     }
 
     .marks {

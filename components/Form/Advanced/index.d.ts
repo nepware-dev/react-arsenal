@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export type FormSubmitCallback = (formData: FormData) => void;
+export type FormSubmitCallback = (formData: FormData) => Promise<void> | void;
 export type FormInvalidCallback = (reason: string) => void;
 
 export type FormFieldValueExtractor<T,V> = (arg: T) => V;

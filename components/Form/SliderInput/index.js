@@ -250,6 +250,8 @@ const ThumbComponent = React.forwardRef((props, ref) => {
         showTooltip,
         tooltipClassName,
         tooltipValueExtractor,
+        onDragging: onDragCallback,
+        isActive,
         ...otherProps
     } = props;
 
@@ -310,6 +312,12 @@ const ThumbComponent = React.forwardRef((props, ref) => {
 
     const {isDragging, onStartMove} = useDrag(containerRef, direction, handleDragChange);
 
+    useEffect(() => {
+        if(onDragCallback && isDragging) {
+            onDragCallback(index);
+        }
+    }, [index, onDragCallback, isDragging]);
+
     return (
         <>
             <div
@@ -325,6 +333,7 @@ const ThumbComponent = React.forwardRef((props, ref) => {
                 <div className={cs(styles.tooltip, tooltipClassName, {
                     [styles.tooltipX]: ['rtl', 'ltr'].includes(direction),
                     [styles.tooltipY]: ['ttb', 'btt'].includes(direction),
+                    [styles.tooltipActive]: isActive,
                 })} style={positionStyle}>
                     {tooltipValueExtractor(controlledValue)}
                 </div>
@@ -364,6 +373,8 @@ const SliderInput = props => {
     const start = useRef({});
     const offset = useRef({});
     const inputRef = useRef();
+
+    const [activeThumbIdx, setActiveThumbIdx] = useState(0);
 
     const direction = useMemo(() => {
         if(axis==='y') {
@@ -493,6 +504,8 @@ const SliderInput = props => {
                 showTooltip={showTooltip}
                 tooltipClassName={tooltipClassName}
                 tooltipValueExtractor={tooltipValueExtractor}
+                isActive={activeThumbIdx === 0}
+                onDragging={isRangeInput ? setActiveThumbIdx : undefined}
             />
             {isRangeInput && (
                 <ThumbComponent
@@ -515,6 +528,8 @@ const SliderInput = props => {
                     showTooltip={showTooltip}
                     tooltipClassName={tooltipClassName}
                     tooltipValueExtractor={tooltipValueExtractor}
+                    onDragging={setActiveThumbIdx}
+                    isActive={activeThumbIdx === 1}
                 />
             )}
             <List

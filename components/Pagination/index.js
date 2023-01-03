@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import cs from '../../cs';
 import { transformToElement } from '../../utils';
+import useControlledState from '../../hooks/useControlledState';
 
 import styles from './styles.module.scss';
 
@@ -82,7 +83,9 @@ const Pagination = (props) => {
         renderRightControl,
     } = props;
 
-    const [currentPage, setCurrentPage] = useState(pageNum ?? 1);
+    const [currentPage, setCurrentPage] = useControlledState(pageNum ?? 1, {
+        value: pageNum
+    });
 
     const totalPages = useMemo(() => Math.ceil(totalRecords / pageLimit) || 1, [totalRecords, pageLimit]);
 

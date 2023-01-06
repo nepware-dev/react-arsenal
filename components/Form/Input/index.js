@@ -70,6 +70,12 @@ const Input = ({
         }
     }, [showRequired, errorMessage]);
 
+    useEffect(() => {
+        if(otherProps.value && meta.warning === 'Required') {
+            setMeta(prevMeta => ({...prevMeta, warning: null}));
+        }
+    }, [otherProps.value]);
+
     const [Wrapper, wrapperProps] = useMemo(() => {
         if(containerClassName) {
             return ['div', {className: containerClassName}];

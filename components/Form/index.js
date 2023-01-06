@@ -193,6 +193,8 @@ const Form = React.forwardRef((props, ref) => {
     } = props;
     const _children = React.useMemo(() => getChildren(children), [children]);
 
+    const internalFormRef = useRef();
+
     const eventEmitter = useRef(new EventEmitter());
     
     const [emptyFields, setEmptyFields] = useState([]);
@@ -269,12 +271,17 @@ const Form = React.forwardRef((props, ref) => {
     useImperativeHandle(ref, () => ({
         getFormData: () => {
             return formData;
+        },
+        reset: () => {
+            if(internalFormRef.current) {
+                internalFormRef.current.reset?.();
+            }
         }
     }), [formData]);
 
     return (
         <FormContext.Provider value={formContext}>
-            <form noValidate {...formProps} onSubmit={handleSubmitForm}>
+            <form noValidate {...formProps} onSubmit={handleSubmitForm} ref={internalFormRef}>
                 {_children.slice(0, -1)}
                 {hasFormError && (
                     <div className={formErrorClassName}>

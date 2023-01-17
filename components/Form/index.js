@@ -218,7 +218,7 @@ const Form = React.forwardRef((props, ref) => {
         if(fields[field.name]) {
             return {...restField};
         }
-        setFormData({...formData, [field.name]: field.defaultValue ?? null});
+        setFormData(fd => ({...fd, [field.name]: field.defaultValue ?? null}));
         setFields({...fields, [field.name]: field});
         return {...restField};
     }, [formData, fields]);

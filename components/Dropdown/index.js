@@ -68,6 +68,7 @@ export default class Dropdown extends React.Component {
             labelItem: null,
             typeDropdown: null
         };
+        this.labelRef = React.createRef();
     }
 
     onMouseEnter = () => {
@@ -85,11 +86,14 @@ export default class Dropdown extends React.Component {
     showDropdown = () => {
         this.setState({ isOpen: true });
         setTimeout(() => {
-            document.addEventListener('click', this.hideDropdown, this.props.useCapture);
+           document.addEventListener('click', this.hideDropdown, this.props.useCapture);
         }, 50);
     };
 
-    hideDropdown = () => {
+    hideDropdown = (evnt) => {
+        if(evnt?.target && this.labelRef?.current?.contains(evnt.target)) {
+            evnt.stopPropagation();
+        }
         this.setState({ isOpen: false });
         document.removeEventListener('click', this.hideDropdown, this.props.useCapture);
     };
@@ -104,6 +108,7 @@ export default class Dropdown extends React.Component {
                     [styles.open]: this.state.isOpen,
                 })}>
                 <div
+                    ref={this.labelRef}
                     className={cs(styles.dropdownToggle, labelContainerClassName)}
                     type="button"
                     onMouseEnter={this.onMouseEnter}

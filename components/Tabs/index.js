@@ -40,61 +40,24 @@ const Tabs = React.forwardRef((props, ref) => {
         PreHeaderComponent = noop,
         PostHeaderComponent = noop,
         mode = 'switch',
-        disableUnmount
+        disableUnmount,
+        scrollRootMarginPercent
     } = props;
 
-    const tabsRef = useRef();
-    tabsRef.current = new Array(_children.length);
+    const tabsRef = useRef(new Array(_children.length));
 
     const [activeTab, setActiveTab] = useState(controlledActiveTab ? controlledActiveTab : defaultActiveTab);
-
-    const onScroll = useCallback(() => {
-        const scrollPos = document.body.scrollTop || document.documentElement.scrollTop;
-        const clientHeight = document.documentElement.clientHeight;
-        if(document.documentElement.scrollHeight - scrollPos - clientHeight < 5) {
-            const newActiveElement = tabsRef.current?.[tabsRef.current?.length - 1];
-            const newActiveTab = newActiveElement?.getAttribute('label');
-            if(newActiveTab && activeTab!==newActiveTab) {
-                return setActiveTab(newActiveTab);
-            }
-        }
-        const firstElement = tabsRef.current?.[0];
-        const firstElementHeight = firstElement?.getBoundingClientRect()?.height;
-        if(scrollPos < firstElementHeight) {
-            const newActiveTab = firstElement?.getAttribute('label');
-            if(newActiveTab && activeTab!==newActiveTab) {
-                return setActiveTab(newActiveTab);
-            }
-        }
-        const newActiveElement = tabsRef.current?.find(refElement => {
-            const elOffset = refElement?.offsetTop;
-            const height = refElement?.getBoundingClientRect()?.height;
-            const offsetHeight = height > clientHeight ? height/2 : height;
-            return scrollPos > elOffset - offsetHeight && scrollPos < elOffset;
-        });
-        const newActiveTab = newActiveElement?.getAttribute('label');
-        if(newActiveTab && activeTab!==newActiveTab) {
-            setActiveTab(newActiveTab);
-        }
-    }, [activeTab]);
-
-    useEffect(() => {
-        if(mode==='scroll') {
-            document.addEventListener('scroll', onScroll);
-        }
-        return () => document.removeEventListener('scroll', onScroll);
-    }, [onScroll, mode]);
 
     const tabContext = useMemo(() => ({
         selectTab: (e, index) => {
             const selectedTab = e.currentTarget.getAttribute('label');
             onChange && onChange({activeTab: selectedTab, previousTab: tabContext.activeTab});
             if(!controlledActiveTab) {
-                if(mode === 'scroll' && tabsRef.current[index]) {
-                    return scrollToElement(tabsRef.current[index]);
-                }
-                setActiveTab(selectedTab);
-            }
+               if(mode === 'scroll' && tabsRef.current?.[index]) {
+                   return scrollToElement(tabsRef.current[index]);
+               }
+               setActiveTab(selectedTab);
+           }
         },
         activeTab: controlledActiveTab ? controlledActiveTab : activeTab
     }), [activeTab, mode, onChange, controlledActiveTab]);
@@ -120,12 +83,14 @@ const Tabs = React.forwardRef((props, ref) => {
         return (
             <TabContent 
                 mode={mode} 
-                ref={el => tabsRef.current[index] = el} 
+                ref={tabsRef}
                 disableUnmount={disableUnmount}
+                index={index}
+                scrollRootMarginPercent={scrollRootMarginPercent}
                 {...childProps}
             />
         );
-    }, [mode, disableUnmount]);
+    }, [mode, disableUnmount, scrollRootMarginPercent]);
 
     return (
         <TabContext.Provider value={tabContext}>
@@ -219,6 +184,14 @@ Tabs.propTypes = {
      * When using scroll mode, the scroll-margin-top property on Tab will be used to calculate scroll offset.
      */
     mode: PropTypes.string,
+    /**
+     * Decides the threshold from top that a tab's content needs to cross to be considered active.
+     * Applies only for scroll mode.
+     * A value of 75 means that a tab becomes active if it crosses 75% from top of the viewport.
+     * Higher values allow tabs at the bottom with small content height to become active. May require some hit-and-trial for the optimal value.
+     * Default value - 50.
+     */
+    scrollRootMarginPercent: PropTypes.number,
     /**
      * Children components
      */

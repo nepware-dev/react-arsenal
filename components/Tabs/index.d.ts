@@ -29,6 +29,7 @@ export interface TabsProps {
     mode?: 'switch' | 'scroll';
     children: React.ReactNode;
     disableUnmount?: boolean;
+    scrollRootMarginPercent?: number;
 }
 
 export interface TabProps {

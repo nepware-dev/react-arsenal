@@ -5,6 +5,8 @@
     display: inline-block;
     cursor: pointer;
     color: var(--color-primary);
+    background-color: transparent;
+    border: none;
 
     .caret {
       display: inline-block;

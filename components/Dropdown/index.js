@@ -107,7 +107,7 @@ export default class Dropdown extends React.Component {
                 {
                     [styles.open]: this.state.isOpen,
                 })}>
-                <div
+                <button
                     ref={this.labelRef}
                     className={cs(styles.dropdownToggle, labelContainerClassName)}
                     type="button"
@@ -120,7 +120,7 @@ export default class Dropdown extends React.Component {
                             <span className={styles.caret}></span>
                         </>
                     )}
-                </div>
+                </button>
                 <div className={cs(
                     styles.dropdownMenu,
                     {

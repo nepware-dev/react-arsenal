@@ -10,7 +10,7 @@ const cs = (...classes) => {
         if(isObject(c)) 
             return Object.keys(c).filter(k => c[k]).join(' ');
         return c;
-    }).join(' ');
+    }).filter(k => k).join(' ');
 };
 
 export default cs;

@@ -12,15 +12,19 @@ const propTypes = {
     className: PropTypes.string,
     classNameItem: PropTypes.string,
     selectedItem: PropTypes.object,
+    focusedItem: PropTypes.object,
     keyExtractor: PropTypes.func.isRequired,
     valueExtractor: PropTypes.func.isRequired,
     onItemClick: PropTypes.func,
+    onItemFocus: PropTypes.func,
 };
 
 const defaultProps = {
     className: '',
     onItemClick: noop,
+    onItemFocus: noop,
     selectedItem: {},
+    focusedItem: {},
 };
 
 export default class Options extends PureComponent {
@@ -30,8 +34,10 @@ export default class Options extends PureComponent {
     renderItem = ({item}) => {
         const {
             onItemClick,
+            onItemFocus,
             classNameItem,
             selectedItem,
+            focusedItem,
             valueExtractor,
             keyExtractor,
         } = this.props;
@@ -41,15 +47,22 @@ export default class Options extends PureComponent {
             onItemClick({item});
         };
 
+        const _onItemFocus = () => {
+            onItemFocus({item});
+        };
+
         const label = valueExtractor(item);
         const selected = selectedItem && keyExtractor(item) === keyExtractor(selectedItem);
+        const focused = focusedItem && keyExtractor(item) === keyExtractor(focusedItem);
 
         return (
             <Option 
                 className={classNameItem}
                 label={label}
                 selected={selected}
+                focused={focused}
                 onClick={_onItemClick}
+                onFocus={_onItemFocus}
             />
         );
     }

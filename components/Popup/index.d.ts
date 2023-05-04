@@ -9,6 +9,7 @@ export interface PopupProps<T> {
     children?: React.ReactNode;
     className?: string,
     closeOnOutsideClick?: boolean;
+    disableFocusLock?: boolean;
     onClose: React.MouseEventHandler;
 };
 

@@ -54,6 +54,12 @@ const propTypes = {
      */
     closeOnOutsideClick: PropTypes.bool,
 
+
+    /**
+    * Disable focus capture
+    */
+    disableFocusLock: PropTypes.bool,
+
     /**
      * Function to run when close is called
      */
@@ -66,6 +72,7 @@ const defaultProps = {
     onClose: noop,
     anchorOrigin: 'bottom right',
     transformOrigin: 'bottom right',
+    disableFocusLock: false,
 };
 
 const Popup = (props) => {
@@ -76,6 +83,7 @@ const Popup = (props) => {
         transformOrigin,
         className: _className,
         closeOnOutsideClick,
+        disableFocusLock,
         onClose,
     } = props;
 
@@ -148,7 +156,7 @@ const Popup = (props) => {
 
     return (
         <Portal>
-            <FocusLock returnFocus>
+            <FocusLock disabled={disableFocusLock} returnFocus>
                 {wrapperRect &&
                     <div
                         ref={wrapperRef}

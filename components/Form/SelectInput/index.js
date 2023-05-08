@@ -107,9 +107,11 @@ export default class Select extends PureComponent {
     constructor(props) {
         super(props);
         this.state = {
+            locked: false,
             expanded: false,
             searchValue: '',
             selectedItem: props.value ?? props.defaultValue,
+            focusedItem: props.value ?? props.defaultValue ?? props.options?.[0],
             options: props.options,
             meta: {
                 warning: null,
@@ -168,11 +170,12 @@ export default class Select extends PureComponent {
         this.setState({
             searchValue: value,
         });
+        if(value) {
+            this.showOption();
+        }
     };
 
     handleClearIconClick = (event) => {
-        const {onChange} = this.props;
-
         event.stopPropagation();
         this.setState({
             selectedItem: null,
@@ -183,7 +186,9 @@ export default class Select extends PureComponent {
 
     handleCaretClick = (event) => {
         event.stopPropagation();
-        const {expanded} = this.state;
+        event.preventDefault();
+        const {expanded, locked} = this.state;
+        if(locked) return;
         if(expanded) {
             this.hideOption();
         }
@@ -192,13 +197,37 @@ export default class Select extends PureComponent {
         }
     };
 
-    handleOptionClick = ({item}) => {
-        const {onChange} = this.props;
+    handleKeyDown = (event) => {
+        if (event.key === "Tab" || event.key === 'Escape') {
+            this.hideOption();
+        }
+        else if (event.key === 'Enter') {
+            const {focusedItem} = this.state;
+            if(focusedItem) {
+                this.setState({selectedItem: focusedItem});
+                this.handleChangeCallback({name: this.props.name, option: focusedItem});
+            }
 
+        }
+    }
+
+    handleOptionClick = ({item}) => {
         this.setState({selectedItem: item});
         this.hideOption();
+        this.inputRef.current && this.inputRef.current.blur();
+        this.wrapperRef.current && this.wrapperRef.current.blur();
 
         this.handleChangeCallback({name: this.props.name, option: item});
+    };
+
+    handleSelectFocus = (event) => {
+        event.stopPropagation();
+        this.setState({expanded: true, locked: true});
+        setTimeout(() => this.setState({locked: false}), 300);
+    }
+
+    handleItemFocus = ({item}) => {
+        this.setState({focusedItem: item});
     };
 
     showOption = () => {
@@ -252,7 +281,7 @@ export default class Select extends PureComponent {
             FooterComponent,
         } = this.props;
 
-        const {expanded, searchValue, selectedItem, options} = this.state;
+        const {expanded, searchValue, selectedItem, focusedItem, options} = this.state;
 
         const showPlaceholder = !searchValue && !selectedItem;
         const showValue = !searchValue && selectedItem;
@@ -271,7 +300,14 @@ export default class Select extends PureComponent {
 
         return (
             <>
-                <div ref={this.wrapperRef} className={className} tabIndex="0">
+                <div
+                    ref={this.wrapperRef}
+                    className={className}
+                    tabIndex="0"
+                    onClick={this.handleCaretClick}
+                    onKeyDown={this.handleKeyDown}
+                    onFocusCapture={this.handleSelectFocus}
+                >
                     <div
                         className={cs(
                             styles.selectControl,
@@ -281,7 +317,6 @@ export default class Select extends PureComponent {
                             [styles.warning, this.state.meta.warning],
                             [styles.error, !!errMsg],
                         )}
-                        onClick={this.handleCaretClick}
                     >
                         <div className={cs(styles.selectValue, 'select-value')}>
                             {searchable && (
@@ -311,17 +346,17 @@ export default class Select extends PureComponent {
                             )}
                             <FiChevronDown
                                 size={16}
-                                onClick={this.handleCaretClick}
                             />
                         </div>
                     </div>
                     <Popup
                         isVisible={expanded}
                         className={styles.popup}
+                        disableFocusLock
                         anchor={this.wrapperRef}
                         anchorOrigin={optionsDirection==='up' ? 'top right' : anchorOrigin}
                         transformOrigin={optionsDirection==='up' ? 'bottom right' : transformOrigin}
-                        onClose={this.handleCaretClick}
+                        onClose={this.hideOption}
                     >
                         <div className={cs(styles.selectOptionsWrapper, optionsWrapperClassName)}>
                             <Options
@@ -332,7 +367,9 @@ export default class Select extends PureComponent {
                                 className={cs(styles.selectOptions, 'select_options', selectOptionClassName)}
                                 classNameItem={cs(styles.selectOption, optionItemClassName)}
                                 selectedItem={selectedItem}
+                                focusedItem={focusedItem || options?.[0]}
                                 onItemClick={this.handleOptionClick}
+                                onItemFocus={this.handleItemFocus}
                                 LoadingComponent={LoadingComponent}
                                 EmptyComponent={searchValue ? FilterEmptyComponent : EmptyComponent} 
                                 FooterComponent={FooterComponent}

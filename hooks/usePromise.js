@@ -33,7 +33,7 @@ const usePromise = (fn, options, initialParams=[]) => {
             dispatch({type: 'RESOLVED', result});
             return result;
         } catch (err) {
-            dispatch({type: 'REJECTED', err});
+            dispatch({type: 'REJECTED', error: err});
             throw err;
         }
     }, [fn, options]);

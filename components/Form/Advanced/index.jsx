@@ -44,7 +44,7 @@ const Input = (props) => {
 
     const inputFieldRef = useRef(null);
     const inputRef = useRef(null);
-    const [showRequired, setShowRequired] = useControlledState(false, {value: showRequiredFields});
+    const [showRequired] = useControlledState(false, {value: showRequiredFields});
 
     const handleChange = useCallback((payload, ...otherArgs) => {
         onChange && onChange(payload, ...otherArgs);
@@ -147,6 +147,8 @@ const Form = React.forwardRef((props, ref) => {
         ...formProps
     } = props;
 
+    const formRef = useRef();
+
     const [showRequiredFields, setShowRequiredFields] = useState(false);
     const [fields, setFields] = useState({});
 
@@ -213,12 +215,13 @@ const Form = React.forwardRef((props, ref) => {
     useImperativeHandle(ref, () => ({
         getFormData: () => {
             return formData;
-        }
+        },
+        nativeForm: formRef.current,
     }), [formData]);
 
     return (
         <FormContext.Provider value={formContext}>
-            <form noValidate {...formProps} onSubmit={handleSubmitForm}>
+            <form ref={formRef} noValidate {...formProps} onSubmit={handleSubmitForm}>
                 {children}
             </form>
             {hasFormError && (

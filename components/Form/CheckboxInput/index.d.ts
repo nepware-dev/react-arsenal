@@ -13,6 +13,7 @@ export interface CheckboxInputProps extends React.InputHTMLAttributes<HTMLInputE
     errorMessage?: any;
     info?: string;
     indeterminate?: boolean;
+    checkboxClassName?: string;
 }
 
 declare const CheckboxInput;

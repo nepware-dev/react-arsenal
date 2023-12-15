@@ -17,8 +17,10 @@ export interface TableProps<T> {
     style?: React.CSSProperties;
     headerClassName?: string;
     headerRowClassName?: string;
+    headerItemClassName?: string;
     bodyClassName?: string;
     bodyRowClassName?: string;
+    dataClassName?: string;
     data: T[];
     columns: Column[];
     renderHeaderItem?: TableRenderHeaderItem;

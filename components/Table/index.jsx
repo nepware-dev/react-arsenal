@@ -23,6 +23,10 @@ const propTypes = {
      */
     headerRowClassName: PropTypes.string,
     /*
+     * Class applied to th element of table.
+     */
+    headerItemClassName: PropTypes.string,
+    /*
      * Class applied to tbody element.
      */
     bodyClassName: PropTypes.string,
@@ -123,6 +127,7 @@ const Table = (props) => {
         bodyClassName,
         bodyRowClassName,
         dataClassName,
+        headerItemClassName,
         onRowClick,
         loading,
         LoadingComponent,
@@ -151,7 +156,7 @@ const Table = (props) => {
                 <tr className={cs(styles.headerRow, headerRowClassName)}>
                     {columns.map((col, idx) => {
                         return (
-                            <th key={idx} className={styles.data}>
+                            <th key={idx} className={cs(styles.data, headerItemClassName)}>
                                 {renderHeaderItem ? renderHeaderItem({column: col}) : col.Header}
                             </th>
                         );
@@ -159,7 +164,7 @@ const Table = (props) => {
                 </tr>
             </thead>
         );
-    }, [columns, renderHeaderItem, headerClassName, headerRowClassName]);
+    }, [columns, renderHeaderItem, headerClassName, headerRowClassName, headerItemClassName]);
 
     const renderRow = useCallback(listProps => {
         if(rowRenderer) {

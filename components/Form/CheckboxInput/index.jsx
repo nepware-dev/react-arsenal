@@ -25,6 +25,7 @@ const propTypes = {
     onChange: PropTypes.func,
     errorMessage: PropTypes.any,
     info: PropTypes.string,
+    checkboxClassName: PropTypes.string,
     indeterminate: PropTypes.bool // Requires inputRef to be sent
 };
 
@@ -39,6 +40,7 @@ const defaultProps = {
 const CheckboxInput = (props) => {
     const {
         className: _className,
+        checkboxClassName,
         size,
         inputRef,
         disabled,
@@ -101,7 +103,7 @@ const CheckboxInput = (props) => {
                     onChange={handleChange}
                     {...otherProps}
                 />
-                <span className={styles.checkbox} />
+                <span className={cs(styles.checkbox, checkboxClassName)} />
             </div>
             {hasInfo && <span className={styles.infoText}>{info}</span>}
             {hasError && <span className={styles.errorText}>{errMsg}</span>}

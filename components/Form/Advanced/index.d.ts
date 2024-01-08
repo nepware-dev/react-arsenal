@@ -1,7 +1,11 @@
 import * as React from 'react';
 
+export type InputChangeEvent = React.ChangeEvent<HTMLInputElement>;
+export type CustomFormChangeEvent = (HTMLAttributes<HTMLInputElement> & {formData: FormData});
+
 export type FormSubmitCallback = (formData: FormData) => Promise<void> | void;
 export type FormInvalidCallback = (reason: string) => void;
+export type FormChangeCallback = (payload: InputChangeEvent | CustomFormChangeEvent) => void;
 
 export type FormFieldValueExtractor<T,V> = (arg: T) => V;
 
@@ -17,6 +21,7 @@ export interface FormProps {
     onInvalidSubmit: FormInvalidCallback;
     formErrorClassName?: string;
     fieldValueExtractor: FormFieldValueExtractor;
+    onChange?:  FormChangeCallback;
 }
 
 declare const Form;

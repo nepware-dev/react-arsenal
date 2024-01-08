@@ -39,6 +39,7 @@ const Input = (props) => {
         addField,
         removeField,
         showRequiredFields,
+        onFormChange,
         ...inputProps
     } = useInputGroupContext(props);
 
@@ -62,6 +63,7 @@ const Input = (props) => {
             value = defaultValueExtractor(payload);
         }
         formData.set(name, value);
+        onFormChange(inputProps);
     }, [formData, onChange, fieldValueExtractor, inputProps, standaloneName]);
 
     useEffect(() => {
@@ -141,6 +143,7 @@ const Form = React.forwardRef((props, ref) => {
     const {
         children,
         onSubmit,
+        onChange,
         error,
         formErrorClassName,
         onInvalidSubmit,
@@ -189,6 +192,13 @@ const Form = React.forwardRef((props, ref) => {
         onSubmit(formData);
     }, [formData, fields, onInvalidSubmit]);
 
+    const handleFormChange = useCallback((payload) => {
+        if(payload?.target) {
+            return onChange?.(payload);
+        }
+        return onChange({...payload, formData});
+    }, [formData]);
+
     const formContext = useMemo(() => {
         return {
             formData,
@@ -197,8 +207,9 @@ const Form = React.forwardRef((props, ref) => {
             removeField,
             showRequiredFields,
             error,
+            onFormChange: handleFormChange
         };
-    }, [formData, fields, addField, removeField, showRequiredFields, error]);
+    }, [formData, fields, addField, removeField, showRequiredFields, error, handleFormChange]);
 
     const hasFormError = useMemo(() => {
         if(!error) {
@@ -221,7 +232,7 @@ const Form = React.forwardRef((props, ref) => {
 
     return (
         <FormContext.Provider value={formContext}>
-            <form ref={formRef} noValidate {...formProps} onSubmit={handleSubmitForm}>
+            <form ref={formRef} noValidate {...formProps} onSubmit={handleSubmitForm} onChange={handleFormChange}>
                 {children}
             </form>
             {hasFormError && (

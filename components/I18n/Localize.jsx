@@ -28,13 +28,15 @@ const propTypes = {
      * @param {string} key - The text that is to be translated.
      * @param {string} selectedLanguage - Current language selected.
      * @param {object} translations - Contains the translations object.
-     *
-     * If dataKey prop is passed:
-     * @param {object} object - Data object passed as child.
-     * @param {string} currentLng- Current language selected.
-     * @param {string} key - Contains the dataKey value.
      */
     translator: PropTypes.func,
+    /**
+     * Translator function that maps text to other translations (for use with dataKey).
+     * @param {object} object - Data object passed as child.
+     * @param {string} key - Contains the dataKey value.
+     * @param {string} currentLng- Current language selected.
+     */
+    keyTranslator: PropTypes.func,
     /**
      * The text to be translated.
      * Strings with template {{ link:text }}, or {{ newline; }} can be used for injecting elements and components.
@@ -80,6 +82,7 @@ const Localize = ({children, ...otherProps}) => {
         i18nTranslator,
         selectedLanguage,
         translator,
+        keyTranslator,
         translations,
         numberFormatter,
         ...scope
@@ -100,8 +103,8 @@ const Localize = ({children, ...otherProps}) => {
 
     if(children) {
         if(dataKey) {
-            const keyTranslator = translator || defaultKeyTranslator;
-            return keyTranslator(children, selectedLanguage, dataKey);
+            const dataKeyTranslator = keyTranslator || defaultKeyTranslator;
+            return dataKeyTranslator(children, dataKey, selectedLanguage);
         }
         if(translator) {
             return translator(children, selectedLanguage, translations);

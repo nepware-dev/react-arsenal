@@ -1,7 +1,7 @@
 import React, {useMemo, useState} from 'react';
 import PropTypes from 'prop-types';
 
-import {I18nContext, useI18nContext, defaultTranslator} from './i18nContext';
+import {I18nContext, useI18nContext, defaultTranslator, defaultKeyTranslator} from './i18nContext';
 import Localize, {localizeFn} from './Localize';
 
 const propTypes = {
@@ -29,6 +29,13 @@ const propTypes = {
      */
     translator: PropTypes.func,
     /**
+     * Translator function that maps text to other translations (for use with dataKey).
+     * @param {object} object - Data object passed as child.
+     * @param {string} key - Contains the dataKey value.
+     * @param {string} currentLng- Current language selected.
+     */
+    keyTranslator: PropTypes.func,
+    /**
      * Language to be used as default.
      */
     defaultLanguage: PropTypes.string,
@@ -41,7 +48,8 @@ const I18nProvider = props => {
         languages, 
         languageAccessor, 
         translator, 
-        defaultLanguage = 'en', 
+        keyTranslator,
+        defaultLanguage = 'en',
     } = props;
 
     const [selectedLanguage, setSelectedLanguage] = useState(defaultLanguage);
@@ -53,6 +61,7 @@ const I18nProvider = props => {
         ],
         languageAccessor: languageAccessor || 'code',
         translator: translator || defaultTranslator,
+        keyTranslator: keyTranslator || defaultKeyTranslator,
         selectedLanguage,
         changeLanguage: setSelectedLanguage,
     }), [translations, languages, languageAccessor, translator, selectedLanguage]);

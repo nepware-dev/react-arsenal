@@ -15,7 +15,7 @@ export const defaultTranslator = (key, selectedLanguage, translations) => {
     return translations?.[selectedLanguage]?.[key] || key;
 };
 
-export const defaultKeyTranslator = (object, currentLng, key) => {
+export const defaultKeyTranslator = (object, key, currentLng) => {
     currentLng = currentLng.charAt(0).toUpperCase() + currentLng.slice(1);
     return object[`${key}${currentLng}`] || object[key];
 };

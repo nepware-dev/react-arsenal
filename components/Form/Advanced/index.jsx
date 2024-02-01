@@ -196,8 +196,10 @@ const Form = React.forwardRef((props, ref) => {
         if(payload?.target) {
             return onChange?.(payload);
         }
-        return onChange({...payload, formData});
-    }, [formData]);
+        if(onChange) {
+            return onChange({...payload, formData});
+        }
+    }, [formData, onChange]);
 
     const formContext = useMemo(() => {
         return {

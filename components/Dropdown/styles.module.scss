@@ -42,6 +42,11 @@
     right: 0;
   }
 
+  .alignCenter {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
   &.open > .dropdownMenu {
     display: block;
   }

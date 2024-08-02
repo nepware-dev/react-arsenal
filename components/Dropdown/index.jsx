@@ -126,6 +126,7 @@ export default class Dropdown extends React.Component {
                     {
                         [styles.alignLeft]: align==='left',
                         [styles.alignRight]: align==='right',
+                        [styles.alignCenter]: align==='center',
                     })}>
                     {children}
                 </div>

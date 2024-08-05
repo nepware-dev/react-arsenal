@@ -1,0 +1,38 @@
+.textarea {
+    border: 1px solid var(--color-border);
+    background-color: inherit;
+    border-radius: var(--border-radius-small);
+    padding: 0.5em 0.8em;
+    font-size: var(--font-size-input);
+
+    &:focus:not(:disabled),
+    &:hover:not(:disabled) {
+        border: 1px solid var(--color-input-outline);
+        outline-color: var(--color-input-outline);
+    }
+
+    &Error,
+    &Error:hover {
+        border: 1px solid var(--color-danger);
+    }
+
+    &Warning,
+    &Warning:hover {
+        border: 1px solid var(--color-warning);
+    }
+}
+
+.errorText {
+    color: var(--color-danger);
+    font-size: 12px;
+}
+
+.warningText {
+    color: var(--color-warning);
+    font-size: 12px;
+}
+
+.infoText {
+    color: var(--color-border);
+    font-size: 12px;
+}

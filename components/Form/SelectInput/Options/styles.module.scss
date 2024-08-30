@@ -5,7 +5,8 @@
     background-color: var(--color-list-highlight);
   }
 
-  &.selected {
+  &.selected,
+  &.selected:hover {
     background-color: var(--color-primary);
     color: var(--color-primary-text);
   }

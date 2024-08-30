@@ -79,6 +79,15 @@ const propTypes = {
         PropTypes.element,
         PropTypes.elementType
     ]),
+    /*
+     * Footer of the select options
+     * IMPORTANT: Elements that lock focus (such as links, buttons, inputs) should not be used here without proper focus handling when searchable prop enabled. Doing so causes focus to shift from search input to the focusable element, causing erroneous behavior when searching.
+     */
+    FooterComponent: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.elementType
+    ]),
+
 };
 
 const defaultProps = {
@@ -119,6 +128,7 @@ const MultiSelect = ({
     renderControlLabel,
     LoadingComponent,
     FilterEmptyComponent,
+    FooterComponent,
     EmptyComponent,
     showRequired,
 }) => {
@@ -267,6 +277,7 @@ const MultiSelect = ({
                         renderItemLabel={renderOptionLabel}
                         LoadingComponent={LoadingComponent}
                         EmptyComponent={searchValue?FilterEmptyComponent:EmptyComponent}
+                        FooterComponent={FooterComponent}
                     />
                 </Popup>
             </div>

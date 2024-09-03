@@ -131,8 +131,7 @@ export default class Select extends PureComponent {
 
         if(
             (this.props.options !== prevProps.options ||
-                this.state.searchValue !== prevState.searchValue) &&
-            !this.props.onInputChange
+                this.state.searchValue !== prevState.searchValue)
         ) {
             const options = this.filterOptions(this.state.searchValue);
             this.setState({

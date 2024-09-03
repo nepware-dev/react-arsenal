@@ -1,4 +1,6 @@
-import React from 'react';
+import * as React from 'react';
+
+export type RenderAccordionHeader = (arg: {isExpanded: boolean}) => React.ReactNode;
 
 export interface AccordionProps {
     title: PropTypes.string,
@@ -7,6 +9,7 @@ export interface AccordionProps {
     activeClassName: PropTypes.string,
     titleClassName: PropTypes.string,
     children: PropTypes.any,
+    renderHeader: RenderAccordionHeader,
 };
 
 declare const Accordion;

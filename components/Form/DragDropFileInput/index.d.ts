@@ -8,7 +8,7 @@ export type FileInputChangeCallback = (payload: {
 
 export type FileValidator = (file: File) => string | Error | Error[];
 
-export interface DragDropFileInputProps {
+export interface DragDropFileInputProps extends React.HTMLAttributes<HTMLInputElement> {
     name?: string;
     onChange?: FileInputChangeCallback;
     multiple?: boolean;

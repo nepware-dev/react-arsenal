@@ -74,7 +74,9 @@ export function localizeFn(text, textPlural, scope) {
     return i18nTranslator(text, selectedLanguage, translations); 
 }
 
-const Localize = ({children, ...otherProps}) => {
+const Localize = (props) => {
+    const {children, ...otherProps} = props;
+
     const {
         text,
         textPlural,

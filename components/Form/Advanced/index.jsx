@@ -1,9 +1,16 @@
-import React, {useImperativeHandle, useCallback, useRef, useMemo, useEffect, useState} from 'react';
+import React, {
+    useImperativeHandle,
+    useCallback,
+    useRef,
+    useMemo,
+    useEffect,
+    useState,
+} from 'react';
 
 import useControlledState from '../../../hooks/useControlledState';
 import {getErrorMessage} from '../../../utils/error';
 
-import {FormContext, InputGroupContext, useFormContext, useInputGroupContext} from './FormContext';
+import {FormContext, InputGroupContext, useInputGroupContext} from './FormContext';
 import Label from '../Label';
 
 const defaultValueExtractor = item => item.value;
@@ -194,6 +201,9 @@ const Form = React.forwardRef((props, ref) => {
 
     const handleFormChange = useCallback((payload) => {
         if(payload?.target) {
+            if(!payload.target.name) {
+                return;
+            }
             return onChange?.(payload);
         }
         if(onChange) {

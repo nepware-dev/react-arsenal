@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import type { JSX } from "react";
+
 export type ListRenderItemProps<T> = {item: T; index: number;};
 
 export type KeyExtractor<T> = (item: T, index: number) => string | number;

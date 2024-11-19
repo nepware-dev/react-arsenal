@@ -8,7 +8,7 @@ export interface CheckboxInputProps extends React.InputHTMLAttributes<HTMLInputE
     warning?: boolean;
     showRequired?: boolean;
     disabled?: boolean;
-    inputRef?: React.RefObject<HTMLInputElement>;
+    inputRef?: React.RefObject<HTMLInputElement | null>;
     onChange?: (HTMLInputElement) => void;
     errorMessage?: any;
     info?: string;

@@ -49,7 +49,7 @@ export interface MultiSelectInputProps<T, V> {
     anchorOrigin?: OriginPosition;
     transformOrigin?: OriginPosition;
     onChange?: MultiSelectInputChangeCallback<T>;
-    onInputChange?: (target: React.RefObject<HTMLInputElement>) => void;
+    onInputChange?: (target: React.RefObject<HTMLInputElement | null>) => void;
     optionsDirection?: 'up' | 'down';
     errorMessage?: any;
     renderOptionLabel?: RenderOptionLabelCallback<T>;

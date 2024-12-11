@@ -79,12 +79,12 @@ const Popup = (props) => {
     const {
         anchor,
         children,
-        anchorOrigin,
-        transformOrigin,
+        anchorOrigin='bottom right',
+        transformOrigin='bottom right',
         className: _className,
-        closeOnOutsideClick,
+        closeOnOutsideClick = true,
         disableFocusLock,
-        onClose,
+        onClose = noop,
     } = props;
 
     const wrapperRef = useRef(null);

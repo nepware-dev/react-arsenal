@@ -121,6 +121,7 @@ const MultiSelect = ({
     anchorOrigin,
     transformOrigin,
     onInputChange,
+    value,
     defaultValue,
     optionsDirection,
     renderOptionLabel,
@@ -135,7 +136,7 @@ const MultiSelect = ({
 
     const [expanded, setExpanded] = useState(false);
     const [searchValue, setSearchValue] = useState('');
-    const [selectedItems, setSelectedItems] = useState([]);
+    const [selectedItems, setSelectedItems] = useState(defaultValue || []);
 
     const [meta, setMeta] = useState({
         warning: null,
@@ -143,12 +144,11 @@ const MultiSelect = ({
     });
 
     useEffect(() => {
-        if(defaultValue?.length === 0) {
+        if(value && value.length === 0) {
             setSelectedItems([]);
-        }
-        if(defaultValue?.length) {
-            setSelectedItems(defaultValue);
-            onChange({name, value: defaultValue});
+        } else if(value?.length) {
+            setSelectedItems(value);
+            onChange({name, value});
         }
     }, [defaultValue]);
 

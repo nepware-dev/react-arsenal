@@ -1,11 +1,12 @@
-import React, {useRef, useMemo} from 'react';
+
+import React, {useCallback, useEffect, useRef, useState, useMemo} from 'react';
 import PropTypes from 'prop-types';
 import {FiChevronRight} from 'react-icons/fi';
 
-import useToggle from '../../hooks/useToggle';
 import cs from '../../cs';
 
 import styles from './styles.module.scss';
+import useControlledState from '../../hooks/useControlledState';
 
 const propTypes = {
     /*
@@ -30,34 +31,56 @@ const propTypes = {
      * Class applied to the title of the accordion when not custom rendered.
      */
     titleClassName: PropTypes.string,
+    /*
+     * Indicates default state of the accordion.
+     * Does not take affect if accordion is controlled.
+     */
+    isExpandedByDefault: PropTypes.bool,
+    /*
+     * Controlled boolean indicating if the accordion is expanded.
+     * If controlled, this value overrides the default state.
+     */
+    isExpanded: PropTypes.bool,
     children: PropTypes.any,
 };
 
 const Accordion = (props) => {
     const {
-        title, 
-        children, 
-        className, 
+        isExpandedByDefault = false,
+        isExpanded,
+        title,
+        children,
+        className,
         activeClassName,
         renderHeader,
         titleClassName,
     } = props;
 
     const content = useRef();
-    const [active, setActive] = useToggle();
+    const [active, setActive] = useControlledState(isExpandedByDefault, {
+        value: isExpanded
+    });
 
-    const contentHeight = useMemo(() => {
-        return active ? `${content.current?.scrollHeight}px` : '0px';
+    const [contentHeight, setContentHeight] = useState('0px');
+
+    const toggleAccordion = useCallback(() => setActive((prev) => !prev), []);
+
+    useEffect(() => {
+        if (active && content.current) {
+            setContentHeight(`${content.current.scrollHeight}px`);
+        } else {
+            setContentHeight('0px');
+        }
     }, [active]);
 
     return (
         <div className={cs(styles.accordionSection, className, active && activeClassName)}>
-            <div className={styles.accordion} onClick={setActive}>
+            <div className={styles.accordion} onClick={toggleAccordion}>
                 {renderHeader ? renderHeader({isExpanded: active}) : (
                     <div className={cs(styles.accordionTitle, titleClassName)}>
                         {title}
-                        <FiChevronRight 
-                            className={cs(styles.rightIcon, {[styles.rotateUp]: active})} 
+                        <FiChevronRight
+                            className={cs(styles.rightIcon, {[styles.rotateUp]: active})}
                         />
                     </div>
                 )}

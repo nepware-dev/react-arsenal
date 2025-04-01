@@ -5,6 +5,8 @@ import List from '../List';
 import cs from '../../cs';
 import styles from './styles.module.scss';
 
+const defaultKeyExtractor = (_item, index) => index;
+
 const propTypes = {
     /*
      * Class Applied to table element.
@@ -47,6 +49,11 @@ const propTypes = {
      * Requires Header and accessor keys for each column
      */
     columns: PropTypes.array.isRequired,
+    /*
+     * Extract key from data items.
+     * @param item - Contains each data item present in the data array.
+     */
+    keyExtractor: PropTypes.func,
     /*
      * Renderer for each data item in header.
      * Appears as a direct child of td element.
@@ -95,28 +102,52 @@ const propTypes = {
      * If controlled, all data passed to table will be visible regardless of props passed for page or maxRows.
      */
     controlled: PropTypes.bool,
+    /**
+     * The space between each row in the table.
+     */
+    rowSpacing: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
-const Row = ({item, index, onClick, columns, className, dataClassName, renderDataItem}) => {
+const Row = ({
+    item, 
+    index, 
+    onClick, 
+    columns, 
+    className, 
+    dataClassName, 
+    renderDataItem, 
+    rowSpacing
+}) => {
     const handleClickRow = useCallback(() => {
         onClick && onClick(item);
     }, [onClick, item]);
 
     return (
-        <tr 
-            className={cs(styles.row, className)} 
-            onClick={handleClickRow}
-        >
-            {columns.map((col, idx) => {
-                return (
-                    <td key={idx} className={cs(styles.data, dataClassName)}>
-                        {renderDataItem ? renderDataItem({item, index, column: col}) : item[col.accessor]}
-                    </td>
-                );
-            })}
-        </tr>
+        <>
+            <tr 
+                className={cs(styles.row, className)} 
+                onClick={handleClickRow}
+            >
+                {columns.map((col, idx) => {
+                    return (
+                        <td 
+                            style={{
+                                '--row-level': '0rem', 
+                                '--row-offset': '0rem'
+                            }}
+                            key={idx} 
+                            className={cs(styles.data, dataClassName)}
+                        >
+                            {renderDataItem ? renderDataItem({item, index, column: col}) : item[col.accessor]}
+                        </td>
+                    );
+                })}
+            </tr>
+            {!!rowSpacing && <tr className={styles.rowSpacing} style={{height: rowSpacing}} />}
+        </>
     );
 };
+
 
 const Table = (props) => {
     const {
@@ -128,11 +159,12 @@ const Table = (props) => {
         bodyRowClassName,
         dataClassName,
         headerItemClassName,
+        rowSpacing,
         onRowClick,
         loading,
         LoadingComponent,
         EmptyComponent,
-        data,
+        data = [],
         columns,
         renderHeaderItem,
         renderDataItem,
@@ -140,6 +172,7 @@ const Table = (props) => {
         maxRows=10,
         controlled,
         rowRenderer,
+        keyExtractor,
     } = props;
 
     const visibleData = useMemo(() => {
@@ -178,10 +211,10 @@ const Table = (props) => {
                 renderDataItem={renderDataItem}
                 className={bodyRowClassName}
                 dataClassName={dataClassName}
+                rowSpacing={rowSpacing}
             />
         );
-    }, [columns, renderDataItem, bodyRowClassName, onRowClick, rowRenderer, dataClassName]);
-
+    }, [columns, renderDataItem, bodyRowClassName, onRowClick, rowRenderer, dataClassName, rowSpacing]);
 
     const Body = useMemo(() => {
         return (
@@ -192,7 +225,7 @@ const Table = (props) => {
                 className={cs(styles.body, bodyClassName)}
                 data={visibleData}
                 renderItem={renderRow}
-                keyExtractor={(item, index) => index}
+                keyExtractor={keyExtractor ?? defaultKeyExtractor}
                 component="tbody"
             />
         );

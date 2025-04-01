@@ -1,0 +1,23 @@
+.row {
+    border: 1px solid var(--color-border);
+
+    &:hover {
+        background-color: #f0f0f0bf;
+    }
+}
+
+.rowSpacing:last-child {
+    display: none;
+}
+
+.data {
+    border: 1px solid var(--color-border);
+    padding: 0.5rem 0.75rem;
+}
+
+.dataHierarchical {
+    &:first-child {
+        padding-left: calc(0.5 * (var(--row-level) + var(--row-offset)));
+    }
+}
+

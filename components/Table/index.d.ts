@@ -1,6 +1,8 @@
 import * as React from 'react';
 
-import {ListRenderItemProps} from '../List';
+import type {ListRenderItemProps, KeyExtractor} from '../List';
+
+export type {KeyExtractor};
 
 export interface Column {
     Header: string;
@@ -22,6 +24,7 @@ export interface TableProps<T> {
     bodyRowClassName?: string;
     dataClassName?: string;
     data: T[];
+    keyExtractor?: KeyExtractor<T>;
     columns: Column[];
     renderHeaderItem?: TableRenderHeaderItem;
     renderDataItem?: TableRenderDataItem;
@@ -32,6 +35,7 @@ export interface TableProps<T> {
     LoadingComponent?: React.ReactNode;
     EmptyComponent?: React.ReactNode;
     controlled?: boolean;
+    rowSpacing?: string | number;
 }
 
 declare const Table;

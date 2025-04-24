@@ -174,3 +174,57 @@ export const associateObjectPath = (path, val, obj) => {
 export const camelize = (...args) => {
     return args.join('-').replace(/-(,)/g, (_, char) => char.toUpperCase());
 };
+
+function setLevelsRecursively(node, currentLevel, {levelKey}) {
+    node[levelKey] = currentLevel;
+    node.children.forEach((child) => {
+        setLevelsRecursively(child, currentLevel + 1, {levelKey});
+    });
+}
+
+export function buildHierarchy(items, {
+    levelKey = 'level', 
+    childrenKey = 'children',
+    keyExtractor = item => item.id,
+    parentKeyExtractor = item => item.parent,
+}) {
+    const hierarchicalItemMap = new Map();
+    items.forEach((item) => {
+        const hierarchicalItem = {
+            ...item,
+            [levelKey]: -1,
+            [childrenKey]: [],
+        };
+        const itemKey = keyExtractor(item);
+        if (itemKey) {
+            hierarchicalItemMap.set(itemKey, hierarchicalItem);
+        }
+    });
+
+    const potentialRoots = [];
+    hierarchicalItemMap.forEach((hierarchicalItem) => {
+        const parentId = parentKeyExtractor(hierarchicalItem);
+        let isRoot = true;
+
+        if (parentId) {
+            const parentItem = hierarchicalItemMap.get(parentId);
+            if (parentItem) {
+                parentItem[childrenKey].push(hierarchicalItem);
+                isRoot = false;
+            }
+        }
+        if (isRoot) {
+            potentialRoots.push(hierarchicalItem);
+        }
+    });
+
+    potentialRoots.forEach((root) => {
+        if (root[levelKey] === -1) {
+            setLevelsRecursively(root, 0, {levelKey});
+        }
+    });
+
+    const finalRootNodes = potentialRoots.filter((node) => node[levelKey] === 0);
+
+    return finalRootNodes;
+}

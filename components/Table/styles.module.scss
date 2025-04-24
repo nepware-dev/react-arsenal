@@ -17,6 +17,10 @@
     }
   }
 
+  .rowSpacing:last-child {
+    display: none;
+  }
+
   .data {
     border: 1px solid var(--color-border);
     padding: 0.5rem 0.75rem;

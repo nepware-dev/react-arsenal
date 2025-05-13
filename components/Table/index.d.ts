@@ -10,7 +10,9 @@ export interface Column {
 }
 
 export type TableRenderHeaderItem = ({col}: {column: Column}) => React.ReactNode | string;
-export type TableRenderDataItem<T> = ({item, index, column}: {item: T; index: number; column: Column}) => React.ReactNode | string;
+
+export type TableRenderDataItemProps<T> = {item: T; index: number; column: Column; path?: (string | number)[]};
+export type TableRenderDataItem<T> = ({item, index, column, path}: TableRenderDataItemProps<T>) => React.ReactNode | string;
 
 export type TableRowRenderer = (props: ListRenderItemProps & {column: Column}) => React.ReactNode | string;
 

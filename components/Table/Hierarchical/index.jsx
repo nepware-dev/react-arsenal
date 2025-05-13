@@ -183,8 +183,11 @@ function HierarchicalRow({
     rowSpacing,
     initialExpandedLevel,
     levelKey,
-    childrenKey
+    childrenKey,
+    path
 }) {
+    const rowPath = useMemo(() => path ? [...path, childrenKey, index] : [index], [path, childrenKey, index]);
+
     const handleClickRow = useCallback(() => {
         onClick && onClick(item);
     }, [onClick, item]);
@@ -224,7 +227,7 @@ function HierarchicalRow({
                         {columnIndex === 0 && item[childrenKey] && item[childrenKey].length > 0 && (
                             <ToggleIcon className={expandToggleIconClassName} onClick={handleToggle} />
                         )}
-                        {renderDataItem({ item, column })}
+                        {renderDataItem({ item, column, index, path: rowPath })}
                     </td>
                 ))}
             </tr>
@@ -247,6 +250,7 @@ function HierarchicalRow({
                         expandToggleIconClassName={expandToggleIconClassName}
                         levelKey={levelKey}
                         childrenKey={childrenKey}
+                        path={rowPath}
                     />
                 ))}
             {!!rowSpacing && !item[levelKey] && <tr className={styles.rowSpacing} style={{height: rowSpacing}} />}

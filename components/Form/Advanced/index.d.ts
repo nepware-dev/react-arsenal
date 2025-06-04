@@ -22,6 +22,7 @@ export interface FormProps {
     formErrorClassName?: string;
     fieldValueExtractor: FormFieldValueExtractor;
     onChange?:  FormChangeCallback;
+    defaultFormData?: FormData
 }
 
 declare const Form;

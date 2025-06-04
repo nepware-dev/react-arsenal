@@ -154,6 +154,7 @@ const Form = React.forwardRef((props, ref) => {
         error,
         formErrorClassName,
         onInvalidSubmit,
+        defaultFormData,
         ...formProps
     } = props;
 
@@ -183,7 +184,7 @@ const Form = React.forwardRef((props, ref) => {
         });
     }, []);
 
-    const formDataObject = useRef(new FormData());
+    const formDataObject = useRef(defaultFormData || new FormData());
     const formData = useMemo(() => formDataObject.current, [formDataObject.current]);
 
     const handleSubmitForm = useCallback((evnt) => {

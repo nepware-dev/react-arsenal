@@ -12,11 +12,13 @@ export function useFormContext(props) {
 export function useInputGroupContext(props) {
     const formContext = useFormContext(props);
     const groupContext = useContext(InputGroupContext);
+    const defaultValueExtractor = (inputName) => formContext.formData.get(inputName) || '';
 
     if(!groupContext) {
         return {
             ...props,
             standaloneName: props.name,
+            defaultValue: defaultValueExtractor(props.name),
             ...formContext            
         };
     }
@@ -29,6 +31,7 @@ export function useInputGroupContext(props) {
             ...formContext,
             name: groupName.concat(groupName.endsWith(']') ? '' : '.', inputName),
             standaloneName: inputName,
+            defaultValue: defaultValueExtractor(inputName)
         };
     }
 };

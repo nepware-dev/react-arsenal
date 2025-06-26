@@ -31,6 +31,7 @@ export interface TableProps<T> {
     renderHeaderItem?: TableRenderHeaderItem;
     renderDataItem?: TableRenderDataItem;
     rowRenderer?: TableRowRenderer;
+    onRowClick?: (item: T) => void;
     page?: number;
     maxRows?: number;
     loading?: boolean;

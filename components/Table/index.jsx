@@ -45,7 +45,7 @@ const propTypes = {
      */
     data: PropTypes.array.isRequired,
     /*
-     * Array of columns for the table. 
+     * Array of columns for the table.
      * Requires Header and accessor keys for each column
      */
     columns: PropTypes.array.isRequired,
@@ -87,7 +87,7 @@ const propTypes = {
      * Component to use when data is loading
      */
     LoadingComponent: PropTypes.oneOfType([
-        PropTypes.element, 
+        PropTypes.element,
         PropTypes.elementType,
     ]),
     /*
@@ -106,16 +106,21 @@ const propTypes = {
      * The space between each row in the table.
      */
     rowSpacing: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    /**
+     * Function called when table row is clicked
+     * @param {rowItem} payload - Contains the item of the row clicked.
+     */
+    onRowClick: PropTypes.func
 };
 
 const Row = ({
-    item, 
-    index, 
-    onClick, 
-    columns, 
-    className, 
-    dataClassName, 
-    renderDataItem, 
+    item,
+    index,
+    onClick,
+    columns,
+    className,
+    dataClassName,
+    renderDataItem,
     rowSpacing
 }) => {
     const handleClickRow = useCallback(() => {
@@ -124,18 +129,18 @@ const Row = ({
 
     return (
         <>
-            <tr 
-                className={cs(styles.row, className)} 
+            <tr
+                className={cs(styles.row, className)}
                 onClick={handleClickRow}
             >
                 {columns.map((col, idx) => {
                     return (
-                        <td 
+                        <td
                             style={{
-                                '--row-level': '0rem', 
+                                '--row-level': '0rem',
                                 '--row-offset': '0rem'
                             }}
-                            key={idx} 
+                            key={idx}
                             className={cs(styles.data, dataClassName)}
                         >
                             {renderDataItem ? renderDataItem({item, index, column: col}) : item[col.accessor]}
@@ -204,10 +209,10 @@ const Table = (props) => {
             return rowRenderer({...listProps, columns});
         }
         return (
-            <Row 
-                {...listProps} 
+            <Row
+                {...listProps}
                 onClick={onRowClick}
-                columns={columns} 
+                columns={columns}
                 renderDataItem={renderDataItem}
                 className={bodyRowClassName}
                 dataClassName={dataClassName}

@@ -14,7 +14,8 @@ export type TableRenderHeaderItem = ({col}: {column: Column}) => React.ReactNode
 export type TableRenderDataItemProps<T> = {item: T; index: number; column: Column; path?: (string | number)[]};
 export type TableRenderDataItem<T> = ({item, index, column, path}: TableRenderDataItemProps<T>) => React.ReactNode | string;
 
-export type TableRowRenderer = (props: ListRenderItemProps & {column: Column}) => React.ReactNode | string;
+export type TableRowRendererProps<T> = ListRenderItemProps<T> & {columns: Column[]};
+export type TableRowRenderer<T> = (props: TableRowRendererProps<T>) => React.ReactNode | string;
 
 export interface TableProps<T> {
     className?: string;

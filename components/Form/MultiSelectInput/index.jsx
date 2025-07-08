@@ -150,7 +150,7 @@ const MultiSelect = ({
             setSelectedItems(value);
             onChange({name, value});
         }
-    }, [defaultValue]);
+    }, [defaultValue, onChange, name]);
 
     useEffect(() => {
         setMeta(prevMeta => ({...prevMeta, warning: showRequired ? 'Required' : null}));

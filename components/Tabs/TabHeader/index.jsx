@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import {useTabContext} from '../TabContext';
 
 import cs from '../../../cs';
@@ -16,9 +16,20 @@ const TabHeader = (props) => {
         ...childProps
     } = useTabContext(props);
 
+    const tabRef = useRef(null);
+
     const handleClick = useCallback((e) => {
         selectTab && selectTab(e, index);
     }, [index, selectTab]);
+
+    useEffect(() => {
+        if (active && tabRef.current) {
+            tabRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+            });
+        }
+    }, [active]);
 
     if(renderHeader) {
         return renderHeader({title, index, active, onClick: handleClick, ...childProps});
@@ -29,9 +40,14 @@ const TabHeader = (props) => {
     }
 
     return (
-        <div className={cs(styles.headerItem, className, {
-            [activeClassName]: active
-        })} onClick={handleClick} {...childProps}>
+        <div 
+            ref={tabRef}
+            className={cs(styles.headerItem, className, {
+                [activeClassName]: active
+            })} 
+            onClick={handleClick} 
+            {...childProps}
+        >
             {title}
         </div>
     );

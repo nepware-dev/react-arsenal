@@ -1,20 +1,21 @@
 import * as React from 'react';
 
-import type {ListRenderItemProps, KeyExtractor} from '../List';
+import type { ListRenderItemProps, KeyExtractor } from '../List';
 
-export type {KeyExtractor};
+export type { KeyExtractor };
 
 export interface Column {
     Header: string;
     accessor: string;
 }
 
-export type TableRenderHeaderItem = ({col}: {column: Column}) => React.ReactNode | string;
+export type TableRenderHeader = ({ columns }: { columns: Column[] }) => React.ReactNode;
+export type TableRenderHeaderItem = ({ col }: { column: Column }) => React.ReactNode | string;
 
-export type TableRenderDataItemProps<T> = {item: T; index: number; column: Column; path?: (string | number)[]};
-export type TableRenderDataItem<T> = ({item, index, column, path}: TableRenderDataItemProps<T>) => React.ReactNode | string;
+export type TableRenderDataItemProps<T> = { item: T; index: number; column: Column; path?: (string | number)[] };
+export type TableRenderDataItem<T> = ({ item, index, column, path }: TableRenderDataItemProps<T>) => React.ReactNode | string;
 
-export type TableRowRendererProps<T> = ListRenderItemProps<T> & {columns: Column[]};
+export type TableRowRendererProps<T> = ListRenderItemProps<T> & { columns: Column[] };
 export type TableRowRenderer<T> = (props: TableRowRendererProps<T>) => React.ReactNode | string;
 
 export interface TableProps<T> {
@@ -29,6 +30,7 @@ export interface TableProps<T> {
     data: T[];
     keyExtractor?: KeyExtractor<T>;
     columns: Column[];
+    renderHeader?: TableRenderHeader;
     renderHeaderItem?: TableRenderHeaderItem;
     renderDataItem?: TableRenderDataItem;
     rowRenderer?: TableRowRenderer;

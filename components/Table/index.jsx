@@ -1,4 +1,4 @@
-import React, {useMemo, useCallback} from 'react';
+import React, { useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import List from '../List';
@@ -54,6 +54,11 @@ const propTypes = {
      * @param item - Contains each data item present in the data array.
      */
     keyExtractor: PropTypes.func,
+    /*
+     * Renderer for header.
+     * @param {{columns: array}} payload - Contains the columns array of table for rendering header.
+     */
+    renderHeader: PropTypes.func,
     /*
      * Renderer for each data item in header.
      * Appears as a direct child of td element.
@@ -121,7 +126,7 @@ const Row = ({
     className,
     dataClassName,
     renderDataItem,
-    rowSpacing
+    rowSpacingHeight
 }) => {
     const handleClickRow = useCallback(() => {
         onClick && onClick(item);
@@ -143,12 +148,12 @@ const Row = ({
                             key={idx}
                             className={cs(styles.data, dataClassName)}
                         >
-                            {renderDataItem ? renderDataItem({item, index, column: col}) : item[col.accessor]}
+                            {renderDataItem ? renderDataItem({ item, index, column: col }) : item[col.accessor]}
                         </td>
                     );
                 })}
             </tr>
-            {!!rowSpacing && <tr className={styles.rowSpacing} style={{height: rowSpacing}} />}
+            {!!rowSpacingHeight && <tr className={styles.rowSpacing} style={{ height: rowSpacingHeight }} />}
         </>
     );
 };
@@ -171,17 +176,18 @@ const Table = (props) => {
         EmptyComponent,
         data = [],
         columns,
+        renderHeader,
         renderHeaderItem,
         renderDataItem,
-        page=1,
-        maxRows=10,
+        page = 1,
+        maxRows = 10,
         controlled,
         rowRenderer,
         keyExtractor,
     } = props;
 
     const visibleData = useMemo(() => {
-        if(controlled) {
+        if (controlled) {
             return data;
         }
         const initIndex = (page - 1) * maxRows;
@@ -189,24 +195,27 @@ const Table = (props) => {
     }, [data, maxRows, page, controlled]);
 
     const Header = useMemo(() => {
+        if (renderHeader) {
+            return renderHeader({ columns });
+        }
         return (
             <thead className={cs(styles.head, headerClassName)}>
                 <tr className={cs(styles.headerRow, headerRowClassName)}>
                     {columns.map((col, idx) => {
                         return (
                             <th key={idx} className={cs(styles.data, headerItemClassName)}>
-                                {renderHeaderItem ? renderHeaderItem({column: col}) : col.Header}
+                                {renderHeaderItem ? renderHeaderItem({ column: col }) : col.Header}
                             </th>
                         );
                     })}
                 </tr>
             </thead>
         );
-    }, [columns, renderHeaderItem, headerClassName, headerRowClassName, headerItemClassName]);
+    }, [columns, renderHeader, renderHeaderItem, headerClassName, headerRowClassName, headerItemClassName]);
 
     const renderRow = useCallback(listProps => {
-        if(rowRenderer) {
-            return rowRenderer({...listProps, columns});
+        if (rowRenderer) {
+            return rowRenderer({ ...listProps, columns });
         }
         return (
             <Row

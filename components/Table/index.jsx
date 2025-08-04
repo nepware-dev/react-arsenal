@@ -110,7 +110,7 @@ const propTypes = {
     /**
      * The space between each row in the table.
      */
-    rowSpacing: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    rowSpacingHeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     /**
      * Function called when table row is clicked
      * @param {rowItem} payload - Contains the item of the row clicked.
@@ -169,7 +169,7 @@ const Table = (props) => {
         bodyRowClassName,
         dataClassName,
         headerItemClassName,
-        rowSpacing,
+        rowSpacingHeight,
         onRowClick,
         loading,
         LoadingComponent,
@@ -225,10 +225,10 @@ const Table = (props) => {
                 renderDataItem={renderDataItem}
                 className={bodyRowClassName}
                 dataClassName={dataClassName}
-                rowSpacing={rowSpacing}
+                rowSpacingHeight={rowSpacingHeight}
             />
         );
-    }, [columns, renderDataItem, bodyRowClassName, onRowClick, rowRenderer, dataClassName, rowSpacing]);
+    }, [columns, renderDataItem, bodyRowClassName, onRowClick, rowRenderer, dataClassName, rowSpacingHeight]);
 
     const Body = useMemo(() => {
         return (

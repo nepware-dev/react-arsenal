@@ -1,6 +1,6 @@
-import {useState, useMemo, useCallback} from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import {MdKeyboardArrowDown, MdKeyboardArrowRight} from 'react-icons/md';
+import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
 
 import Table from "..";
 import cs from '../../../cs';
@@ -28,11 +28,11 @@ const propTypes = {
      *   v childNode   | -> Tree1
      *     leafNode    |
      * -------
-     * *rowSpacing*
+     * *rowSpacingHeight*
      * -------
      * > rootNode2     | -> Tree2
      */
-    rowSpacing: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    rowSpacingHeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     /**
      * Options for confuring the hierarchical structure of the table.
      */
@@ -82,19 +82,19 @@ function HierarchicalTable(props) {
         renderDataItem,
         bodyRowClassName,
         dataClassName,
-        rowSpacing,
+        rowSpacingHeight,
         ...tableProps
     } = props;
 
     const tableData = useMemo(() => {
         const {
-            hierarchyBuilder, 
-            parentKeyExtractor, 
+            hierarchyBuilder,
+            parentKeyExtractor,
             levelKey,
-            childrenKey, 
+            childrenKey,
         } = hierarchyOptions;
 
-        if(hierarchyBuilder) {
+        if (hierarchyBuilder) {
             return hierarchyBuilder(data, {
                 levelKey,
                 childrenKey,
@@ -108,22 +108,22 @@ function HierarchicalTable(props) {
     const renderHierarchicalRow = useCallback((tableRowProps) => {
         const {
             levelKey = 'level',
-            childrenKey = 'children', 
+            childrenKey = 'children',
             initialExpandedLevel = 1,
         } = hierarchyOptions;
 
-        if(rowRenderer) {
+        if (rowRenderer) {
             return rowRenderer(tableRowProps)
         }
 
         return (
-            <HierarchicalRow 
+            <HierarchicalRow
                 {...tableRowProps}
                 onClick={onRowClick}
                 renderDataItem={renderDataItem}
                 className={bodyRowClassName}
                 dataClassName={dataClassName}
-                rowSpacing={rowSpacing}
+                rowSpacingHeight={rowSpacingHeight}
                 parentClassName={bodyRowParentClassName}
                 childClassName={bodyRowChildClassName}
                 lastChildClassName={bodyRowLastChildClassName}
@@ -144,34 +144,34 @@ function HierarchicalTable(props) {
         renderDataItem,
         bodyRowClassName,
         dataClassName,
-        rowSpacing,
+        rowSpacingHeight,
     ]);
 
     return (
-        <Table 
+        <Table
             {...tableProps}
             data={tableData}
-            rowRenderer={renderHierarchicalRow} 
+            rowRenderer={renderHierarchicalRow}
             keyExtractor={keyExtractor}
             onRowClick={onRowClick}
             renderDataItem={renderDataItem}
             bodyRowClassName={bodyRowClassName}
             dataClassName={dataClassName}
-            rowSpacing={rowSpacing}
+            rowSpacingHeight={rowSpacingHeight}
         />
     );
 }
 
-HierarchicalTable.propTypes = {...Table.propTypes, ...propTypes};
+HierarchicalTable.propTypes = { ...Table.propTypes, ...propTypes };
 export default HierarchicalTable;
 
 
 function HierarchicalRow({
-    item, 
-    index, 
-    onClick, 
-    columns, 
-    className, 
+    item,
+    index,
+    onClick,
+    columns,
+    className,
     dataClassName,
     parentClassName,
     childClassName,
@@ -180,7 +180,7 @@ function HierarchicalRow({
     renderDataItem,
     isInitiallyExpanded,
     isLastChild,
-    rowSpacing,
+    rowSpacingHeight,
     initialExpandedLevel,
     levelKey,
     childrenKey,
@@ -253,7 +253,7 @@ function HierarchicalRow({
                         path={rowPath}
                     />
                 ))}
-            {!!rowSpacing && !item[levelKey] && <tr className={styles.rowSpacing} style={{height: rowSpacing}} />}
+            {!!rowSpacingHeight && !item[levelKey] && <tr className={styles.rowSpacing} style={{ height: rowSpacingHeight }} />}
         </>
     );
 }

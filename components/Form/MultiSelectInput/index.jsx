@@ -148,9 +148,15 @@ const MultiSelect = ({
             setSelectedItems([]);
         } else if(value?.length) {
             setSelectedItems(value);
-            onChange({name, value});
         }
-    }, [defaultValue]); // not using exhaustive dependencies to avoid circular dependencies
+    }, [value]);
+
+    useEffect(() => {
+        if((!value || value.length === 0) && defaultValue && defaultValue.length > 0) {
+            setSelectedItems(defaultValue);
+            onChange({name, value: defaultValue});
+        }
+    }, [onChange, name, defaultValue, value]);
 
     useEffect(() => {
         setMeta(prevMeta => ({...prevMeta, warning: showRequired ? 'Required' : null}));

@@ -16,11 +16,13 @@ const propTypes = {
         PropTypes.element,
     ]).isRequired,
     onClick: PropTypes.func,
+    disabled: PropTypes.bool,
 };
 
 const defaultProps = {
     onClick: noop,
     selected: false,
+    disabled: false,
 };
 
 const Option = ({
@@ -28,14 +30,16 @@ const Option = ({
             label,
             selected,
             onClick,
+            disabled,
 }) => {
     const className = cs(styles.option, _className, {
         [styles.selected]: selected,
+        [styles.disabled]: disabled,
     });
 
     return (
-        <div className={className} onClick={onClick}>
-            <CheckboxInput checked={selected} />
+        <div className={className} onClick={!disabled ? onClick : undefined}>
+            <CheckboxInput checked={selected} disabled={disabled} />
             {label}
         </div>
     );

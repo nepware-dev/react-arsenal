@@ -10,4 +10,9 @@
     background-color: var(--color-primary);
     color: var(--color-primary-text);
   }
+
+  &.disabled, &.disabled:hover {
+    color: var(--color-text-light);
+    cursor: default;
+  }
 }

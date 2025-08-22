@@ -15,6 +15,7 @@ const propTypes = {
     focusedItem: PropTypes.object,
     keyExtractor: PropTypes.func.isRequired,
     valueExtractor: PropTypes.func.isRequired,
+    isDisabledExtractor: PropTypes.func,
     onItemClick: PropTypes.func,
     onItemFocus: PropTypes.func,
 };
@@ -40,6 +41,7 @@ export default class Options extends PureComponent {
             focusedItem,
             valueExtractor,
             keyExtractor,
+            isDisabledExtractor,
         } = this.props;
 
         const _onItemClick = (event) => {
@@ -52,8 +54,11 @@ export default class Options extends PureComponent {
         };
 
         const label = valueExtractor(item);
-        const selected = selectedItem && keyExtractor(item) === keyExtractor(selectedItem);
-        const focused = focusedItem && keyExtractor(item) === keyExtractor(focusedItem);
+        const key = keyExtractor(item);
+        const selected = selectedItem && key === keyExtractor(selectedItem);
+        const focused = focusedItem && key === keyExtractor(focusedItem);
+
+        const isDisabled = isDisabledExtractor && isDisabledExtractor(item);
 
         return (
             <Option 
@@ -63,6 +68,7 @@ export default class Options extends PureComponent {
                 focused={focused}
                 onClick={_onItemClick}
                 onFocus={_onItemFocus}
+                disabled={isDisabled}
             />
         );
     }

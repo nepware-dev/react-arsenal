@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import type {KeyExtractor, ListRenderItem} from '../../List';
 import type {OriginPosition} from '../../Popup';
+import { IsDisabledExtractor } from '../SelectInput';
 
 
 export type {KeyExtractor, ListRenderItem};
@@ -46,6 +47,7 @@ export interface MultiSelectInputProps<T, V> {
     options: T[];
     keyExtractor: KeyExtractor<T>;
     valueExtractor: ValueExtractor<T, V>;
+    isDisabledExtractor: IsDisabledExtractor<T>;
     anchorOrigin?: OriginPosition;
     transformOrigin?: OriginPosition;
     onChange?: MultiSelectInputChangeCallback<T>;

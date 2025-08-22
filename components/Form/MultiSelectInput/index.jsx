@@ -32,6 +32,7 @@ const propTypes = {
     placeholder: PropTypes.string,
     options: PropTypes.array,
     keyExtractor: PropTypes.func,
+    isDisabledExtractor: PropTypes.func,
     valueExtractor: PropTypes.func,
     /**
      * Anchor position the popup in vertical and horizontal position in respect to the anchor
@@ -116,6 +117,7 @@ const MultiSelect = ({
     placeholder,
     keyExtractor,
     valueExtractor,
+    isDisabledExtractor,
     options,
     onChange,
     anchorOrigin,
@@ -270,6 +272,7 @@ const MultiSelect = ({
                         data={filteredOptions}
                         keyExtractor={keyExtractor}
                         valueExtractor={valueExtractor}
+                        isDisabledExtractor={isDisabledExtractor}
                         anchor={wrapperRef}
                         loading={loading}
                         className={cs(styles.selectOptions, 'select_options', {

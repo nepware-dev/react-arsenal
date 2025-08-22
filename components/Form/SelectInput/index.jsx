@@ -31,6 +31,7 @@ const propTypes = {
     placeholder: PropTypes.string,
     options: PropTypes.array,
     keyExtractor: PropTypes.func,
+    isDisabledExtractor: PropTypes.func,
     valueExtractor: PropTypes.func,
     /**
      * Anchor position the popup in vertical and horizontal position in respect to the anchor
@@ -277,6 +278,7 @@ export default class Select extends PureComponent {
             placeholder,
             keyExtractor,
             valueExtractor,
+            isDisabledExtractor,
             optionsDirection,
             LoadingComponent,
             FilterEmptyComponent,
@@ -366,6 +368,7 @@ export default class Select extends PureComponent {
                                 data={options}
                                 keyExtractor={keyExtractor}
                                 valueExtractor={valueExtractor}
+                                isDisabledExtractor={isDisabledExtractor}
                                 loading={loading}
                                 className={cs(styles.selectOptions, 'select_options', selectOptionClassName)}
                                 classNameItem={cs(styles.selectOption, optionItemClassName)}

@@ -7,4 +7,9 @@
   &:hover {
     background-color: var(--color-list-highlight);
   }
+
+  &.disabled, &.disabled:hover {
+    color: var(--color-text-light);
+    cursor: default;
+  }
 }

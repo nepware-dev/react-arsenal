@@ -15,6 +15,7 @@ const propTypes = {
     selectedItems: PropTypes.array,
     keyExtractor: PropTypes.func.isRequired,
     valueExtractor: PropTypes.func.isRequired,
+    isDisabledExtractor: PropTypes.func,
     onItemAdd: PropTypes.func.isRequired,
     onItemRemove: PropTypes.func.isRequired,
     onItemStateChange: PropTypes.func.isRequired,
@@ -36,6 +37,7 @@ const Options = ({
     selectedItems,
     keyExtractor,
     valueExtractor,
+    isDisabledExtractor,
     onItemAdd,
     onItemRemove,
     onItemStateChange,
@@ -50,9 +52,11 @@ const Options = ({
         item = selectedItem?selectedItem:item;
         const selected = !!selectedItem;
 
+        const disabled = isDisabledExtractor && isDisabledExtractor(item);
+
         const onClick = useCallback((event) => {
             event.stopPropagation();
-            selected?onItemRemove({item}):onItemAdd({item});
+            selected ? onItemRemove({item}) : onItemAdd({item});
         }, [item, selected, onItemAdd, onItemRemove]);
 
         const onStateChange = useCallback(({item}) => {
@@ -70,6 +74,7 @@ const Options = ({
                 label={Label}
                 selected={selected}
                 onClick={onClick}
+                disabled={disabled}
             />
         );
     }

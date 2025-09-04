@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import cs from '../../../cs';
 import {isArray} from '../../../utils';
 
+import Localize from '../../I18n/Localize';
+
 import styles from './styles.module.scss';
 
 const noop = () => {};
@@ -126,17 +128,17 @@ const Input = ({
             />
             {!!info && (
                 <span className={cs(textClassName, styles.infoText, 'input-info')}>
-                    {info}
+                    <Localize>{info}</Localize>
                 </span>
             )}
             {!!meta.error && (
                 <span className={cs(textClassName, styles.errorText, 'input-error')}>
-                    {meta.error}
+                     <Localize>{meta.error}</Localize>
                 </span>
             )}
             {!!meta.warning && (
                 <span className={cs(textClassName, styles.warningText, 'input-warning')}>
-                    {meta.warning}
+                    <Localize>{meta.warning}</Localize>
                 </span>
             )}
         </Wrapper>

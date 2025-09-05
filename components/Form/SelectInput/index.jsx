@@ -11,6 +11,8 @@ import Options from './Options';
 import cs from '../../../cs';
 import {isArray} from '../../../utils';
 
+import Localize from '../../I18n/Localize';
+
 import styles from './styles.module.scss';
 
 const noop = () => {};
@@ -149,8 +151,8 @@ export default class Select extends PureComponent {
         }
 
         if(
-            (this.props.defaultValue && !prevProps.defaultValue) || 
-            (this.props.defaultValue && prevProps.defaultValue && 
+            (this.props.defaultValue && !prevProps.defaultValue) ||
+            (this.props.defaultValue && prevProps.defaultValue &&
                 valueExtractor(this.props.defaultValue) !== valueExtractor(prevProps.defaultValue)
             )) {
             this.setState({
@@ -377,14 +379,22 @@ export default class Select extends PureComponent {
                                 onItemClick={this.handleOptionClick}
                                 onItemFocus={this.handleItemFocus}
                                 LoadingComponent={LoadingComponent}
-                                EmptyComponent={searchValue ? FilterEmptyComponent : EmptyComponent} 
+                                EmptyComponent={searchValue ? FilterEmptyComponent : EmptyComponent}
                                 FooterComponent={FooterComponent}
                             />
                         </div>
                     </Popup>
                 </div>
-                {!!errMsg && <span className={styles.errorText}>{errMsg}</span>}
-                {this.state.meta.warning && <span className={styles.warningText}>{this.state.meta.warning}</span>}
+                {!!errMsg && (
+                    <span className={styles.errorText}>
+                        <Localize>{errMsg}</Localize>
+                    </span>
+                )}
+                {this.state.meta.warning && (
+                    <span className={styles.warningText}>
+                        <Localize>{this.state.meta.warning}</Localize>
+                    </span>
+                )}
             </>
         );
     }

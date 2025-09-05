@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import cs from '../../../cs';
 import {isArray} from '../../../utils';
 
+import Localize from '../../I18n/Localize';
+
 import styles from './styles.module.scss';
 
 const noop = () => {};
@@ -105,9 +107,21 @@ const CheckboxInput = (props) => {
                 />
                 <span className={cs(styles.checkbox, checkboxClassName)} />
             </div>
-            {hasInfo && <span className={styles.infoText}>{info}</span>}
-            {hasError && <span className={styles.errorText}>{errMsg}</span>}
-            {hasWarning && <span className={styles.warningText}>{warning || 'Required'}</span>}
+            {hasInfo && (
+                <span className={styles.infoText}>
+                    <Localize>{info}</Localize>
+                </span>
+            )}
+            {hasError && (
+                <span className={styles.errorText}>
+                    <Localize>{errMsg}</Localize>
+                </span>
+            )}
+            {hasWarning && (
+                <span className={styles.warningText}>
+                    <Localize>{warning || 'Required'}</Localize>
+                </span>
+            )}
         </>
     );
 };

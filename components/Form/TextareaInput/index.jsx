@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import cs from '../../../cs';
 import { isArray } from '../../../utils';
 
+import Localize from '../../I18n/Localize';
+
 import styles from './styles.module.scss';
 
 const noop = () => {};
@@ -13,8 +15,8 @@ const propTypes = {
     value: PropTypes.string,
     required: PropTypes.bool,
     disabled: PropTypes.bool,
-    inputRef: PropTypes.shape({ 
-        current: PropTypes.elementType 
+    inputRef: PropTypes.shape({
+        current: PropTypes.elementType
     }),
     onChange: PropTypes.func,
     errorMessage: PropTypes.any,
@@ -30,20 +32,20 @@ const defaultProps = {
 };
 
 const TextareaInput = (props) => {
-    const { 
+    const {
         containerClassName,
-        className, 
+        className,
         inputRef,
         disabled,
-        required, 
-        errorMessage, 
-        showRequired, 
+        required,
+        errorMessage,
+        showRequired,
         warning,
         info,
         textClassName,
         onChange,
         onInvalid,
-        ...otherProps 
+        ...otherProps
     } = props;
 
     const [meta, setMeta] = useState({
@@ -120,17 +122,17 @@ const TextareaInput = (props) => {
             />
             {!!meta.warning && (
                 <p className={cs(textClassName, styles.warningText, 'input-warning')}>
-                    {meta.warning}
+                    <Localize>{meta.warning}</Localize>
                 </p>
             )}
             {!!info && (
                 <span className={cs(textClassName, styles.infoText, 'input-info')}>
-                    {info}
+                    <Localize>{info}</Localize>
                 </span>
             )}
             {!!meta.error && (
                 <span className={cs(textClassName, styles.errorText, 'input-error')}>
-                    {meta.error}
+                    <Localize>{meta.error}</Localize>
                 </span>
             )}
         </Wrapper>

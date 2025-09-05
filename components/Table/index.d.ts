@@ -10,7 +10,7 @@ export interface Column {
 }
 
 export type TableRenderHeader = ({ columns }: { columns: Column[] }) => React.ReactNode;
-export type TableRenderHeaderItem = ({ col }: { column: Column }) => React.ReactNode | string;
+export type TableRenderHeaderItem = ({ column }: { column: Column }) => React.ReactNode | string;
 
 export type TableRenderDataItemProps<T> = { item: T; index: number; column: Column; path?: (string | number)[] };
 export type TableRenderDataItem<T> = ({ item, index, column, path }: TableRenderDataItemProps<T>) => React.ReactNode | string;
@@ -28,12 +28,12 @@ export interface TableProps<T> {
     bodyRowClassName?: string;
     dataClassName?: string;
     data: T[];
-    keyExtractor?: KeyExtractor<T>;
+    keyExtractor: KeyExtractor<T>;
     columns: Column[];
     renderHeader?: TableRenderHeader;
     renderHeaderItem?: TableRenderHeaderItem;
-    renderDataItem?: TableRenderDataItem;
-    rowRenderer?: TableRowRenderer;
+    renderDataItem?: TableRenderDataItem<T>;
+    rowRenderer?: TableRowRenderer<T>;
     onRowClick?: (item: T) => void;
     page?: number;
     maxRows?: number;
@@ -42,6 +42,9 @@ export interface TableProps<T> {
     EmptyComponent?: React.ReactNode;
     controlled?: boolean;
     rowSpacing?: string | number;
+    selectable?: boolean;
+    selectedItems?: T[];
+    onSelectedItemsChange?: (items: T[]) => void;
 }
 
 declare const Table;

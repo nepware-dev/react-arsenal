@@ -1,11 +1,13 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
+import CheckboxInput from '../Form/CheckboxInput'
 import List from '../List';
-import cs from '../../cs';
-import styles from './styles.module.scss';
 
-const defaultKeyExtractor = (_item, index) => index;
+import cs from '../../cs';
+import useControlledState from '../../hooks/useControlledState';
+
+import styles from './styles.module.scss';
 
 const propTypes = {
     /*
@@ -53,7 +55,7 @@ const propTypes = {
      * Extract key from data items.
      * @param item - Contains each data item present in the data array.
      */
-    keyExtractor: PropTypes.func,
+    keyExtractor: PropTypes.func.isRequired,
     /*
      * Renderer for header.
      * @param {{columns: array}} payload - Contains the columns array of table for rendering header.
@@ -115,7 +117,26 @@ const propTypes = {
      * Function called when table row is clicked
      * @param {rowItem} payload - Contains the item of the row clicked.
      */
-    onRowClick: PropTypes.func
+    onRowClick: PropTypes.func,
+    /**
+     * Whether rows are selectable.
+     * Defaults to false.
+     */
+    selectable: PropTypes.bool,
+    /**
+     * Array of selected items.
+     * Requires keyExtractor to be sent.
+     */
+    selectedItems: PropTypes.array,
+    /**
+     * Function called when selected items change.
+     * @param {Array} items - Contains the array of selected items.
+     */
+    onSelectedItemsChange: PropTypes.func,
+    /**
+     * Class applied to selected row.
+     */
+    selectedRowClassName: PropTypes.string,
 };
 
 const Row = ({
@@ -184,7 +205,21 @@ const Table = (props) => {
         controlled,
         rowRenderer,
         keyExtractor,
+        selectable = false,
+        selectedItems = [],
+        onSelectedItemsChange,
+        selectedRowClassName
     } = props;
+
+    const tableColumns = useMemo(() => {
+        if(!selectable) {
+            return columns;
+        }
+        return [
+            { Header: '', accessor: 'select' },
+            ...columns
+        ]
+    }, [selectable, columns]);
 
     const visibleData = useMemo(() => {
         if (controlled) {
@@ -194,14 +229,49 @@ const Table = (props) => {
         return data.slice(initIndex, initIndex + maxRows);
     }, [data, maxRows, page, controlled]);
 
+    useEffect(() => {
+        if(page && maxRows && selectable) {
+            onSelectedItemsChange([]);
+        }
+    }, [page, selectable, onSelectedItemsChange, maxRows]);
+
+    const handleSelectedRowsChange = useCallback((item) => {
+        const isSelected = selectedItems.some(i => keyExtractor(i) === keyExtractor(item));
+        if(isSelected) {
+            const newSelectedItems = selectedItems.filter(i => keyExtractor(i) !== keyExtractor(item));
+            return onSelectedItemsChange(newSelectedItems);
+        }
+        onSelectedItemsChange([...selectedItems, item]);
+    }, [selectedItems, keyExtractor, onSelectedItemsChange]);
+
+    const handleAllRowsSelectedChange = useCallback(() => {
+        if(selectedItems.length === visibleData.length) {
+            return onSelectedItemsChange([]);
+        }
+        onSelectedItemsChange(visibleData);
+    }, [selectedItems, visibleData, onSelectedItemsChange]);
+
+    const headerCheckboxRef = useRef(null);
     const Header = useMemo(() => {
         if (renderHeader) {
-            return renderHeader({ columns });
+            return renderHeader({ columns: tableColumns });
         }
         return (
             <thead className={cs(styles.head, headerClassName)}>
                 <tr className={cs(styles.headerRow, headerRowClassName)}>
-                    {columns.map((col, idx) => {
+                    {tableColumns.map((col, idx) => {
+                        if(selectable && col.accessor === 'select') {
+                            return (
+                                <th key={idx} className={cs(styles.data, headerItemClassName)}>
+                                    <CheckboxInput 
+                                        inputRef={headerCheckboxRef}
+                                        onChange={handleAllRowsSelectedChange}
+                                        checked={selectedItems.length === visibleData.length} 
+                                        indeterminate={selectedItems.length > 0 && selectedItems.length < visibleData.length}
+                                    />
+                                </th>
+                            );
+                        }
                         return (
                             <th key={idx} className={cs(styles.data, headerItemClassName)}>
                                 {renderHeaderItem ? renderHeaderItem({ column: col }) : col.Header}
@@ -211,24 +281,44 @@ const Table = (props) => {
                 </tr>
             </thead>
         );
-    }, [columns, renderHeader, renderHeaderItem, headerClassName, headerRowClassName, headerItemClassName]);
+    }, [columns, renderHeader, renderHeaderItem, headerClassName, headerRowClassName, headerItemClassName, selectable, handleAllRowsSelectedChange, selectedItems, visibleData]);
+
+    const renderTableDataItem = useCallback((listProps) => {
+        if(selectable && listProps.column.accessor === 'select') {
+            const itemKey = keyExtractor(listProps.item);
+            const isChecked = selectedItems.some(i => keyExtractor(i) === itemKey);
+            return (
+                <CheckboxInput 
+                    id={itemKey}
+                    checked={isChecked} 
+                    onChange={() => handleSelectedRowsChange(listProps.item)} 
+                />
+            );
+        }
+        return renderDataItem ? renderDataItem(listProps) : listProps.item[listProps.column.accessor];
+    }, [renderDataItem, selectable, handleSelectedRowsChange]);
 
     const renderRow = useCallback(listProps => {
+        const isSelected = selectedItems.some(i => keyExtractor(i) === keyExtractor(listProps.item));
         if (rowRenderer) {
-            return rowRenderer({ ...listProps, columns });
+            return rowRenderer({ ...listProps, columns: tableColumns, isSelected });
         }
         return (
             <Row
                 {...listProps}
                 onClick={onRowClick}
-                columns={columns}
-                renderDataItem={renderDataItem}
-                className={bodyRowClassName}
+                columns={tableColumns}
+                renderDataItem={renderTableDataItem}
+                className={cs(bodyRowClassName, {
+                    [styles.rowSelected]: isSelected,
+                    [selectedRowClassName]: isSelected
+                })}
                 dataClassName={dataClassName}
                 rowSpacingHeight={rowSpacingHeight}
+                isSelected={isSelected}
             />
         );
-    }, [columns, renderDataItem, bodyRowClassName, onRowClick, rowRenderer, dataClassName, rowSpacingHeight]);
+    }, [columns, renderTableDataItem, bodyRowClassName, onRowClick, rowRenderer, dataClassName, rowSpacingHeight]);
 
     const Body = useMemo(() => {
         return (
@@ -239,7 +329,7 @@ const Table = (props) => {
                 className={cs(styles.body, bodyClassName)}
                 data={visibleData}
                 renderItem={renderRow}
-                keyExtractor={keyExtractor ?? defaultKeyExtractor}
+                keyExtractor={keyExtractor}
                 component="tbody"
             />
         );

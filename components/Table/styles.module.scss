@@ -12,7 +12,15 @@
   .row {
     border: 1px solid var(--color-border);
 
-    &:hover {
+    &Selected {
+      background-color: color-mix(in srgb, var(--color-primary) 10%, white);
+
+      &:hover {
+        background-color: color-mix(in srgb, var(--color-primary) 15%, white);
+      }
+    }
+
+    &:hover:not(.rowSelected) {
       background-color: #f0f0f0bf;
     }
   }

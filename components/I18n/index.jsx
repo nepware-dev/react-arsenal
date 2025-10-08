@@ -1,8 +1,8 @@
-import React, {useMemo, useState} from 'react';
+import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 
-import {I18nContext, useI18nContext, defaultTranslator, defaultKeyTranslator} from './i18nContext';
-import Localize, {localizeFn} from './Localize';
+import { I18nContext, useI18nContext, defaultContext } from './i18nContext';
+import Localize, { localizeFn } from './Localize';
 
 const propTypes = {
     children: PropTypes.oneOfType([
@@ -43,31 +43,29 @@ const propTypes = {
 
 const I18nProvider = props => {
     const {
-        children, 
-        translations, 
-        languages, 
-        languageAccessor, 
-        translator, 
+        children,
+        translations,
+        languages,
+        languageAccessor,
+        translator,
         keyTranslator,
         defaultLanguage = 'en',
     } = props;
 
     const [selectedLanguage, setSelectedLanguage] = useState(defaultLanguage);
 
-    const defaultContext = useMemo(() => ({
-        translations: translations || {},
-        languages: languages || [
-            {code: 'en', title: 'English'},
-        ],
-        languageAccessor: languageAccessor || 'code',
-        translator: translator || defaultTranslator,
-        keyTranslator: keyTranslator || defaultKeyTranslator,
+    const contextValue = useMemo(() => ({
+        translations: translations || defaultContext.translations,
+        languages: languages || defaultContext.languages,
+        languageAccessor: languageAccessor || defaultContext.languageAccessor,
+        translator: translator || defaultContext.translator,
+        keyTranslator: keyTranslator || defaultContext.keyTranslator,
         selectedLanguage,
         changeLanguage: setSelectedLanguage,
     }), [translations, languages, languageAccessor, translator, selectedLanguage]);
 
     return (
-        <I18nContext.Provider value={defaultContext}>
+        <I18nContext.Provider value={contextValue}>
             {children}
         </I18nContext.Provider>
     );

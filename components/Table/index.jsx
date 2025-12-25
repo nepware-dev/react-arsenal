@@ -263,10 +263,10 @@ const Table = (props) => {
                         if(selectable && col.accessor === 'select') {
                             return (
                                 <th key={idx} className={cs(styles.data, headerItemClassName)}>
-                                    <CheckboxInput 
+                                    <CheckboxInput
                                         inputRef={headerCheckboxRef}
                                         onChange={handleAllRowsSelectedChange}
-                                        checked={selectedItems.length === visibleData.length} 
+                                        checked={selectedItems.length > 0 && selectedItems.length === visibleData.length}
                                         indeterminate={selectedItems.length > 0 && selectedItems.length < visibleData.length}
                                     />
                                 </th>
@@ -288,10 +288,10 @@ const Table = (props) => {
             const itemKey = keyExtractor(listProps.item);
             const isChecked = selectedItems.some(i => keyExtractor(i) === itemKey);
             return (
-                <CheckboxInput 
+                <CheckboxInput
                     id={itemKey}
-                    checked={isChecked} 
-                    onChange={() => handleSelectedRowsChange(listProps.item)} 
+                    checked={isChecked}
+                    onChange={() => handleSelectedRowsChange(listProps.item)}
                 />
             );
         }

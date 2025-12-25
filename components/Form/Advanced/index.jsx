@@ -42,7 +42,6 @@ const Input = (props) => {
         labelClassName,
         label,
         standaloneName,
-        fields,
         addField,
         removeField,
         showRequiredFields,
@@ -121,7 +120,7 @@ const Input = (props) => {
             return {
                 ...inputProps,
                 showRequired: (
-                    inputProps.required && 
+                    inputProps.required &&
                     (!value || ['undefined', 'null'].includes(value))
                 ) ? showRequired : false,
                 errorMessage: error?.[inputProps.name],
@@ -161,27 +160,18 @@ const Form = React.forwardRef((props, ref) => {
     const formRef = useRef();
 
     const [showRequiredFields, setShowRequiredFields] = useState(false);
-    const [fields, setFields] = useState({});
+    const fieldsObject = useRef({});
 
     const addField = useCallback(fieldObj => {
-        setFields(fs => {
-            if(!fs[fieldObj.name]) {
-                const newFields = {...fs, [fieldObj.name]: fieldObj.field};
-                return {...newFields};
-            }
-            return fs;
-        });
+      if(!fieldsObject.current[fieldObj.name]) {
+        fieldsObject.current[fieldObj.name] = fieldObj.field;
+      }
     }, []);
 
     const removeField = useCallback(fieldName => {
-        setFields(fs => {
-            if(fs[fieldName]) {
-                const newFields = {...fs};
-                delete newFields[fieldName];
-                return {...newFields};
-            }
-            return fs;
-        });
+      if(fieldsObject.current[fieldName]) {
+        delete fieldsObject.current[fieldName];
+      }
     }, []);
 
     const formDataObject = useRef(defaultFormData || new FormData());
@@ -190,15 +180,15 @@ const Form = React.forwardRef((props, ref) => {
     const handleSubmitForm = useCallback((evnt) => {
         evnt.preventDefault();
         for(const [key, value] of formData) {
-            if(fields[key] && fields[key].required && (!value || ['undefined', 'null'].includes(value))) {
-                fields[key].ref.onInvalidSubmit();
+            if(fieldsObject.current[key] && fieldsObject.current[key].required && (!value || ['undefined', 'null'].includes(value))) {
+                fieldsObject.current[key].ref.onInvalidSubmit();
                 onInvalidSubmit?.('required');
                 setShowRequiredFields(true);
                 return;
             }
         }
         onSubmit(formData);
-    }, [formData, fields, onInvalidSubmit]);
+    }, [formData, onInvalidSubmit, onSubmit]);
 
     const handleFormChange = useCallback((payload) => {
         if(payload?.target) {
@@ -215,26 +205,25 @@ const Form = React.forwardRef((props, ref) => {
     const formContext = useMemo(() => {
         return {
             formData,
-            fields,
             addField,
             removeField,
             showRequiredFields,
             error,
             onFormChange: handleFormChange
         };
-    }, [formData, fields, addField, removeField, showRequiredFields, error, handleFormChange]);
+    }, [formData, addField, removeField, showRequiredFields, error, handleFormChange]);
 
     const hasFormError = useMemo(() => {
         if(!error) {
             return false;
         }
-        for(let key of Object.keys(fields)) {
+        for(let key of Object.keys(fieldsObject.current)) {
             if(error[key]) {
-                return false;;
+                return false;
             }
         }
         return true;
-    }, [fields, error]);
+    }, [error]);
 
     useImperativeHandle(ref, () => ({
         getFormData: () => {

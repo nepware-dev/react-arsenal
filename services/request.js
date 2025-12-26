@@ -13,11 +13,11 @@ const request = (baseUrl, originalFetch, interceptors) => {
                 interceptors.response.forEach(f => f(response, request, controller));
                 let data;
                 if(/application\/.*json.*$/.test(response.headers.get('Content-Type'))) {
-                    data = await response.json();
+                    data = await response.clone().json();
                 } else if(/text/.test(response.headers.get('Content-Type'))) {
-                    data = await response.text();
+                    data = await response.clone().text();
                 } else {
-                    data = await response.blob();
+                    data = await response.clone().blob();
                 }
                 return resolve({error: !response.ok, data, response});
             }).catch(error => {

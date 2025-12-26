@@ -1,15 +1,6 @@
-import React, {useContext} from 'react';
+import React, { useContext } from 'react';
 
 export const I18nContext = React.createContext(null);
-
-export function useI18nContext(props) {
-    const {translator, ...context} = useContext(I18nContext);
-    return {
-        i18nTranslator: translator,
-        ...context, 
-        ...props,
-    };
-}
 
 export const defaultTranslator = (key, selectedLanguage, translations) => {
     return translations?.[selectedLanguage]?.[key] || key;
@@ -19,6 +10,24 @@ export const defaultKeyTranslator = (object, key, currentLng) => {
     currentLng = currentLng.charAt(0).toUpperCase() + currentLng.slice(1);
     return object[`${key}${currentLng}`] || object[key];
 };
+
+export const defaultContext = {
+    translations: {},
+    languages: [{ code: 'en', title: 'English' }],
+    languageAccessor: 'code',
+    translator: defaultTranslator,
+    keyTranslator: defaultKeyTranslator,
+}
+
+export function useI18nContext(props) {
+    const {translator, ...context} = useContext(I18nContext) ?? defaultContext;
+
+    return {
+        i18nTranslator: translator,
+        ...context,
+        ...props,
+    };
+}
 
 export const defaultLocalizer = (
     text,

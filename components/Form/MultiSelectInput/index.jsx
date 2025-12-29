@@ -91,41 +91,28 @@ const propTypes = {
 
 };
 
-const defaultProps = {
-    searchable: true,
-    clearable: true,
-    disabled: false,
-    loading: false,
-    placeholder: 'Select...',
-    keyExtractor: (item) => item.id,
-    valueExtractor: (item) => item.name,
-    options: [],
-    onChange: noop,
-    optionsDirection: 'down',
-};
-
 const MultiSelect = ({
     name,
     className: _className,
     controlClassName,
     optionsWrapperClassName,
     selectOptionClassName,
-    loading,
-    disabled,
-    clearable,
-    searchable,
-    placeholder,
-    keyExtractor,
-    valueExtractor,
+    loading = false,
+    disabled = false,
+    clearable = true,
+    searchable = true,
+    placeholder = 'Select...',
+    keyExtractor = (item) => item.id,
+    valueExtractor = (item) => item.name,
     isDisabledExtractor,
-    options,
-    onChange,
-    anchorOrigin,
-    transformOrigin,
+    options = [],
+    onChange = noop,
+    anchorOrigin = 'bottom left',
+    transformOrigin = 'top left',
     onInputChange,
     value,
     defaultValue,
-    optionsDirection,
+    optionsDirection = 'down',
     renderOptionLabel,
     renderControl,
     renderControlLabel,
@@ -232,10 +219,12 @@ const MultiSelect = ({
                     loading={loading}
                     expanded={expanded}
                     maxItems={5}
+                    editable
                     handleCaretClick={handleCaretClick}
                     selectedItems={selectedItems}
                     keyExtractor={keyExtractor}
                     valueExtractor={valueExtractor}
+                    onItemRemove={handleRemoveItem}
                     renderControlLabel={renderControlLabel}
                 />
                 <Popup
@@ -246,19 +235,6 @@ const MultiSelect = ({
                     transformOrigin={transformOrigin}
                     onClose={handleCaretClick}
                 >
-                    <ControlComponent
-                        controlClassName={controlClassName}
-                        placeholder={placeholder}
-                        loading={loading}
-                        expanded={expanded}
-                        editable
-                        handleCaretClick={handleCaretClick}
-                        selectedItems={selectedItems}
-                        keyExtractor={keyExtractor}
-                        valueExtractor={valueExtractor}
-                        onItemRemove={handleRemoveItem}
-                        renderControlLabel={renderControlLabel}
-                    />
                     <div className={styles.searchContainer}>
                         <Input
                             placeholder="Search"
@@ -296,6 +272,5 @@ const MultiSelect = ({
 }
 
 MultiSelect.propTypes = propTypes;
-MultiSelect.defaultProps = defaultProps;
 
 export default MultiSelect;

@@ -14,6 +14,8 @@ const request = (baseUrl, originalFetch, interceptors) => {
                 let data;
                 if(/application\/.*json.*$/.test(response.headers.get('Content-Type'))) {
                     data = await response.clone().json();
+                } else if(/text\/event-stream.*$/.test(response.headers.get('Content-Type'))) {
+                    data = null;
                 } else if(/text/.test(response.headers.get('Content-Type'))) {
                     data = await response.clone().text();
                 } else {

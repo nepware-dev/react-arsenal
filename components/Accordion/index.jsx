@@ -71,7 +71,7 @@ const Accordion = (props) => {
         } else {
             setContentHeight('0px');
         }
-    }, [active]);
+    }, [active, children]);
 
     return (
         <div className={cs(styles.accordionSection, className, active && activeClassName)}>

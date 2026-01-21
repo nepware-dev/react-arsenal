@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
 
@@ -68,6 +68,28 @@ const propTypes = {
     })
 };
 
+/**
+ * Recursively collects keys of items that should be initially expanded based on initialExpandedLevel.
+ */
+function collectInitiallyExpandedKeys(items, keyExtractor, childrenKey, levelKey, initialExpandedLevel, expandedKeys = new Set()) {
+    if (!items || !Array.isArray(items)) return expandedKeys;
+
+    for (const item of items) {
+        const itemLevel = item[levelKey] ?? 0;
+        const children = item[childrenKey];
+
+        // If this item has children and its level is less than initialExpandedLevel, expand it
+        if (children && children.length > 0 && itemLevel < initialExpandedLevel) {
+            const key = keyExtractor(item);
+            expandedKeys.add(key);
+            // Recursively process children
+            collectInitiallyExpandedKeys(children, keyExtractor, childrenKey, levelKey, initialExpandedLevel, expandedKeys);
+        }
+    }
+
+    return expandedKeys;
+}
+
 function HierarchicalTable(props) {
     const {
         data,
@@ -86,12 +108,16 @@ function HierarchicalTable(props) {
         ...tableProps
     } = props;
 
+    const {
+        levelKey = 'level',
+        childrenKey = 'children',
+        initialExpandedLevel = 1,
+    } = hierarchyOptions;
+
     const tableData = useMemo(() => {
         const {
             hierarchyBuilder,
             parentKeyExtractor,
-            levelKey,
-            childrenKey,
         } = hierarchyOptions;
 
         if (hierarchyBuilder) {
@@ -103,15 +129,52 @@ function HierarchicalTable(props) {
             })
         }
         return data;
-    }, [hierarchyOptions, data]);
+    }, [hierarchyOptions, data, levelKey, childrenKey, keyExtractor]);
+
+    const [expandedKeys, setExpandedKeys] = useState(() =>
+        collectInitiallyExpandedKeys(
+            tableData,
+            keyExtractor,
+            childrenKey,
+            levelKey,
+            initialExpandedLevel
+        )
+    );
+
+    const isInitialMount = useRef(true);
+
+    // Sync expanded state when configuration changes (but not when data changes)
+    // This preserves user interactions (expand/collapse) across data updates.
+    // Note: Stale keys from removed items remain in the Set but are harmless.
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        setExpandedKeys(
+            collectInitiallyExpandedKeys(
+                tableData,
+                keyExtractor,
+                childrenKey,
+                levelKey,
+                initialExpandedLevel
+            )
+        );
+    }, [keyExtractor, childrenKey, levelKey, initialExpandedLevel]);
+
+    const handleToggleExpand = useCallback((itemKey) => {
+        setExpandedKeys(prevKeys => {
+            const newKeys = new Set(prevKeys);
+            if (newKeys.has(itemKey)) {
+                newKeys.delete(itemKey);
+            } else {
+                newKeys.add(itemKey);
+            }
+            return newKeys;
+        });
+    }, []);
 
     const renderHierarchicalRow = useCallback((tableRowProps) => {
-        const {
-            levelKey = 'level',
-            childrenKey = 'children',
-            initialExpandedLevel = 1,
-        } = hierarchyOptions;
-
         if (rowRenderer) {
             return rowRenderer(tableRowProps)
         }
@@ -128,13 +191,14 @@ function HierarchicalTable(props) {
                 childClassName={bodyRowChildClassName}
                 lastChildClassName={bodyRowLastChildClassName}
                 expandToggleIconClassName={expandToggleIconClassName}
-                isInitiallyExpanded={initialExpandedLevel > -1}
                 levelKey={levelKey}
                 childrenKey={childrenKey}
+                expandedKeys={expandedKeys}
+                onToggleExpand={handleToggleExpand}
+                keyExtractor={keyExtractor}
             />
         );
     }, [
-        hierarchyOptions,
         rowRenderer,
         bodyRowParentClassName,
         bodyRowChildClassName,
@@ -145,6 +209,11 @@ function HierarchicalTable(props) {
         bodyRowClassName,
         dataClassName,
         rowSpacingHeight,
+        levelKey,
+        childrenKey,
+        expandedKeys,
+        handleToggleExpand,
+        keyExtractor,
     ]);
 
     return (
@@ -178,40 +247,40 @@ function HierarchicalRow({
     lastChildClassName,
     expandToggleIconClassName,
     renderDataItem,
-    isInitiallyExpanded,
     isLastChild,
     rowSpacingHeight,
-    initialExpandedLevel,
     levelKey,
     childrenKey,
-    path
+    path,
+    expandedKeys,
+    onToggleExpand,
+    keyExtractor,
 }) {
     const rowPath = useMemo(() => path ? [...path, childrenKey, index] : [index], [path, childrenKey, index]);
+
+    const itemKey = useMemo(() => keyExtractor(item), [keyExtractor, item]);
+    const isExpanded = useMemo(() => expandedKeys.has(itemKey), [expandedKeys, itemKey]);
 
     const handleClickRow = useCallback(() => {
         onClick && onClick(item);
     }, [onClick, item]);
 
-    const [isExpanded, setIsExpanded] = useState(isInitiallyExpanded);
+    const handleToggle = useCallback((e) => {
+        e.stopPropagation();
+        onToggleExpand(itemKey);
+    }, [onToggleExpand, itemKey]);
 
-    const handleToggle = useCallback(() => {
-        setIsExpanded(previousIsExpanded => !previousIsExpanded);
-    }, []);
+    const ToggleIcon = useMemo(() => isExpanded ? MdKeyboardArrowDown : MdKeyboardArrowRight, [isExpanded]);
 
-    const ToggleIcon = useMemo(() => {
-        if (isExpanded) {
-            return MdKeyboardArrowDown;
-        }
-        return MdKeyboardArrowRight;
-    }, [isExpanded]);
+    const hasChildren = useMemo(() => item[childrenKey] && item[childrenKey].length > 0, [item, childrenKey]);
 
     return (
         <>
             <tr
                 className={cs(styles.row, className, {
-                    [childClassName]: item[levelKey] > 0,
-                    [parentClassName]: item[childrenKey]?.length > 0 && isExpanded,
-                    [lastChildClassName]: !isExpanded && (isLastChild || item.level === 0),
+                    [childClassName]: (item[levelKey] ?? 0) > 0,
+                    [parentClassName]: hasChildren && isExpanded,
+                    [lastChildClassName]: !isExpanded && (isLastChild || (item[levelKey] ?? 0) === 0),
                 })}
                 onClick={handleClickRow}
             >
@@ -220,11 +289,11 @@ function HierarchicalRow({
                         className={cs(styles.data, styles.dataHierarchical, dataClassName)}
                         key={column.accessor + index}
                         style={{
-                            '--row-level': item[levelKey] ? `${item[levelKey]}rem` : '0rem',
-                            '--row-offset': item[levelKey] === 0 || item[childrenKey]?.length ? '0rem' : '1rem',
+                            '--row-level': `${item[levelKey] ?? 0}rem`,
+                            '--row-offset': (item[levelKey] ?? 0) === 0 || hasChildren ? '0rem' : '1rem',
                         }}
                     >
-                        {columnIndex === 0 && item[childrenKey] && item[childrenKey].length > 0 && (
+                        {columnIndex === 0 && hasChildren && (
                             <ToggleIcon className={expandToggleIconClassName} onClick={handleToggle} />
                         )}
                         {renderDataItem({ item, column, index, path: rowPath })}
@@ -232,28 +301,30 @@ function HierarchicalRow({
                 ))}
             </tr>
             {isExpanded && item[childrenKey] &&
-                item[childrenKey]?.map((childItem, childItemIndex) => (
+                item[childrenKey].map((childItem, childItemIndex) => (
                     <HierarchicalRow
-                        key={`row-${item[levelKey]}-${childItemIndex}`}
+                        key={keyExtractor(childItem)}
                         item={childItem}
                         index={childItemIndex}
                         columns={columns}
                         dataClassName={dataClassName}
-                        isLastChild={childItemIndex === item[childrenKey]?.length - 1}
+                        isLastChild={childItemIndex === item[childrenKey].length - 1}
                         renderDataItem={renderDataItem}
-                        isInitiallyExpanded={initialExpandedLevel > item[levelKey]}
-                        initialExpandedLevel={initialExpandedLevel}
+                        onClick={onClick}
                         parentClassName={parentClassName}
                         childClassName={childClassName}
                         className={className}
-                        lastChildClassName={(isLastChild || item.level === 0) ? lastChildClassName : ''}
+                        lastChildClassName={(isLastChild || (item[levelKey] ?? 0) === 0) ? lastChildClassName : ''}
                         expandToggleIconClassName={expandToggleIconClassName}
                         levelKey={levelKey}
                         childrenKey={childrenKey}
                         path={rowPath}
+                        expandedKeys={expandedKeys}
+                        onToggleExpand={onToggleExpand}
+                        keyExtractor={keyExtractor}
                     />
                 ))}
-            {!!rowSpacingHeight && !item[levelKey] && <tr className={styles.rowSpacing} style={{ height: rowSpacingHeight }} />}
+            {!!rowSpacingHeight && (item[levelKey] ?? 0) === 0 && <tr className={styles.rowSpacing} style={{ height: rowSpacingHeight }} />}
         </>
     );
 }

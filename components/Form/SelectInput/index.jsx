@@ -126,7 +126,7 @@ export default class Select extends PureComponent {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const {valueExtractor, showRequired} = this.props;
+        const {keyExtractor, showRequired} = this.props;
 
         if(showRequired !== prevProps.showRequired) {
             this.setState({meta: {...this.state.meta, warning: showRequired ? 'Required' : null}});
@@ -153,7 +153,7 @@ export default class Select extends PureComponent {
         if(
             (this.props.defaultValue && !prevProps.defaultValue) ||
             (this.props.defaultValue && prevProps.defaultValue &&
-                valueExtractor(this.props.defaultValue) !== valueExtractor(prevProps.defaultValue)
+                keyExtractor(this.props.defaultValue) !== keyExtractor(prevProps.defaultValue)
             )) {
             this.setState({
                 selectedItem: this.props.defaultValue,

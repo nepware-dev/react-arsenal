@@ -34,6 +34,7 @@ const propTypes = {
     keyExtractor: PropTypes.func,
     isDisabledExtractor: PropTypes.func,
     valueExtractor: PropTypes.func,
+    searchExtractor: PropTypes.func,
     /**
      * Anchor position the popup in vertical and horizontal position in respect to the anchor
      * The first position defines the vertical position of the anchor and the second position defines the horizontal position
@@ -104,6 +105,7 @@ const MultiSelect = ({
     placeholder = 'Select...',
     keyExtractor = (item) => item.id,
     valueExtractor = (item) => item.name,
+    searchExtractor,
     isDisabledExtractor,
     options = [],
     onChange = noop,
@@ -166,23 +168,34 @@ const MultiSelect = ({
     const handleCaretClick = useCallback((event) => {
         event.stopPropagation();
         setExpanded(!expanded);
-    });
+    }, [expanded]);
 
     const handleSearchValueChange = useCallback(({value}) => {
         onInputChange && onInputChange(value);
         setSearchValue(value);
-    });
+    }, [onInputChange]);
 
     const filteredOptions = useMemo(() => {
         if(!onInputChange) {
-            return options.filter((d) =>
-                valueExtractor(d)
-                .toLowerCase()
-                .includes(searchValue.toLowerCase())
-            );
+            return options.filter((d) => {
+                // If searchExtractor is provided, use it for filtering
+                if (searchExtractor) {
+                    const searchText = searchExtractor(d);
+                    if (typeof searchText === 'string') {
+                        return searchText.toLowerCase().includes(searchValue.toLowerCase());
+                    }
+                    return false;
+                }
+                // Otherwise try valueExtractor (only works if it returns a string)
+                const extracted = valueExtractor(d);
+                if (typeof extracted === 'string') {
+                    return extracted.toLowerCase().includes(searchValue.toLowerCase());
+                }
+                return false;
+            });
         }
         return options;
-    }, [searchValue, options, valueExtractor]);
+    }, [searchValue, options, valueExtractor, searchExtractor, onInputChange]);
 
     const handleAddItem = ({item}) => {
         const newSelectedItems = [...selectedItems, item];

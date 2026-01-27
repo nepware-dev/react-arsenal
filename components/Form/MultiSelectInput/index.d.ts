@@ -9,6 +9,7 @@ export type {KeyExtractor, ListRenderItem};
 export type {OriginPosition};
 
 export type ValueExtractor<T, V> = (item: T) => V;
+export type SearchExtractor<T> = (item: T) => string;
 
 export type MultiSelectInputChangeCallback<T> = (payload: {name?: string, value: T[]}) => void;
 
@@ -47,6 +48,7 @@ export interface MultiSelectInputProps<T, V> {
     options: T[];
     keyExtractor: KeyExtractor<T>;
     valueExtractor: ValueExtractor<T, V>;
+    searchExtractor?: SearchExtractor<T>;
     isDisabledExtractor: IsDisabledExtractor<T>;
     anchorOrigin?: OriginPosition;
     transformOrigin?: OriginPosition;

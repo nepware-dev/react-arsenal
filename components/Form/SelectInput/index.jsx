@@ -35,6 +35,7 @@ const propTypes = {
     keyExtractor: PropTypes.func,
     isDisabledExtractor: PropTypes.func,
     valueExtractor: PropTypes.func,
+    searchExtractor: PropTypes.func,
     /**
      * Anchor position the popup in vertical and horizontal position in respect to the anchor
      * The first position defines the vertical position of the anchor and the second position defines the horizontal position
@@ -249,12 +250,22 @@ export default class Select extends PureComponent {
     };
 
     filterOptions = (searchValue) => {
-        return this.props.options.filter((d) =>
-            this.props
-                .valueExtractor(d)
-                .toLowerCase()
-                .includes(searchValue.toLowerCase())
-    );
+        return this.props.options.filter((d) => {
+            // If searchExtractor is provided, use it for filtering
+            if (this.props.searchExtractor) {
+                const searchText = this.props.searchExtractor(d);
+                if (typeof searchText === 'string') {
+                    return searchText.toLowerCase().includes(searchValue.toLowerCase());
+                }
+                return false;
+            }
+            // Otherwise try valueExtractor (only works if it returns a string)
+            const extracted = this.props.valueExtractor(d);
+            if (typeof extracted === 'string') {
+                return extracted.toLowerCase().includes(searchValue.toLowerCase());
+            }
+            return false;
+        });
     };
 
     getErrorMessage = () => {

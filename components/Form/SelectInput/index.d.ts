@@ -4,6 +4,7 @@ import type {KeyExtractor} from '../../List';
 export type {KeyExtractor};
 
 export type ValueExtractor<T, V> = (item: T) => V;
+export type SearchExtractor<T> = (item: T) => string;
 export type IsDisabledExtractor<T> = (item: T) => boolean;
 
 export type SelectInputChangeCallback<T> = (payload: {name?: string, option: T | null}) => void;
@@ -25,6 +26,7 @@ export interface SelectInputProps<T, V> {
     options: T[];
     keyExtractor: KeyExtractor<T>;
     valueExtractor: ValueExtractor<T, V>;
+    searchExtractor?: SearchExtractor<T>;
     isDisabledExtractor?: IsDisabledExtractor<T>;
     onChange?: SelectInputChangeCallback<T>;
     onInputChange?: (target: React.RefObject<HTMLInputElement | null>) => void;

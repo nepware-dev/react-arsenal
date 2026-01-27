@@ -8,6 +8,13 @@ export type IsDisabledExtractor<T> = (item: T) => boolean;
 
 export type SelectInputChangeCallback<T> = (payload: {name?: string, option: T | null}) => void;
 
+export type RenderOptionLabelProps<T> = {
+    item: T;
+    selected: boolean;
+};
+
+export type RenderOptionLabel<T> = React.FC<RenderOptionLabelProps<T>>;
+
 export interface SelectInputProps<T, V> {
     name?: string;
     className?: string;
@@ -36,6 +43,7 @@ export interface SelectInputProps<T, V> {
     FilterEmptyComponent?: React.ReactNode;
     EmptyComponent?: React.ReactNode;
     FooterComponent?: React.ReactNode;
+    renderOptionLabel?: RenderOptionLabel<T>;
 }
 
 declare const SelectInput;

@@ -18,6 +18,7 @@ const propTypes = {
     isDisabledExtractor: PropTypes.func,
     onItemClick: PropTypes.func,
     onItemFocus: PropTypes.func,
+    renderItemLabel: PropTypes.func,
 };
 
 const defaultProps = {
@@ -42,6 +43,7 @@ export default class Options extends PureComponent {
             valueExtractor,
             keyExtractor,
             isDisabledExtractor,
+            renderItemLabel: ItemLabel,
         } = this.props;
 
         const _onItemClick = (event) => {
@@ -53,15 +55,18 @@ export default class Options extends PureComponent {
             onItemFocus({item});
         };
 
-        const label = valueExtractor(item);
         const key = keyExtractor(item);
         const selected = selectedItem && key === keyExtractor(selectedItem);
         const focused = focusedItem && key === keyExtractor(focusedItem);
 
         const isDisabled = isDisabledExtractor && isDisabledExtractor(item);
 
+        const label = ItemLabel ?
+            <ItemLabel item={item} selected={selected} /> :
+            valueExtractor(item);
+
         return (
-            <Option 
+            <Option
                 className={classNameItem}
                 label={label}
                 selected={selected}

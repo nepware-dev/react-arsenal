@@ -86,6 +86,11 @@ const propTypes = {
         PropTypes.element,
         PropTypes.elementType
     ]),
+    /*
+     * Custom render function for option labels
+     * Receives { item, selected } props
+     */
+    renderOptionLabel: PropTypes.func,
 };
 
 const defaultProps = {
@@ -286,6 +291,7 @@ export default class Select extends PureComponent {
             FilterEmptyComponent,
             EmptyComponent,
             FooterComponent,
+            renderOptionLabel,
         } = this.props;
 
         const {expanded, searchValue, selectedItem, focusedItem, options} = this.state;
@@ -381,6 +387,7 @@ export default class Select extends PureComponent {
                                 LoadingComponent={LoadingComponent}
                                 EmptyComponent={searchValue ? FilterEmptyComponent : EmptyComponent}
                                 FooterComponent={FooterComponent}
+                                renderItemLabel={renderOptionLabel}
                             />
                         </div>
                     </Popup>

@@ -11,7 +11,7 @@ const propTypes = {
     className: PropTypes.string,
     selected: PropTypes.bool,
     focused: PropTypes.bool,
-    label: PropTypes.string.isRequired,
+    label: PropTypes.node.isRequired,
     onClick: PropTypes.func,
     onFocus: PropTypes.func,
     disabled: PropTypes.bool,

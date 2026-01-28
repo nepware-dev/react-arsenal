@@ -33,10 +33,9 @@ export const Label = ({
         >
             <div className={styles.label}>{value}</div>
             {editable &&
-                <div className={styles.close}>
+                <div className={styles.close} onClick={onCloseClick}>
                     <IoClose
                         className={styles.icon}
-                        onClick={onCloseClick}
                     />
                 </div>
             }

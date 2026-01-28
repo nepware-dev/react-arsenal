@@ -1,4 +1,4 @@
-import React, {PureComponent} from 'react';
+import React, {useCallback} from 'react';
 import PropTypes from 'prop-types';
 
 import CheckboxInput from '../../CheckboxInput';
@@ -37,9 +37,13 @@ const Option = ({
         [styles.disabled]: disabled,
     });
 
+    // Disable pointer events on the checkbox wrapper to prevent the native focus behavior of the browser.
+    // Without this, clicking the checkbox would try to focus the absolutely positioned input (see CheckboxInput) causing unexpected scroll behavior
     return (
         <div className={className} onClick={!disabled ? onClick : undefined}>
-            <CheckboxInput checked={selected} disabled={disabled} />
+            <div style={{ pointerEvents: 'none' }}>
+                <CheckboxInput checked={selected} disabled={disabled} />
+            </div>
             {label}
         </div>
     );

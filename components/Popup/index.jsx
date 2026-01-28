@@ -110,7 +110,7 @@ const Popup = (props) => {
     const transformWrapperRect = useCallback((rect) => {
         const [anchorVertical, anchorHorizontal] = anchorOrigin.trim().split(' ');
         const [transformVertical, transformHorizontal] = transformOrigin.trim().split(' ');
-        
+
         const topAnchor = {
             'top': rect.top,
             'center': (rect.top + rect.bottom)/2,

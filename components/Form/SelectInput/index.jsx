@@ -140,10 +140,11 @@ export default class Select extends PureComponent {
             if(!this.props.onInputChange) {
                 const options = this.filterOptions(this.state.searchValue);
                 this.setState({
-                    options: options,
+                  options: options,
+                  focusedItem: this.props.value ?? this.props.defaultValue ?? this.props.options?.[0],
                 });
             } else {
-                this.setState({ options: this.props.options });
+                this.setState({ options: this.props.options, focusedItem: this.props.value ?? this.props.defaultValue ?? this.props.options?.[0] });
             }
         }
 
@@ -212,9 +213,9 @@ export default class Select extends PureComponent {
             const {focusedItem} = this.state;
             if(focusedItem) {
                 this.setState({selectedItem: focusedItem});
-                this.handleChangeCallback({name: this.props.name, option: focusedItem});
+                this.handleChangeCallback({ name: this.props.name, option: focusedItem });
+                this.hideOption();
             }
-
         }
     }
 
@@ -228,9 +229,11 @@ export default class Select extends PureComponent {
     };
 
     handleSelectFocus = (event) => {
-        event.stopPropagation();
-        this.setState({expanded: true, locked: true});
-        setTimeout(() => this.setState({locked: false}), 300);
+        if (!this.props.disabled) {
+            event.stopPropagation();
+            this.setState({expanded: true, locked: true});
+            setTimeout(() => this.setState({ locked: false }), 300);
+        }
     }
 
     handleItemFocus = ({item}) => {
@@ -312,7 +315,7 @@ export default class Select extends PureComponent {
                 [styles.disabled]: disabled,
             },
             _className
-    );
+      );
 
         const errMsg = this.getErrorMessage();
 
@@ -321,7 +324,7 @@ export default class Select extends PureComponent {
                 <div
                     ref={this.wrapperRef}
                     className={className}
-                    tabIndex="0"
+                    tabIndex={disabled ? undefined : "0"}
                     onClick={this.handleCaretClick}
                     onKeyDown={this.handleKeyDown}
                     onFocusCapture={this.handleSelectFocus}

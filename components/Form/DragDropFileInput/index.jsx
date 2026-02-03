@@ -6,9 +6,9 @@ import FileInput from '../FileInput';
 import cs from '../../../cs';
 import {transformToElement} from '../../../utils';
 import {
-    eventHasFiles, 
-    fileAccepted, 
-    fileMatchSize, 
+    eventHasFiles,
+    fileAccepted,
+    fileMatchSize,
     TOO_MANY_FILES_REJECTION,
 } from './utils';
 
@@ -19,7 +19,7 @@ const propTypes = {
      * The name attribute for the underlying input element.
      */
     name: PropTypes.string,
-    
+
     /**
      * Called when user drops file(s) into a dropzone OR selects files from input.
      * @param {String} name - The name of the input element supplied.
@@ -32,10 +32,10 @@ const propTypes = {
      * Indicates if multiple files can be added.
      */
     multiple: PropTypes.bool,
-    
+
     /**
      * One or more unique file type specifiers describing file types to allow.
-     * Follows https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#accept 
+     * Follows https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#accept
      */
     accept: PropTypes.string,
 
@@ -48,50 +48,50 @@ const propTypes = {
      * Minimum size (IN KILOBYTES) of files to accept.
      */
     minSize: PropTypes.number,
-    
+
     /**
      * Maximum size (IN KILOBYTES) of files to accept.
      */
     maxSize: PropTypes.number,
-    
+
     /**
      * Maximum number of files to be accepted.
      * If user adds more than this value, all files will be rejected with Too many files error.
      */
     maxFiles: PropTypes.number,
-    
+
     /**
      * Custom validator that is checked for each file the user inputs.
      * @param {File} file
      * @returns {String|Error|Error[]}
      */
     validator: PropTypes.func,
-    
+
     /**
      * Called when user drags a file over the dropzone.
      * @param {(DragEvent|Event)} event
      */
     onDragOver: PropTypes.func,
-    
+
     /**
      * Called when user drags a file and leaves the dropzone.
      * @param {(DragEvent|Event)} event
      */
     onDragLeave: PropTypes.func,
-    
+
     /**
      * The element that is to be considered as frame.
      * This allows customizing the component when the user is dragging files into an area different from the file dropzone.
      * Defaults to window.document.
      */
     frame: PropTypes.element,
-    
+
     /**
      * Called when user drags a file and enters the frame.
      * @param {(DragEvent|Event)} event
      */
     onFrameDragEnter: PropTypes.func,
-    
+
     /**
      * Called when user drags a file and leaves the frame.
      * @param {(DragEvent|Event)} event
@@ -102,22 +102,22 @@ const propTypes = {
      * Classname applied to the container element.
      */
     containerClassName: PropTypes.string,
-    
+
     /**
      * Classname applied to the label element wrapping the dropzone.
      */
     dropZoneClassName: PropTypes.string,
-    
+
     /**
      * Classname applied to the dropzone when user is dragging over it.
      */
     activeDropZoneClassName: PropTypes.string,
-    
+
     /**
      * Classname applied to the dropzone when user is dragging files over the frame.
      */
     dragOverFrameClassName: PropTypes.string,
-    
+
     /**
      * Component that is rendered inside the dropzone.
      */
@@ -270,7 +270,7 @@ const DragDropFileInput = props => {
                     if (customErrors) {
                         errors = errors.concat(customErrors);
                     }
-                    fileRejections.push({ file, errors });
+                    fileRejections.push({ file, errors: errors.filter(Boolean) });
                 }
             });
             if ((!multiple && acceptedFiles.length > 1) || (multiple && maxFiles >= 1 &&  acceptedFiles.length > maxFiles)) {
@@ -283,14 +283,14 @@ const DragDropFileInput = props => {
         }
         resetDragging();
     }, [
-        onChange, 
-        resetDragging, 
-        disabled, 
-        multiple, 
-        name, 
-        maxFiles, 
-        minSize, 
-        maxSize, 
+        onChange,
+        resetDragging,
+        disabled,
+        multiple,
+        name,
+        maxFiles,
+        minSize,
+        maxSize,
         accept,
         validator,
     ]);
@@ -305,16 +305,17 @@ const DragDropFileInput = props => {
         const fileRejections = [];
 
         files.forEach(file => {
+            const [accepted, acceptError] = fileAccepted(file, accept);
             const [sizeMatch, sizeError] = fileMatchSize(file, minSize, maxSize);
             const customErrors = validator ? validator(file) : null;
-            if (sizeMatch && !customErrors) {
+            if (accepted && sizeMatch && !customErrors) {
                 acceptedFiles.push(file);
             } else {
-                let errors = [sizeError];
+                let errors = [acceptError, sizeError];
                 if (customErrors) {
                     errors = errors.concat(customErrors);
                 }
-                fileRejections.push({ file, errors });
+                fileRejections.push({ file, errors: errors.filter(Boolean) });
             }
         });
         if (multiple && maxFiles >= 1 && acceptedFiles.length > maxFiles) {
@@ -349,7 +350,7 @@ const DragDropFileInput = props => {
                 <FileInput
                     className={styles.fileInput}
                     name={name}
-                    multiple={multiple} 
+                    multiple={multiple}
                     onChange={handleChange}
                     accept={accept}
                     disabled={disabled}
@@ -357,7 +358,7 @@ const DragDropFileInput = props => {
                     {...inputProps}
                 />
                 {DropZoneComponent
-                    ? transformToElement(DropZoneComponent) 
+                    ? transformToElement(DropZoneComponent)
                     : 'Drag & drop or click here to add files'
                 }
             </label>

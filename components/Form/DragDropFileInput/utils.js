@@ -31,30 +31,32 @@ export function accepts(file, acceptedFiles) {
 
 export const getInvalidTypeRejectionErr = accept => {
     accept = Array.isArray(accept) && accept.length === 1 ? accept[0] : accept;
-    const messageSuffix = Array.isArray(accept) ? `one of ${accept.join(', ')}` : accept;
+    const messageSuffix = Array.isArray(accept) ? `one of the following: ${accept.join(', ')}` : accept;
     return {
         code: FILE_INVALID_TYPE,
-        message: `File type must be ${messageSuffix}`,
+        message: `Invalid file type. Accepted formats: ${messageSuffix}`,
     };
 };
 
 export const getTooLargeRejectionErr = maxSize => {
+    const formattedSize = maxSize >= 1024 ? `${(maxSize / 1024).toFixed(1)} MB` : `${maxSize} KB`;
     return {
         code: FILE_TOO_LARGE,
-        message: `File is larger than ${maxSize} kilobytes`,
+        message: `File size exceeds the maximum allowed limit of ${formattedSize}. Please select a smaller file.`,
     };
 };
 
 export const getTooSmallRejectionErr = minSize => {
+    const formattedSize = minSize >= 1024 ? `${(minSize / 1024).toFixed(1)} MB` : `${minSize} KB`;
     return {
         code: FILE_TOO_SMALL,
-        message: `File is smaller than ${minSize} kilobytes`,
+        message: `File size is below the minimum required size of ${formattedSize}. Please select a larger file.`,
     };
 };
 
 export const TOO_MANY_FILES_REJECTION = {
     code: TOO_MANY_FILES,
-    message: 'Too many files',
+    message: 'Too many files selected. Please reduce the number of files and try again.',
 };
 
 function isDefined(value) {

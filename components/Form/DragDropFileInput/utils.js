@@ -1,3 +1,5 @@
+import { formatFileSize } from '../../../utils';
+
 export const eventHasFiles = (event) => {
     return event.dataTransfer?.types?.some(type => type === 'Files');
 };
@@ -39,7 +41,7 @@ export const getInvalidTypeRejectionErr = accept => {
 };
 
 export const getTooLargeRejectionErr = maxSize => {
-    const formattedSize = maxSize >= 1024 ? `${(maxSize / 1024).toFixed(1)} MB` : `${maxSize} KB`;
+    const formattedSize = formatFileSize(maxSize * 1000);
     return {
         code: FILE_TOO_LARGE,
         message: `File size exceeds the maximum allowed limit of ${formattedSize}. Please select a smaller file.`,
@@ -47,7 +49,7 @@ export const getTooLargeRejectionErr = maxSize => {
 };
 
 export const getTooSmallRejectionErr = minSize => {
-    const formattedSize = minSize >= 1024 ? `${(minSize / 1024).toFixed(1)} MB` : `${minSize} KB`;
+    const formattedSize = formatFileSize(minSize * 1000);
     return {
         code: FILE_TOO_SMALL,
         message: `File size is below the minimum required size of ${formattedSize}. Please select a larger file.`,
@@ -71,16 +73,16 @@ export function fileAccepted(file, accept) {
 export function fileMatchSize(file, minSize, maxSize) {
     if (isDefined(file.size)) {
         if (isDefined(minSize) && isDefined(maxSize)) {
-            if (file.size > maxSize * 1024) {
+            if (file.size > maxSize * 1000) {
                 return [false, getTooLargeRejectionErr(maxSize)];
             }
-            if (file.size < minSize * 1024) {
+            if (file.size < minSize * 1000) {
                 return [false, getTooSmallRejectionErr(minSize)];
             }
-        } else if (isDefined(minSize) && file.size < minSize * 1024) {
+        } else if (isDefined(minSize) && file.size < minSize * 1000) {
             return [false, getTooSmallRejectionErr(minSize)];
         }
-        else if (isDefined(maxSize) && file.size > maxSize * 1024) {
+        else if (isDefined(maxSize) && file.size > maxSize * 1000) {
             return [false, getTooLargeRejectionErr(maxSize)];
         }
     }

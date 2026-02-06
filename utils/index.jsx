@@ -183,7 +183,7 @@ function setLevelsRecursively(node, currentLevel, {levelKey}) {
 }
 
 export function buildHierarchy(items, {
-    levelKey = 'level', 
+    levelKey = 'level',
     childrenKey = 'children',
     keyExtractor = item => item.id,
     parentKeyExtractor = item => item.parent,
@@ -228,3 +228,18 @@ export function buildHierarchy(items, {
 
     return finalRootNodes;
 }
+
+export const formatFileSize = (bytes, options = {}) => {
+    const { base1000 = true, numFixed = 2 } = options;
+    if (!bytes) {
+        return '0.00 B';
+    }
+    const base = base1000 ? 1000 : 1024;
+    const e = Math.floor(Math.log(bytes) / Math.log(base));
+    const siPrefixes = ['', 'K', 'M', 'G', 'T', 'P', 'E'];
+    const iecPrefixes = ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei'];
+    const prefixes = base1000 ? siPrefixes : iecPrefixes;
+    const prefix = prefixes[e] ?? '';
+    const size = (bytes / Math.pow(base, e)).toFixed(numFixed);
+    return `${size} ${prefix}B`.replace('  ', ' ');
+};

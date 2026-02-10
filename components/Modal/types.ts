@@ -7,10 +7,6 @@ export interface ModalProps {
     closeOnEscape?: boolean;
     closeOnOutsideClick?: boolean;
     disableFocusLock?: boolean;
-    onClose?: (payload?: {outsideClick?: boolean}) => void;
+    onClose?: (payload?: { outsideClick?: boolean; escape?: boolean }) => void;
     isVisible?: boolean;
-};
-
-declare const Modal;
-
-export default Modal;
+}

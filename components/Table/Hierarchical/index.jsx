@@ -287,7 +287,7 @@ function HierarchicalRow({
                 {columns.map((column, columnIndex) => (
                     <td
                         className={cs(styles.data, styles.dataHierarchical, dataClassName)}
-                        key={column.accessor + index}
+                        key={column.accessor + index + columnIndex}
                         style={{
                             '--row-level': `${item[levelKey] ?? 0}rem`,
                             '--row-offset': (item[levelKey] ?? 0) === 0 || hasChildren ? '0rem' : '1rem',

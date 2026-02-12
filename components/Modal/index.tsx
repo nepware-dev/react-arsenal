@@ -79,3 +79,5 @@ const Modal: React.FC<ModalProps> = (props) => {
 };
 
 export default withVisibleCheck(Modal);
+
+export type { ModalProps };

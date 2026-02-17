@@ -1,26 +1,26 @@
 import React from 'react';
 
+import styles from './styles.module.scss';
+import type { TrapProps, TrapState } from './types';
 import Button from '../Button';
 
-import styles from './styles.module.scss';
-
-class Trap extends React.Component {
-    constructor(props) {
+class Trap extends React.Component<TrapProps, TrapState> {
+    constructor(props: TrapProps) {
         super(props);
-        this.state = {error: false};
+        this.state = { error: false, errorInfo: null };
     }
 
-    componentDidCatch(error, errorInfo) {
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         this.props.onCatchError && this.props.onCatchError(error, errorInfo);
-        return this.setState({error, errorInfo});
+        return this.setState({ error, errorInfo });
     }
 
     refreshPage = () => {
-        window.location.reload(false);
-    }
+        window.location.reload();
+    };
 
     render() {
-        if(this.state.error) {
+        if (this.state.error) {
             return (
                 <div className={styles.container}>
                     <h1>Something went wrong.</h1>
@@ -29,9 +29,11 @@ class Trap extends React.Component {
                     <details className={styles.details}>
                         {this.state.error && this.state.error.toString()}
                         <br />
-                        {this.state.errorInfo.componentStack}
+                        {this.state.errorInfo?.componentStack}
                     </details>
-                    <Button className={styles.reloadButton} onClick={this.refreshPage}>Click to reload!</Button>
+                    <Button className={styles.reloadButton} onClick={this.refreshPage}>
+                        Click to reload!
+                    </Button>
                 </div>
             );
         }
@@ -40,3 +42,5 @@ class Trap extends React.Component {
 }
 
 export default Trap;
+
+export type { TrapProps } from './types';

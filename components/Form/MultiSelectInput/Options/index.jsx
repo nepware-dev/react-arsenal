@@ -30,6 +30,50 @@ const defaultProps = {
     selectedItems: [],
 };
 
+const Item = ({
+    item: initialItem,
+    classNameItem,
+    selectedItems,
+    keyExtractor,
+    valueExtractor,
+    isDisabledExtractor,
+    onItemAdd,
+    onItemRemove,
+    onItemStateChange,
+    ItemLabel,
+}) => {
+    const selectedItem = useMemo(() =>
+        selectedItems.find(i => keyExtractor(initialItem) === keyExtractor(i)), [selectedItems, initialItem, keyExtractor]);
+
+    const item = useMemo(() => selectedItem || initialItem, [selectedItem, initialItem]);
+    const selected = useMemo(() => !!selectedItem, [selectedItem]);
+
+    const disabled = useMemo(() => isDisabledExtractor?.(item) || false, [item, isDisabledExtractor]);
+
+    const onClick = useCallback((event) => {
+        event.stopPropagation();
+        selected ? onItemRemove({item}) : onItemAdd({item});
+    }, [item, selected, onItemAdd, onItemRemove]);
+
+    const onStateChange = useCallback(({item}) => {
+        onItemStateChange({item});
+    }, [onItemStateChange]);
+
+    const Label = useMemo(() => {
+        return ItemLabel ? <ItemLabel item={item} selected={selected} disabled={disabled} onStateChange={onStateChange} /> : <div>{valueExtractor(item)}</div>;
+    }, [ItemLabel, item, valueExtractor, selected, disabled, onStateChange]);
+
+    return (
+        <Option
+            className={classNameItem}
+            label={Label}
+            selected={selected}
+            onClick={onClick}
+            disabled={disabled}
+        />
+    );
+};
+
 const Options = ({
     data,
     className,
@@ -44,47 +88,27 @@ const Options = ({
     renderItemLabel: ItemLabel,
     ...otherProps
 }) => {
-    const Item = ({item}) => {
-
-        const selectedItem = useMemo(() =>
-            selectedItems.find(i => keyExtractor(item) === keyExtractor(i)), [selectedItems, item, keyExtractor]);
-
-        item = selectedItem?selectedItem:item;
-        const selected = !!selectedItem;
-
-        const disabled = isDisabledExtractor && isDisabledExtractor(item);
-
-        const onClick = useCallback((event) => {
-            event.stopPropagation();
-            selected ? onItemRemove({item}) : onItemAdd({item});
-        }, [item, selected, onItemAdd, onItemRemove]);
-
-        const onStateChange = useCallback(({item}) => {
-            onItemStateChange({item});
-        }, [item, onItemStateChange]);
-
-        const Label = ItemLabel?
-            <ItemLabel selected={selected} item={item} onStateChange={onStateChange} />:
-            <div>{valueExtractor(item)}</div>;
-
-
-        return (
-            <Option
-                className={classNameItem}
-                label={Label}
-                selected={selected}
-                onClick={onClick}
-                disabled={disabled}
-            />
-        );
-    }
+    const renderItem = useCallback(({item}) => (
+        <Item
+            item={item}
+            selectedItems={selectedItems}
+            keyExtractor={keyExtractor}
+            valueExtractor={valueExtractor}
+            isDisabledExtractor={isDisabledExtractor}
+            onItemAdd={onItemAdd}
+            onItemRemove={onItemRemove}
+            onItemStateChange={onItemStateChange}
+            classNameItem={classNameItem}
+            ItemLabel={ItemLabel}
+        />
+    ), [selectedItems, keyExtractor, valueExtractor, isDisabledExtractor, onItemAdd, onItemRemove, onItemStateChange, classNameItem, ItemLabel]);
 
     return (
         <List
             className={cs(styles.options, className)}
             data={data}
             keyExtractor={keyExtractor}
-            renderItem={Item}
+            renderItem={renderItem}
             {...otherProps}
         />
     );

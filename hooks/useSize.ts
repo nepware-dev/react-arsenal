@@ -5,10 +5,10 @@ interface Size {
     height?: number;
 }
 
-export default (node = window) => {
+export default (node: Window = window, defaultSize?: Size) => {
     const [nodeSize, setNodeSize] = useState<Size>({
-        width: undefined,
-        height: undefined,
+        width: defaultSize?.width,
+        height: defaultSize?.height,
     });
 
     useEffect(() => {

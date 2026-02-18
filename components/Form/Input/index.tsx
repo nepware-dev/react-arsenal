@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import PropTypes from 'prop-types';
 
 import cs from '../../../cs';
 import {isArray} from '../../../utils';
@@ -7,53 +6,40 @@ import {isArray} from '../../../utils';
 import Localize from '../../I18n/Localize';
 
 import styles from './styles.module.scss';
+import { InputProps } from './types';
 
 const noop = () => {};
 
-const propTypes = {
-    className: PropTypes.string,
-    value: PropTypes.string,
-    required: PropTypes.bool,
-    disabled: PropTypes.bool,
-    inputRef: PropTypes.shape({ 
-        current: PropTypes.elementType 
-    }),
-    onChange: PropTypes.func,
-    errorMessage: PropTypes.any,
-    warning: PropTypes.string,
-    info: PropTypes.string,
-};
-
-const defaultProps = {
-    className: '',
-    required: false,
-    disabled: false,
-    onChange: noop,
-};
-
-const getErrorMessage = (msg) => {
+const getErrorMessage = (msg: InputProps['errorMessage']): string => {
     if(isArray(msg)) {
         return msg[0];
     }
     return msg;
 };
 
-const Input = ({
-    containerClassName, 
-    className, 
+interface MetaState {
+    invalid: boolean;
+    touched: boolean;
+    error: string | null;
+    warning: string | null;
+}
+
+const Input: React.FC<InputProps> = ({
+    containerClassName,
+    className = '',
     inputRef,
-    disabled,
-    required,
+    disabled = false,
+    required = false,
     errorMessage,
     showRequired,
     warning,
     info,
     textClassName,
-    onChange,
+    onChange = noop,
     onInvalid,
     ...otherProps
 }) => {
-    const [meta, setMeta] = useState({
+    const [meta, setMeta] = useState<MetaState>({
         invalid: false,
         touched: false,
         error: null,
@@ -85,7 +71,7 @@ const Input = ({
         return [React.Fragment, {}];
     }, [containerClassName]);
 
-    const handleChange = useCallback((event) => {
+    const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         setMeta(prevMeta => ({
             ...prevMeta,
             error: null,
@@ -96,9 +82,9 @@ const Input = ({
         onChange(event.target);
     }, [onChange, required]);
 
-    const handleInvalid = useCallback((e) => {
+    const handleInvalid = useCallback((e: React.FormEvent<HTMLInputElement>) => {
         setMeta(prevMeta => {
-            if(required && !e.target.value) {
+            if(required && !e.currentTarget.value) {
                 return {...prevMeta, warning: 'Required', error: null};
             }
             return {...prevMeta, invalid: true, error: 'Invalid'};
@@ -145,7 +131,6 @@ const Input = ({
     );
 };
 
-Input.propTypes = propTypes;
-Input.defaultProps = defaultProps;
-
 export default Input;
+
+export * from './types';

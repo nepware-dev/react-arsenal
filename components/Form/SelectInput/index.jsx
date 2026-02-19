@@ -35,6 +35,7 @@ const propTypes = {
     keyExtractor: PropTypes.func,
     isDisabledExtractor: PropTypes.func,
     valueExtractor: PropTypes.func,
+    renderDisplayLabel: PropTypes.func,
     searchExtractor: PropTypes.func,
     /**
      * Anchor position the popup in vertical and horizontal position in respect to the anchor
@@ -294,6 +295,7 @@ export default class Select extends PureComponent {
             placeholder,
             keyExtractor,
             valueExtractor,
+            renderDisplayLabel,
             isDisabledExtractor,
             optionsDirection,
             LoadingComponent,
@@ -352,7 +354,7 @@ export default class Select extends PureComponent {
                                 <div className={styles.placeholder}>{placeholder}</div>
                             )}
                             {showValue && (
-                                <div className={styles.value}>{valueExtractor(selectedItem)}</div>
+                                <div className={styles.value}>{renderDisplayLabel ? renderDisplayLabel(selectedItem) : valueExtractor(selectedItem)}</div>
                             )}
                         </div>
                         <div className={cs(styles.selectIndicator, 'select-indicator')}>

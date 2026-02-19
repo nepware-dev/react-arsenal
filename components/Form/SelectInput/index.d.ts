@@ -26,6 +26,7 @@ export interface SelectInputProps<T, V> {
     options: T[];
     keyExtractor: KeyExtractor<T>;
     valueExtractor: ValueExtractor<T, V>;
+    renderDisplayLabel?: (item: T) => React.ReactNode | string;
     searchExtractor?: SearchExtractor<T>;
     isDisabledExtractor?: IsDisabledExtractor<T>;
     onChange?: SelectInputChangeCallback<T>;

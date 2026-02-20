@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 
-export default (node=window) => {
-    const [nodeSize, setNodeSize] = useState({
+interface Size {
+    width?: number;
+    height?: number;
+}
+
+export default (node = window) => {
+    const [nodeSize, setNodeSize] = useState<Size>({
         width: undefined,
         height: undefined,
     });
@@ -17,7 +22,6 @@ export default (node=window) => {
         node.addEventListener('resize', handleResize);
         handleResize();
         return () => node.removeEventListener('resize', handleResize);
-
     }, [!!node]);
 
     return nodeSize;

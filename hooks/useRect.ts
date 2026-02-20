@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 
-export default (node) => {
-    const [rect, setRect] = useState({});
+export default (node: HTMLElement | null) => {
+    const [rect, setRect] = useState<DOMRect>({} as DOMRect);
 
-    const calculate = () => setRect(node? node.getBoundingClientRect() : {});
+    const calculate = () => setRect(node ? node.getBoundingClientRect() : ({} as DOMRect));
 
     useEffect(() => {
         calculate();

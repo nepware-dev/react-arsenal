@@ -39,6 +39,7 @@ export interface SelectInputProps<T, V> {
     FilterEmptyComponent?: React.ReactNode;
     EmptyComponent?: React.ReactNode;
     FooterComponent?: React.ReactNode;
+    onOptionsEndReach?: () => void;
 }
 
 declare const SelectInput;

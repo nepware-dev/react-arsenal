@@ -99,14 +99,18 @@ const List = <T,>(props: ListProps<T>) => {
     }, [_EmptyComponent]);
 
     const handleRenderList = useCallback(() => {
-        if (loading) {
-            return <LoadingComponent key="loading" />;
-        }
         if (data.length === 0) {
+            if (loading) {
+                return <LoadingComponent key="loading" />;
+            }
             return <EmptyComponent key="empty" />;
         }
-        return data.map(renderItem);
-    }, [loading, EmptyComponent, LoadingComponent, data, renderItem]);
+        const renderedList = data.map(renderItem);
+        if (loading && onEndReached) {
+            renderedList.push(<LoadingComponent key="loading" />);
+        }
+        return renderedList;
+    }, [loading, EmptyComponent, LoadingComponent, data, renderItem, onEndReached]);
 
     const [ContainerComponent, containerProps] = useMemo(() => {
         if (contentContainerClassName) {

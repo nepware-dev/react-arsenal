@@ -89,7 +89,11 @@ const propTypes = {
         PropTypes.element,
         PropTypes.elementType
     ]),
-
+    /*
+     * Callback function that is called when the end of options list is reached while scrolling
+     * Useful for implementing infinite loading
+     */
+    onOptionsEndReach: PropTypes.func,
 };
 
 const MultiSelect = ({
@@ -123,6 +127,7 @@ const MultiSelect = ({
     FooterComponent,
     EmptyComponent,
     showRequired,
+    onOptionsEndReach,
 }) => {
 
     const [expanded, setExpanded] = useState(false);
@@ -279,6 +284,7 @@ const MultiSelect = ({
                         LoadingComponent={LoadingComponent}
                         EmptyComponent={searchValue?FilterEmptyComponent:EmptyComponent}
                         FooterComponent={FooterComponent}
+                        onEndReached={onOptionsEndReach}
                     />
                 </Popup>
             </div>

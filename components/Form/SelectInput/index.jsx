@@ -88,6 +88,11 @@ const propTypes = {
         PropTypes.element,
         PropTypes.elementType
     ]),
+    /*
+     * Callback function that is called when the end of options list is reached while scrolling
+     * Useful for implementing infinite loading
+     */
+    onOptionsEndReach: PropTypes.func,
 };
 
 const defaultProps = {
@@ -302,6 +307,7 @@ export default class Select extends PureComponent {
             FilterEmptyComponent,
             EmptyComponent,
             FooterComponent,
+            onOptionsEndReach,
         } = this.props;
 
         const {expanded, searchValue, selectedItem, focusedItem, options} = this.state;
@@ -397,6 +403,7 @@ export default class Select extends PureComponent {
                                 LoadingComponent={LoadingComponent}
                                 EmptyComponent={searchValue ? FilterEmptyComponent : EmptyComponent}
                                 FooterComponent={FooterComponent}
+                                onEndReached={onOptionsEndReach}
                             />
                         </div>
                     </Popup>

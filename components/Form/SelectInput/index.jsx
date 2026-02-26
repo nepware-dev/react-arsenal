@@ -254,8 +254,10 @@ export default class Select extends PureComponent {
     hideOption = () => {
         this.setState({
             expanded: false,
-            searchValue: '',
         });
+        if (this.state.searchValue !== '') {
+            this.handleInputChange({value: ''});
+        }
     };
 
     filterOptions = (searchValue) => {

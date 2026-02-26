@@ -172,8 +172,11 @@ const MultiSelect = ({
 
     const handleCaretClick = useCallback((event) => {
         event.stopPropagation();
+        if (expanded && searchValue !== '') {
+            handleSearchValueChange({value: ''});
+        }
         setExpanded(!expanded);
-    }, [expanded]);
+    }, [expanded, searchValue]);
 
     const handleSearchValueChange = useCallback(({value}) => {
         onInputChange && onInputChange(value);

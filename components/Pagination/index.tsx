@@ -206,7 +206,7 @@ const Pagination: React.FC<PaginationProps> = (props) => {
 
 export default React.memo(Pagination);
 
-export type { PaginationProps } from './types';
+export type { PaginationProps, PageChangeCallback } from './types';
 
 function PageItem({
     page,

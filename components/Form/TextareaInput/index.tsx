@@ -1,58 +1,35 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import PropTypes from 'prop-types';
 
+import styles from './styles.module.scss';
+import type { TextareaInputProps, TextareaMeta } from './types';
+import Localize from '../../I18n/Localize';
 import cs from '../../../cs';
 import { isArray } from '../../../utils';
 
-import Localize from '../../I18n/Localize';
-
-import styles from './styles.module.scss';
-
 const noop = () => {};
 
-const propTypes = {
-    className: PropTypes.string,
-    value: PropTypes.string,
-    required: PropTypes.bool,
-    disabled: PropTypes.bool,
-    inputRef: PropTypes.shape({
-        current: PropTypes.elementType
-    }),
-    onChange: PropTypes.func,
-    errorMessage: PropTypes.any,
-    warning: PropTypes.string,
-    info: PropTypes.string,
-};
-
-const defaultProps = {
-    className: '',
-    required: false,
-    disabled: false,
-    onChange: noop,
-};
-
-const TextareaInput = (props) => {
+const TextareaInput: React.FC<TextareaInputProps> = (props) => {
     const {
         containerClassName,
-        className,
+        className = '',
         inputRef,
-        disabled,
-        required,
+        disabled = false,
+        required = false,
         errorMessage,
         showRequired,
         warning,
         info,
         textClassName,
-        onChange,
+        onChange = noop,
         onInvalid,
         ...otherProps
     } = props;
 
-    const [meta, setMeta] = useState({
+    const [meta, setMeta] = useState<TextareaMeta>({
         invalid: false,
         touched: false,
         error: null,
-        warning: warning
+        warning: warning,
     });
 
     useEffect(() => {
@@ -62,62 +39,66 @@ const TextareaInput = (props) => {
         if (errorMessage) {
             setMeta((prevMeta) => ({
                 ...prevMeta,
-                error: isArray(errorMessage) ? errorMessage[0] : errorMessage
+                error: isArray(errorMessage) ? errorMessage[0] : (errorMessage as string),
             }));
         }
     }, [showRequired, errorMessage]);
 
     useEffect(() => {
-        if(otherProps.value && meta.warning === 'Required') {
-            setMeta(prevMeta => ({...prevMeta, warning: null}));
+        if (otherProps.value && meta.warning === 'Required') {
+            setMeta((prevMeta) => ({ ...prevMeta, warning: null }));
         }
     }, [otherProps.value]);
 
     const [Wrapper, wrapperProps] = useMemo(() => {
-        if(containerClassName) {
-            return ['div', {className: containerClassName}];
+        if (containerClassName) {
+            return ['div', { className: containerClassName }];
         }
         return [React.Fragment, {}];
     }, [containerClassName]);
 
-
     const handleChange = useCallback(
-        (event) => {
+        (event: React.ChangeEvent<HTMLTextAreaElement>) => {
             setMeta((prevMeta) => ({
                 ...prevMeta,
                 error: null,
                 warning: required && !event.target.value ? 'Required' : null,
                 invalid: false,
-                touched: true
+                touched: true,
             }));
             onChange(event.target);
         },
-        [onChange, required]
+        [onChange, required],
     );
 
-    const handleInvalid = useCallback((e) => {
-        setMeta(prevMeta => {
-            if(required && !e.target.value) {
-                return {...prevMeta, warning: 'Required', error: null};
-            }
-            return {...prevMeta, invalid: true, error: 'Invalid'};
-        });
-        onInvalid?.(e);
-    }, [meta, onInvalid, required]);
+    const handleInvalid = useCallback(
+        (e: React.FormEvent<HTMLTextAreaElement>) => {
+            setMeta((prevMeta) => {
+                if (required && !e.currentTarget.value) {
+                    return { ...prevMeta, warning: 'Required', error: null };
+                }
+                return { ...prevMeta, invalid: true, error: 'Invalid' };
+            });
+            onInvalid?.(e);
+        },
+        [meta, onInvalid, required],
+    );
 
     return (
         <Wrapper {...wrapperProps}>
             <textarea
+                ref={inputRef}
                 className={cs(className, styles.textarea, {
                     [styles.textareaWarning]: meta.warning,
                     [styles.textareaError]: meta.error,
                     required,
-                    disabled
+                    disabled,
                 })}
                 rows={4}
                 onChange={handleChange}
                 onInvalid={handleInvalid}
                 required={required}
+                disabled={disabled}
                 {...otherProps}
             />
             {!!meta.warning && (
@@ -138,8 +119,5 @@ const TextareaInput = (props) => {
         </Wrapper>
     );
 };
-
-TextareaInput.propTypes = propTypes;
-TextareaInput.defaultProps = defaultProps;
 
 export default TextareaInput;

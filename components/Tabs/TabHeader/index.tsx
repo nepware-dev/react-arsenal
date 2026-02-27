@@ -1,26 +1,30 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { useTabContext } from '../TabContext';
 
-import cs from '../../../cs';
 import styles from './styles.module.scss';
+import type { TabHeaderProps } from '../types';
+import { useTabContext } from '../TabContext';
+import cs from '../../../cs';
 
-const TabHeader = (props) => {
+const TabHeader: React.FC<TabHeaderProps> = (props) => {
     const {
         title,
         renderHeader,
         index,
         className,
-        activeClassName,
+        activeClassName = '',
         active,
         selectTab,
         ...childProps
     } = useTabContext(props);
 
-    const tabRef = useRef(null);
+    const tabRef = useRef<HTMLDivElement>(null);
 
-    const handleClick = useCallback((e) => {
-        selectTab && selectTab(e, index);
-    }, [index, selectTab]);
+    const handleClick = useCallback(
+        (e: React.MouseEvent<HTMLDivElement>) => {
+            selectTab && selectTab(e, index);
+        },
+        [index, selectTab],
+    );
 
     useEffect(() => {
         if (active && tabRef.current && tabRef.current.scrollIntoView) {
@@ -43,7 +47,7 @@ const TabHeader = (props) => {
         <div
             ref={tabRef}
             className={cs(styles.headerItem, className, {
-                [activeClassName]: active
+                [activeClassName]: active,
             })}
             onClick={handleClick}
             {...childProps}

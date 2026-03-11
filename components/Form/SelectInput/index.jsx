@@ -235,6 +235,11 @@ export default class Select extends PureComponent {
     };
 
     handleSelectFocus = (event) => {
+        // Skip focus events where relatedTarget is null — this happens when the previously
+        // focused element was removed from the DOM (e.g. FocusLock returnFocus after a Popup unmounts).
+        if (event.relatedTarget === null) {
+            return;
+        }
         if (!this.props.disabled) {
             event.stopPropagation();
             this.setState({expanded: true, locked: true});

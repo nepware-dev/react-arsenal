@@ -63,6 +63,7 @@ export interface MultiSelectInputProps<T, V> {
     FilterEmptyComponent?: React.ReactNode;
     EmptyComponent?: React.ReactNode;
     onOptionsEndReach?: () => void;
+    onEndReachedThreshold?: number;
 }
 
 declare const MultiSelectInput;

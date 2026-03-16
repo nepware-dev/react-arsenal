@@ -94,6 +94,10 @@ const propTypes = {
      * Useful for implementing infinite loading
      */
     onOptionsEndReach: PropTypes.func,
+    /**
+     * Threshold in pixels for calling onOptionsEndReach before the end of the list is reached
+     */
+    onEndReachedThreshold: PropTypes.number,
 };
 
 const MultiSelect = ({
@@ -128,6 +132,7 @@ const MultiSelect = ({
     EmptyComponent,
     showRequired,
     onOptionsEndReach,
+    onEndReachedThreshold,
 }) => {
 
     const [expanded, setExpanded] = useState(false);
@@ -288,6 +293,7 @@ const MultiSelect = ({
                         EmptyComponent={searchValue?FilterEmptyComponent:EmptyComponent}
                         FooterComponent={FooterComponent}
                         onEndReached={onOptionsEndReach}
+                        onEndReachedThreshold={onEndReachedThreshold}
                     />
                 </Popup>
             </div>

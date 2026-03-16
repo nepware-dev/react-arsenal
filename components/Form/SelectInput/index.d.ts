@@ -40,6 +40,7 @@ export interface SelectInputProps<T, V> {
     EmptyComponent?: React.ReactNode;
     FooterComponent?: React.ReactNode;
     onOptionsEndReach?: () => void;
+    onEndReachedThreshold?: number;
 }
 
 declare const SelectInput;

@@ -93,6 +93,10 @@ const propTypes = {
      * Useful for implementing infinite loading
      */
     onOptionsEndReach: PropTypes.func,
+    /**
+     * Threshold in pixels for calling onOptionsEndReach before the end of the list is reached
+     */
+    onEndReachedThreshold: PropTypes.number,
 };
 
 const defaultProps = {
@@ -315,6 +319,7 @@ export default class Select extends PureComponent {
             EmptyComponent,
             FooterComponent,
             onOptionsEndReach,
+            onEndReachedThreshold,
         } = this.props;
 
         const {expanded, searchValue, selectedItem, focusedItem, options} = this.state;
@@ -411,6 +416,7 @@ export default class Select extends PureComponent {
                                 EmptyComponent={searchValue ? FilterEmptyComponent : EmptyComponent}
                                 FooterComponent={FooterComponent}
                                 onEndReached={onOptionsEndReach}
+                                onEndReachedThreshold={onEndReachedThreshold}
                             />
                         </div>
                     </Popup>

@@ -11,6 +11,7 @@ export interface TextareaInputProps extends Omit<
     showRequired?: boolean;
     onChange?: (target: HTMLTextAreaElement) => void;
     onInvalid?: (event: React.FormEvent<HTMLTextAreaElement>) => void;
+    ref?: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 export interface TextareaMeta {

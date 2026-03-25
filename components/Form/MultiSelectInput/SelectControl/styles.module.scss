@@ -31,6 +31,8 @@
     }
 
     .selectIndicator {
+        display: flex;
+        align-items: center;
         margin-left: 1em;
 
         .clear,

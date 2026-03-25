@@ -1,22 +1,21 @@
 import * as React from 'react';
 
-import type {KeyExtractor, ListRenderItem} from '../../List';
-import type {OriginPosition} from '../../Popup';
-import { IsDisabledExtractor } from '../SelectInput';
+import type { KeyExtractor, ListRenderItem } from '../../List';
+import type { OriginPosition } from '../../Popup';
+import { type IsDisabledExtractor } from '../SelectInput/types';
 
-
-export type {KeyExtractor, ListRenderItem};
-export type {OriginPosition};
+export type { KeyExtractor, ListRenderItem };
+export type { OriginPosition };
 
 export type ValueExtractor<T, V> = (item: T) => V;
 export type SearchExtractor<T> = (item: T) => string;
 
-export type MultiSelectInputChangeCallback<T> = (payload: {name?: string, value: T[]}) => void;
+export type MultiSelectInputChangeCallback<T> = (payload: { name?: string; value: T[] }) => void;
 
 export type RenderOptionLabelCallback<T> = (props: {
     selected?: boolean;
     item: T;
-    onStateChange?: (payload: {item: T}) => void;
+    onStateChange?: (payload: { item: T }) => void;
 }) => React.ReactNode;
 
 export type RenderControlCallback<T, V> = (props: {
@@ -25,14 +24,14 @@ export type RenderControlCallback<T, V> = (props: {
     loading?: boolean;
     expanded?: boolean;
     editable?: boolean;
-    handleCaretClick?: React.MouseEventHandler<HTMLElement>;
+    handleCaretClick?: (event: React.MouseEvent<HTMLDivElement | SVGElement>) => void;
     selectedItems: T[];
     keyExtractor: KeyExtractor<T>;
-    valueExtractor: ValueExtractor<T,V>;
-    onItemRemove: (payload: {item: T}) => void;
+    valueExtractor: ValueExtractor<T, V>;
+    onItemRemove: (payload: { item: T }) => void;
 }) => React.ReactNode;
 
-export interface MultiSelectInputProps<T, V> {
+export interface MultiSelectInputProps<T, V extends React.ReactNode> {
     name?: string;
     className?: string;
     controlClassName?: string;
@@ -43,13 +42,13 @@ export interface MultiSelectInputProps<T, V> {
     disabled?: boolean;
     loading?: boolean;
     value?: T[];
-    defaultValue?: T;
+    defaultValue?: T[];
     placeholder?: string;
     options: T[];
     keyExtractor: KeyExtractor<T>;
     valueExtractor: ValueExtractor<T, V>;
     searchExtractor?: SearchExtractor<T>;
-    isDisabledExtractor: IsDisabledExtractor<T>;
+    isDisabledExtractor?: IsDisabledExtractor<T>;
     anchorOrigin?: OriginPosition;
     transformOrigin?: OriginPosition;
     onChange?: MultiSelectInputChangeCallback<T>;
@@ -62,10 +61,8 @@ export interface MultiSelectInputProps<T, V> {
     LoadingComponent?: React.ReactNode;
     FilterEmptyComponent?: React.ReactNode;
     EmptyComponent?: React.ReactNode;
+    FooterComponent?: React.ReactNode;
+    showRequired?: boolean;
     onOptionsEndReach?: () => void;
     onEndReachedThreshold?: number;
 }
-
-declare const MultiSelectInput;
-
-export default MultiSelectInput;

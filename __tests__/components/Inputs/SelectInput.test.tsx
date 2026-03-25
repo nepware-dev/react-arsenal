@@ -1,0 +1,205 @@
+import { act, render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+import SelectInput, { type SelectInputProps } from '../../../components/Form/SelectInput';
+import styles from '../../../components/Form/SelectInput/styles.module.scss';
+
+vi.mock('../../../components/Popup', () => ({
+    default: ({ isVisible, children }: { isVisible: boolean; children: React.ReactNode }) =>
+        isVisible ? <div data-testid="popup">{children}</div> : null,
+}));
+
+interface OptionType {
+    id: string;
+    label: string;
+}
+
+const OPTIONS: OptionType[] = [
+    { id: '1', label: 'Option A' },
+    { id: '2', label: 'Option B' },
+    { id: '3', label: 'Option C' },
+];
+
+const keyExtractor = (item: OptionType) => item.id;
+const valueExtractor = (item: OptionType) => item.label;
+
+describe('SelectInput', () => {
+    const onChange = vi.fn();
+
+    beforeEach(() => {
+        onChange.mockClear();
+    });
+
+    const renderSelect = (props: Partial<SelectInputProps<OptionType, string>> = {}) =>
+        render(
+            <SelectInput
+                options={OPTIONS}
+                keyExtractor={keyExtractor}
+                valueExtractor={valueExtractor}
+                onChange={onChange}
+                {...props}
+            />,
+        );
+
+    describe('rendering & configurations', () => {
+        it('renders the placeholder, search inputs, and errors conditionally based on props', () => {
+            const { container, rerender } = renderSelect({ placeholder: 'Choose one' });
+            expect(screen.getByText('Choose one')).toBeInTheDocument();
+            expect(container.querySelector(`.${styles.input}`)).toBeInTheDocument();
+
+            rerender(
+                <SelectInput
+                    options={OPTIONS}
+                    keyExtractor={keyExtractor}
+                    valueExtractor={valueExtractor}
+                    onChange={onChange}
+                    disabled
+                    errorMessage="This field is required"
+                />,
+            );
+            expect(container.querySelector(`.${styles.disabled}`)).toBeInTheDocument();
+            expect(screen.getByText('This field is required')).toBeInTheDocument();
+        });
+
+        it('renders the selected value or custom label template', () => {
+            const { rerender } = renderSelect({ value: OPTIONS[1] });
+            expect(screen.getByText('Option B')).toBeInTheDocument();
+
+            rerender(
+                <SelectInput
+                    options={OPTIONS}
+                    keyExtractor={keyExtractor}
+                    valueExtractor={valueExtractor}
+                    onChange={onChange}
+                    value={OPTIONS[0]}
+                    renderDisplayLabel={(item) => (
+                        <span data-testid="custom-label">{item.label} (custom)</span>
+                    )}
+                />,
+            );
+            expect(screen.getByTestId('custom-label')).toBeInTheDocument();
+        });
+    });
+
+    describe('interactivity (open / close / select)', () => {
+        it('opens the popup, allows selection, and sends the correct data to onChange', async () => {
+            const { container } = renderSelect({ name: 'mySelect' });
+            const wrapper = container.querySelector(`.${styles.selectContainer}`) as HTMLElement;
+
+            await act(async () => {
+                fireEvent.click(wrapper);
+            });
+            expect(await screen.findByText('Option A')).toBeInTheDocument();
+
+            const optionA = screen.getByText('Option A');
+            await act(async () => {
+                fireEvent.click(optionA);
+            });
+
+            expect(onChange).toHaveBeenCalledWith({ name: 'mySelect', option: OPTIONS[0] });
+        });
+
+        it('closes the open popup when the Escape key is pressed', async () => {
+            const { container } = renderSelect();
+            const wrapper = container.querySelector(`.${styles.selectContainer}`) as HTMLElement;
+
+            await act(async () => {
+                fireEvent.click(wrapper);
+            });
+            expect(await screen.findByText('Option B')).toBeInTheDocument();
+
+            await act(async () => {
+                fireEvent.keyDown(wrapper, { key: 'Escape' });
+            });
+            expect(screen.queryByText('Option B')).not.toBeInTheDocument();
+        });
+
+        it('prevents interaction and removes tab index when disabled', () => {
+            const { container } = renderSelect({ disabled: true });
+            const wrapper = container.querySelector(`.${styles.selectContainer}`) as HTMLElement;
+
+            expect(wrapper).toHaveClass(styles.disabled);
+            expect(wrapper).not.toHaveAttribute('tabindex');
+        });
+    });
+
+    describe('clear functionality', () => {
+        it('manages clear visibility and triggers onChange with null', () => {
+            const { container } = renderSelect({ value: OPTIONS[0], name: 'mySelect' });
+            const clearIcon = container.querySelector(`.${styles.clear}`) as HTMLElement;
+            expect(clearIcon).toBeInTheDocument();
+
+            fireEvent.click(clearIcon);
+            expect(onChange).toHaveBeenCalledWith({ name: 'mySelect', option: null });
+        });
+    });
+
+    describe('search / filtering', () => {
+        it('fires callback when typing but does not filter options internally when onInputChange is provided', async () => {
+            const onInputChange = vi.fn();
+            const { container } = renderSelect({ onInputChange });
+
+            const wrapper = container.querySelector(`.${styles.selectContainer}`);
+            if (!wrapper) throw new Error('Select container not found');
+            await act(async () => {
+                fireEvent.click(wrapper);
+            });
+
+            const searchInput = container.querySelector('input');
+            if (!searchInput) throw new Error('Search input not found');
+            await act(async () => {
+                fireEvent.change(searchInput, { target: { value: 'B' } });
+            });
+
+            expect(onInputChange).toHaveBeenCalledWith('B');
+            expect(await screen.findByText('Option B')).toBeInTheDocument();
+            expect(screen.queryByText('Option A')).toBeInTheDocument();
+        });
+
+        it('internally filters dropdown list items when typing without onInputChange', async () => {
+            const { container } = renderSelect();
+
+            const wrapper = container.querySelector(`.${styles.selectContainer}`);
+            if (!wrapper) throw new Error('Select container not found');
+            await act(async () => {
+                fireEvent.click(wrapper);
+            });
+
+            const searchInput = container.querySelector('input');
+            if (!searchInput) throw new Error('Search input not found');
+            await act(async () => {
+                fireEvent.change(searchInput, { target: { value: 'B' } });
+            });
+
+            expect(await screen.findByText('Option B')).toBeInTheDocument();
+            expect(screen.queryByText('Option A')).not.toBeInTheDocument();
+        });
+    });
+
+    describe('loading state', () => {
+        it('shows spinner and hides clear icon during loading states', () => {
+            const { container } = renderSelect({ value: OPTIONS[0], loading: true });
+            expect(container.querySelector(`.${styles.loading}`)).toBeInTheDocument();
+            expect(container.querySelector(`.${styles.clear}`)).not.toBeInTheDocument();
+        });
+    });
+
+    describe('validation updates', () => {
+        it('shows warning text upon dynamic changes or clearing required selections', () => {
+            const { rerender } = renderSelect({ showRequired: false });
+            expect(screen.queryByText('Required')).not.toBeInTheDocument();
+
+            rerender(
+                <SelectInput
+                    options={OPTIONS}
+                    keyExtractor={keyExtractor}
+                    valueExtractor={valueExtractor}
+                    onChange={onChange}
+                    showRequired={true}
+                />,
+            );
+            expect(screen.getByText('Required')).toBeInTheDocument();
+        });
+    });
+});

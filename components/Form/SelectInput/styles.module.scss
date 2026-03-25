@@ -78,7 +78,9 @@
 .popup {
     .selectOptionsWrapper {
         background-color: var(--color-background);
-        box-shadow: rgba(0, 0, 0, 0.1) 0 0 0 1px, rgba(0, 0, 0, 0.1) 0 4px 11px;
+        box-shadow:
+            rgba(0, 0, 0, 0.1) 0 0 0 1px,
+            rgba(0, 0, 0, 0.1) 0 4px 11px;
         border-radius: var(--border-radius-small);
 
         .selectOptions {

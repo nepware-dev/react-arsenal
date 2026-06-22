@@ -1,19 +1,17 @@
-import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
 
-import {FiChevronDown} from 'react-icons/fi';
-import {FaSpinner} from 'react-icons/fa';
-import {IoMdClose} from 'react-icons/io';
-
-import Input from '../Input';
-import Popup from '../../Popup';
-import Options from './Options';
-import cs from '../../../cs';
-import {isArray} from '../../../utils';
-
-import Localize from '../../I18n/Localize';
+import { FaSpinner } from 'react-icons/fa';
+import { FiChevronDown } from 'react-icons/fi';
+import { IoMdClose } from 'react-icons/io';
 
 import styles from './styles.module.scss';
+import Options from './Options';
+import Input from '../Input';
+import Localize from '../../I18n/Localize';
+import Popup from '../../Popup';
+import cs from '../../../cs';
+import { isArray } from '../../../utils';
 
 const noop = () => {};
 
@@ -320,6 +318,7 @@ export default class Select extends PureComponent {
             FooterComponent,
             onOptionsEndReach,
             onEndReachedThreshold,
+            portalContainer,
         } = this.props;
 
         const {expanded, searchValue, selectedItem, focusedItem, options} = this.state;
@@ -362,6 +361,7 @@ export default class Select extends PureComponent {
                         <div className={cs(styles.selectValue, 'select-value')}>
                             {searchable && (
                                 <Input
+                                    disabled={disabled}
                                     inputRef={this.inputRef}
                                     value={searchValue}
                                     className={styles.input}
@@ -398,6 +398,7 @@ export default class Select extends PureComponent {
                         anchorOrigin={optionsDirection==='up' ? 'top right' : anchorOrigin}
                         transformOrigin={optionsDirection==='up' ? 'bottom right' : transformOrigin}
                         onClose={this.hideOption}
+                        portalContainer={portalContainer}
                     >
                         <div className={cs(styles.selectOptionsWrapper, optionsWrapperClassName)}>
                             <Options

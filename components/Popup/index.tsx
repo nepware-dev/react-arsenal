@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import FocusLock from 'react-focus-lock';
 
 import styles from './styles.module.scss';
@@ -20,6 +20,7 @@ function Popup<T extends HTMLElement>(props: PopupProps<T>) {
         closeOnOutsideClick = true,
         disableFocusLock = false,
         onClose = noop,
+        portalContainer,
     } = props;
 
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -50,16 +51,23 @@ function Popup<T extends HTMLElement>(props: PopupProps<T>) {
             const [anchorVertical, anchorHorizontal] = anchorOrigin.trim().split(' ');
             const [transformVertical, transformHorizontal] = transformOrigin.trim().split(' ');
 
+            const container = portalContainer ?? document.body;
+            const isDocumentBody = container === document.body;
+            const containerRect = container.getBoundingClientRect();
+
+            const scrollTop = isDocumentBody ? window.pageYOffset : container.scrollTop - containerRect.top;
+            const scrollLeft = isDocumentBody ? window.pageXOffset : container.scrollLeft - containerRect.left;
+
             const topAnchor = {
-                top: rect.top,
-                center: (rect.top + rect.bottom) / 2,
-                bottom: rect.bottom,
+                top: rect.top + scrollTop,
+                center: (rect.top + rect.bottom) / 2 + scrollTop,
+                bottom: rect.bottom + scrollTop,
             };
 
             const leftAnchor = {
-                left: rect.left,
-                center: (rect.left + rect.right) / 2,
-                right: rect.right,
+                left: rect.left + scrollLeft,
+                center: (rect.left + rect.right) / 2 + scrollLeft,
+                right: rect.right + scrollLeft,
             };
 
             const vertTransform = {
@@ -75,12 +83,12 @@ function Popup<T extends HTMLElement>(props: PopupProps<T>) {
             };
 
             return {
-                top: topAnchor[anchorVertical as keyof typeof topAnchor] + window.pageYOffset,
-                left: leftAnchor[anchorHorizontal as keyof typeof leftAnchor] + window.pageXOffset,
+                top: topAnchor[anchorVertical as keyof typeof topAnchor],
+                left: leftAnchor[anchorHorizontal as keyof typeof leftAnchor],
                 transform: `translate(${horiTranform[transformHorizontal as keyof typeof horiTranform]}, ${vertTransform[transformVertical as keyof typeof vertTransform]})`,
             };
         },
-        [anchorOrigin, transformOrigin],
+        [anchorOrigin, transformOrigin, portalContainer],
     );
 
     useEffect(() => {
@@ -97,7 +105,7 @@ function Popup<T extends HTMLElement>(props: PopupProps<T>) {
     }, [anchorRect, transformWrapperRect]);
 
     return (
-        <Portal>
+        <Portal container={portalContainer}>
             <FocusLock disabled={disableFocusLock} returnFocus>
                 {wrapperRect && (
                     <div ref={wrapperRef} className={className} style={wrapperRect}>

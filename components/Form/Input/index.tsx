@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import cs from '../../../cs';
-import {isArray} from '../../../utils';
+import { isArray } from '../../../utils';
 
 import Localize from '../../I18n/Localize';
 
@@ -134,3 +134,4 @@ const Input: React.FC<InputProps> = ({
 export default Input;
 
 export * from './types';
+

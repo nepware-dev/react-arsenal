@@ -48,4 +48,9 @@ export interface PopupProps<T extends HTMLElement> {
      * Function to run when close is called
      */
     onClose?: (event: MouseEvent) => void;
+    /**
+     * Container element to render the popup into. By default,
+     * it will render into the body of the document
+    */
+    portalContainer?: Element;
 }

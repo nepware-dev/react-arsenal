@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import type {KeyExtractor} from '../../List';
-export type {KeyExtractor};
+import type { KeyExtractor } from '../../List';
+export type { KeyExtractor };
 
 export type ValueExtractor<T, V> = (item: T) => V;
 export type SearchExtractor<T> = (item: T) => string;
@@ -41,6 +41,7 @@ export interface SelectInputProps<T, V> {
     FooterComponent?: React.ReactNode;
     onOptionsEndReach?: () => void;
     onEndReachedThreshold?: number;
+    portalContainer?: Element;
 }
 
 declare const SelectInput;

@@ -1,19 +1,14 @@
-import React, {useState, useMemo, useCallback, useEffect} from 'react';
 import PropTypes from 'prop-types';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {IoSearchOutline} from 'react-icons/io5';
-import {FiChevronDown} from 'react-icons/fi';
-
-import Input from '../Input';
-import Popup from '../../Popup';
-import Modal from '../../Modal';
-import Options from './Options';
-import SelectControl from './SelectControl';
-import Icon from '../../Icon';
-import cs from '../../../cs';
-import {isArray} from '../../../utils';
+import { IoSearchOutline } from 'react-icons/io5';
 
 import styles from './styles.module.scss';
+import Options from './Options';
+import SelectControl from './SelectControl';
+import Input from '../Input';
+import Popup from '../../Popup';
+import cs from '../../../cs';
 
 const noop = () => {};
 
@@ -133,6 +128,7 @@ const MultiSelect = ({
     showRequired,
     onOptionsEndReach,
     onEndReachedThreshold,
+    portalContainer
 }) => {
 
     const [expanded, setExpanded] = useState(false);
@@ -260,6 +256,7 @@ const MultiSelect = ({
                     anchorOrigin={anchorOrigin}
                     transformOrigin={transformOrigin}
                     onClose={handleCaretClick}
+                    portalContainer={portalContainer}
                 >
                     {
                         searchable &&

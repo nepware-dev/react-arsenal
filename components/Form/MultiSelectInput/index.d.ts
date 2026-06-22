@@ -1,12 +1,11 @@
 import * as React from 'react';
 
-import type {KeyExtractor, ListRenderItem} from '../../List';
-import type {OriginPosition} from '../../Popup';
+import type { KeyExtractor, ListRenderItem } from '../../List';
+import type { OriginPosition } from '../../Popup';
 import { IsDisabledExtractor } from '../SelectInput';
 
 
-export type {KeyExtractor, ListRenderItem};
-export type {OriginPosition};
+export type { KeyExtractor, ListRenderItem, OriginPosition };
 
 export type ValueExtractor<T, V> = (item: T) => V;
 export type SearchExtractor<T> = (item: T) => string;
@@ -64,6 +63,7 @@ export interface MultiSelectInputProps<T, V> {
     EmptyComponent?: React.ReactNode;
     onOptionsEndReach?: () => void;
     onEndReachedThreshold?: number;
+    portalContainer?: HTMLElement;
 }
 
 declare const MultiSelectInput;

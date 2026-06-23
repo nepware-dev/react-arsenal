@@ -18,7 +18,7 @@ const initialState = {
 function usePromise<FN extends PromiseFunction>(
     fn: FN,
     options?: Record<string, any>,
-    initialParams?: Parameters<FN>,
+    // initialParams?: Parameters<FN>,
 ): [
     UsePromiseState<Awaited<ReturnType<FN>>>,
     (...args: Parameters<FN>) => Promise<Awaited<ReturnType<FN>>>,

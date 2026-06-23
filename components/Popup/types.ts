@@ -11,7 +11,7 @@ export type OriginPosition =
     | 'center center'
     | 'center right';
 
-export interface PopupProps<T extends HTMLElement> {
+export interface PopupProps<T extends HTMLElement | null> {
     /**
      * Component or element that acts as anchor/base point for the popup
      */

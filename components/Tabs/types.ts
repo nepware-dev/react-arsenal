@@ -3,7 +3,7 @@ import React, { type HTMLAttributes, type PropsWithChildren, type ReactElement }
 type ElementOrElementType = React.ReactElement | React.ElementType;
 
 export type TabChangeCallback = (payload: { activeTab: string; previousTab: string }) => void;
-export type HeaderClickCallback = (e: React.MouseEvent<HTMLDivElement>, index: number) => void;
+export type HeaderClickCallback = (e: React.MouseEvent<HTMLDivElement>) => void;
 
 export interface TabProps extends PropsWithChildren<HTMLAttributes<HTMLDivElement>> {
     /**

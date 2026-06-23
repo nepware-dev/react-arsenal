@@ -10,7 +10,7 @@ import useRect from '../../hooks/useRect';
 
 const noop = () => {};
 
-function Popup<T extends HTMLElement>(props: PopupProps<T>) {
+function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
     const {
         anchor,
         children,

@@ -1,0 +1,4 @@
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+minimumReleaseAge: 2880 # 2 days

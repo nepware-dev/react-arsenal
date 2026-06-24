@@ -49,6 +49,7 @@ function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
     const handleKeyPressed = useCallback(
         (event: KeyboardEvent) => {
             if (closeOnEscape && event.key === 'Escape') {
+                event.stopPropagation();
                 onClose?.(event);
             }
         },
@@ -100,7 +101,7 @@ function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
             document.removeEventListener('keydown', handleKeyPressed);
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [handleClickOutside]);
+    }, [handleClickOutside, handleKeyPressed]);
 
     useEffect(() => {
         if (anchorRect?.top) {

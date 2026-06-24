@@ -1,0 +1,47 @@
+{
+    "name": "react-arsenal",
+    "version": "0.0.0",
+    "description": "Shared React component and utility library.",
+    "license": "MIT",
+    "type": "module",
+    "scripts": {
+        "test": "vitest",
+        "test:run": "vitest run",
+        "typecheck": "tsc --noEmit"
+    },
+    "peerDependencies": {
+        "react": ">=18",
+        "react-dom": ">=18",
+        "react-router-dom": "^5.0.0"
+    },
+    "peerDependenciesMeta": {
+        "react-router-dom": {
+            "optional": true
+        }
+    },
+    "dependencies": {
+        "hoist-non-react-statics": "3.3.2",
+        "prop-types": "15.8.1",
+        "react-focus-lock": "2.13.7",
+        "react-icons": "5.6.0",
+        "whatwg-fetch": "^3.6.20",
+        "yet-another-abortcontroller-polyfill": "^0.0.4"
+    },
+    "devDependencies": {
+        "@testing-library/jest-dom": "6.9.1",
+        "@testing-library/react": "16.3.2",
+        "@testing-library/user-event": "14.6.1",
+        "@types/hoist-non-react-statics": "3.3.7",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "@vitejs/plugin-react": "5.2.0",
+        "jsdom": "29.1.1",
+        "react": "19.2.4",
+        "react-dom": "19.2.4",
+        "react-router-dom": "^5.0.0",
+        "sass": "1.98.0",
+        "typescript": "5.9.3",
+        "vite": "7.3.5",
+        "vitest": "3.2.6"
+    }
+}

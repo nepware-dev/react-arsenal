@@ -95,17 +95,24 @@ describe('List', () => {
     });
 
     describe('Loading State', () => {
-        it('should render loading component when loading is true', () => {
-            render(<List {...defaultProps} loading={true} />);
+        it('should render loading component during initial load when data is empty', () => {
+            render(<List {...defaultProps} data={[]} loading={true} />);
 
             expect(screen.getByText('Loading...')).toBeInTheDocument();
         });
 
-        it('should not render list items when loading', () => {
-            render(<List {...defaultProps} loading={true} />);
+        it('should not render list items during initial empty load', () => {
+            render(<List {...defaultProps} data={[]} loading={true} />);
 
             expect(screen.queryByTestId('item-1')).not.toBeInTheDocument();
             expect(screen.queryByTestId('item-2')).not.toBeInTheDocument();
+        });
+
+        it('should render a loading footer alongside items while paginating', () => {
+            render(<List {...defaultProps} loading={true} onEndReached={vi.fn()} />);
+
+            expect(screen.getByTestId('item-1')).toBeInTheDocument();
+            expect(screen.getByText('Loading...')).toBeInTheDocument();
         });
 
         it('should render custom loading component', () => {
@@ -113,6 +120,7 @@ describe('List', () => {
             render(
                 <List
                     {...defaultProps}
+                    data={[]}
                     loading={true}
                     LoadingComponent={CustomLoading}
                 />,

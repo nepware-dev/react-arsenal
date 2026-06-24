@@ -212,6 +212,44 @@ describe('FunctionalPopup', () => {
         });
     });
 
+    describe('Escape key handling', () => {
+        it('calls onClose when pressing escape', () => {
+            render(<TestComponent closeOnEscape={true} />);
+
+            fireEvent.keyDown(document.body, { key: 'Escape', code: 'Escape' });
+
+            expect(mockOnClose).toHaveBeenCalledTimes(1);
+            expect(mockOnClose).toHaveBeenCalledWith(expect.any(KeyboardEvent));
+        });
+
+        it('does not call onClose when pressing another key', () => {
+            render(<TestComponent closeOnEscape={true} />);
+
+            fireEvent.keyDown(document.body, { key: 'a', code: 'KeyA' });
+
+            expect(mockOnClose).not.toHaveBeenCalled();
+        });
+
+        it('does not call onClose when closeOnEscape is false', () => {
+            render(<TestComponent closeOnEscape={false} />);
+
+            fireEvent.keyDown(document.body, { key: 'Escape', code: 'Escape' });
+
+            expect(mockOnClose).not.toHaveBeenCalled();
+        });
+
+        it('stops propagation when closing on escape', () => {
+            render(<TestComponent closeOnEscape={true} />);
+
+            const event = new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true });
+            const stopPropagationSpy = vi.spyOn(event, 'stopPropagation');
+
+            fireEvent(document.body, event);
+
+            expect(stopPropagationSpy).toHaveBeenCalled();
+        });
+    });
+
     describe('Focus lock functionality', () => {
         it('enables focus lock by default', () => {
             render(<TestComponent />);

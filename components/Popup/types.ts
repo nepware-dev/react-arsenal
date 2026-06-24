@@ -41,11 +41,15 @@ export interface PopupProps<T extends HTMLElement | null> {
      */
     closeOnOutsideClick?: boolean;
     /**
+     * Auto close popup when user presses escape key
+     */
+    closeOnEscape?: boolean;
+    /**
      * Disable focus capture
      */
     disableFocusLock?: boolean;
     /**
      * Function to run when close is called
      */
-    onClose?: (event: MouseEvent) => void;
+    onClose?: (event: MouseEvent | KeyboardEvent) => void;
 }

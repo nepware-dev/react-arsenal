@@ -17,6 +17,7 @@ function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
         anchorOrigin = 'bottom right',
         transformOrigin = 'bottom right',
         className: _className,
+        closeOnEscape = false,
         closeOnOutsideClick = true,
         disableFocusLock = false,
         onClose = noop,
@@ -43,6 +44,15 @@ function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
             }
         },
         [closeOnOutsideClick, onClose, anchor],
+    );
+
+    const handleKeyPressed = useCallback(
+        (event: KeyboardEvent) => {
+            if (closeOnEscape && event.key === 'Escape') {
+                onClose?.(event);
+            }
+        },
+        [closeOnEscape, onClose],
     );
 
     const transformWrapperRect = useCallback(
@@ -84,8 +94,10 @@ function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
     );
 
     useEffect(() => {
+        document.addEventListener('keydown', handleKeyPressed);
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
+            document.removeEventListener('keydown', handleKeyPressed);
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [handleClickOutside]);

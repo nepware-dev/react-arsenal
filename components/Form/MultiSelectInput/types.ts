@@ -38,7 +38,6 @@ export interface MultiSelectInputProps<T, V extends React.ReactNode> {
     optionsWrapperClassName?: string;
     selectOptionClassName?: string;
     searchable?: boolean;
-    clearable?: boolean;
     disabled?: boolean;
     loading?: boolean;
     value?: T[];

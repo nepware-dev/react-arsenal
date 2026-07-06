@@ -5,10 +5,6 @@ import { describe, it, expect, vi } from 'vitest';
 import TextareaInput from '../../../components/Form/TextareaInput';
 import styles from '../../../components/Form/TextareaInput/styles.module.scss';
 
-vi.mock('@ra/components/I18n/Localize', () => ({
-    default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
 describe('TextareaInput', () => {
     describe('Basic rendering', () => {
         it('renders textarea element', () => {

@@ -1,53 +1,22 @@
-import React, {useCallback, useEffect} from 'react';
-import PropTypes from 'prop-types';
-
-import cs from '../../../cs';
-import {isArray} from '../../../utils';
-
-import Localize from '../../I18n/Localize';
+import React, { useCallback, useEffect } from 'react';
 
 import styles from './styles.module.scss';
+import { CheckboxInputProps } from './types';
+import Localize from '../../I18n/Localize';
+import cs from '../../../cs';
+import { isArray } from '../../../utils';
 
 const noop = () => {};
 
-const propTypes = {
-    className: PropTypes.string,
-    size: PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.string,
-    ]).isRequired,
-    value: PropTypes.string,
-    required: PropTypes.bool,
-    warning: PropTypes.bool,
-    showRequired: PropTypes.bool,
-    disabled: PropTypes.bool,
-    inputRef: PropTypes.shape({
-        current: PropTypes.elementType
-    }),
-    onChange: PropTypes.func,
-    errorMessage: PropTypes.any,
-    info: PropTypes.string,
-    checkboxClassName: PropTypes.string,
-    indeterminate: PropTypes.bool // Requires inputRef to be sent
-};
-
-const defaultProps = {
-    className: '',
-    size: '1em',
-    required: false,
-    disabled: false,
-    onChange: noop,
-};
-
-const CheckboxInput = (props) => {
+const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
     const {
-        className: _className,
+        className: _className = '',
         checkboxClassName,
-        size,
+        size = '1em',
         inputRef,
-        disabled,
-        required,
-        onChange,
+        disabled = false,
+        required = false,
+        onChange = noop,
         errorMessage,
         warning,
         showRequired,
@@ -71,7 +40,7 @@ const CheckboxInput = (props) => {
         _className,
     );
 
-    const handleChange = useCallback(event => {
+    const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         onChange(event.target);
     }, [onChange]);
 
@@ -126,7 +95,6 @@ const CheckboxInput = (props) => {
     );
 };
 
-CheckboxInput.propTypes = propTypes;
-CheckboxInput.defaultProps = defaultProps;
-
 export default CheckboxInput;
+
+export type { CheckboxInputProps };

@@ -5,7 +5,7 @@ export interface CheckboxInputProps extends Omit<React.InputHTMLAttributes<HTMLI
     size?: number | string;
     value?: string;
     required?: boolean;
-    warning?: boolean;
+    warning?: string;
     showRequired?: boolean;
     disabled?: boolean;
     inputRef?: React.RefObject<HTMLInputElement | null>;

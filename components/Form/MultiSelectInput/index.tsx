@@ -23,7 +23,6 @@ const MultiSelect = <T, V extends ReactNode>({
     selectOptionClassName,
     loading = false,
     disabled = false,
-    clearable = true,
     searchable = true,
     placeholder = 'Select...',
     keyExtractor,

@@ -15,7 +15,7 @@ export interface SliderInputProps<T extends string | number> {
      * Function called when the input is changed.
      * @param {{x: number, y: number}} value - The value of the input, based on axis value.
      */
-    onChange: SliderInputChangeCallback;
+    onChange?: SliderInputChangeCallback;
     /**
      * Major axis of the input (can be one of x and y).
      */

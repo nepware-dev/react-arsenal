@@ -175,7 +175,7 @@ describe('Pagination', () => {
         });
 
         it('disables left control on first page', () => {
-            const { container } = render(
+            render(
                 <Pagination {...defaultProps} showControlIcons pageNum={1} />,
             );
 
@@ -184,7 +184,7 @@ describe('Pagination', () => {
         });
 
         it('disables right control on last page', () => {
-            const { container } = render(
+            render(
                 <Pagination {...defaultProps} showControlIcons pageNum={10} />,
             );
 
@@ -338,7 +338,7 @@ describe('Pagination', () => {
 
         it('prevents navigation beyond first page', () => {
             const handleChange = vi.fn();
-            const { container } = render(
+            render(
                 <Pagination {...defaultProps} pageNum={1} onChange={handleChange} />,
             );
 

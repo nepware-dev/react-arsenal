@@ -7,7 +7,7 @@ export interface MaskProps {
      * Padding for the mask area
      * @param {Array.<{xPadding: Number, yPadding: Number}>}
      */
-    padding: [number, number];
+    padding?: [number, number];
     /**
      * Should lock the scroll when mask is active
      */

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import type { KeyExtractor } from '../../../components/List';
+import type { KeyExtractor, ListProps } from '../../../components/List';
 import type { OriginPosition } from '../../../components/Popup';
 
 export type { KeyExtractor };
@@ -60,20 +60,20 @@ export interface SelectInputProps<T, V extends ReactNode> {
     /*
      * Component to use when data is loading
      */
-    LoadingComponent?: React.ReactNode;
+    LoadingComponent?: ListProps<T>['LoadingComponent'];
     /*
      * Component to use when filtered data is empty
      */
-    FilterEmptyComponent?: React.ReactNode;
+    FilterEmptyComponent?: ListProps<T>['EmptyComponent'];
     /*
      * Component to use when data is empty
      */
-    EmptyComponent?: React.ReactNode;
+    EmptyComponent?: ListProps<T>['EmptyComponent'];
     /*
      * Footer of the select options
      * IMPORTANT: Elements that lock focus (such as links, buttons, inputs) should not be used here without proper focus handling when searchable prop enabled. Doing so causes focus to shift from search input to the focusable element, causing erroneous behavior when searching.
      */
-    FooterComponent?: React.ReactNode;
+    FooterComponent?: ListProps<T>['FooterComponent'];
     /*
      * Callback function that is called when the end of options list is reached while scrolling
      * Useful for implementing infinite loading

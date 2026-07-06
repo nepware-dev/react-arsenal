@@ -81,7 +81,7 @@ const TextareaInput: React.FC<TextareaInputProps> = (props) => {
             });
             onInvalid?.(e);
         },
-        [meta, onInvalid, required],
+        [onInvalid, required],
     );
 
     return (
@@ -89,8 +89,8 @@ const TextareaInput: React.FC<TextareaInputProps> = (props) => {
             <textarea
                 ref={inputRef}
                 className={cs(className, styles.textarea, {
-                    [styles.textareaWarning]: meta.warning,
-                    [styles.textareaError]: meta.error,
+                    [styles.textareaWarning]: !!meta.warning,
+                    [styles.textareaError]: !!meta.error,
                     required,
                     disabled,
                 })}

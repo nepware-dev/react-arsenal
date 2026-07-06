@@ -18,12 +18,14 @@ function getOffset(value: number, min: number, max: number) {
 
 function getActiveTrackStyle(
     direction: 'rtl' | 'ltr' | 'ttb' | 'btt',
-    value: number[],
+    value: number | number[],
     min: number,
     max: number,
 ) {
-    let val = value;
-    if (!isArray(value)) {
+    let val: number[];
+    if (isArray(value)) {
+        val = value;
+    } else {
         val = [min, value];
     }
 
@@ -154,7 +156,7 @@ const ThumbComponent: React.FC<{
                 );
             }
         },
-        [triggerChange, minValue, maxValue, step, controlledValue, index],
+        [disabled, minValue, maxValue, step, controlledValue, index, triggerChange],
     );
 
     const handleKeyDown = useCallback(
@@ -275,7 +277,7 @@ function SliderInput<T extends string | number>(props: SliderInputProps<T>) {
 
     const handleChange = useCallback(
         (val: number | number[]) => {
-            onChange && onChange({ name, value: val });
+            onChange?.({ name, value: val });
         },
         [name, onChange],
     );
@@ -293,7 +295,7 @@ function SliderInput<T extends string | number>(props: SliderInputProps<T>) {
             let newValue: number | number[];
 
             newValue = Math.max(minValue, Math.min(maxValue, val));
-            if (isRangeInput) {
+            if (isRangeInput && isArray(controlledValue)) {
                 if (idx === 0 && newValue > controlledValue[1] - step) {
                     return;
                 }
@@ -399,7 +401,7 @@ function SliderInput<T extends string | number>(props: SliderInputProps<T>) {
                 step={step}
                 tabIndex={disabled ? undefined : 0}
                 index={0}
-                controlledValue={controlledValue?.[0] ?? controlledValue}
+                controlledValue={isArray(controlledValue) ? controlledValue?.[0] ?? controlledValue: controlledValue}
                 direction={direction}
                 disabled={disabled}
                 showTooltip={showTooltip}
@@ -423,7 +425,7 @@ function SliderInput<T extends string | number>(props: SliderInputProps<T>) {
                     step={step}
                     tabIndex={disabled ? undefined : 0}
                     index={1}
-                    controlledValue={controlledValue?.[1] ?? controlledValue}
+                    controlledValue={isArray(controlledValue) ? controlledValue?.[1] ?? controlledValue : controlledValue}
                     direction={direction}
                     disabled={disabled}
                     showTooltip={showTooltip}

@@ -194,7 +194,7 @@ const MultiSelect = <T, V extends ReactNode>({
             <div ref={wrapperRef} className={className} tabIndex={0}>
                 <ControlComponent
                     controlClassName={cs(controlClassName, {
-                        [styles.controlWarning]: meta.warning,
+                        [styles.controlWarning]: !!meta.warning,
                     })}
                     placeholder={placeholder}
                     loading={loading}

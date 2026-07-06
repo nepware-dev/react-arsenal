@@ -63,7 +63,7 @@ const Tabs: React.FC<TabsProps> = (props) => {
                     return;
                 }
 
-                onChange && onChange({ activeTab: selectedTab, previousTab: tabContext.activeTab });
+                onChange?.({ activeTab: selectedTab, previousTab: tabContext.activeTab });
                 if (!controlledActiveTab) {
                     if (mode === 'scroll' && tabsRef.current?.[index]) {
                         return scrollToElement(tabsRef.current[index]);

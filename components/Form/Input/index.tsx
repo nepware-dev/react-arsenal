@@ -90,7 +90,7 @@ const Input: React.FC<InputProps> = ({
             return {...prevMeta, invalid: true, error: 'Invalid'};
         });
         onInvalid?.(e);
-    }, [meta, onInvalid, required]);
+    }, [onInvalid, required]);
 
     return (
         <Wrapper {...wrapperProps}>
@@ -100,8 +100,8 @@ const Input: React.FC<InputProps> = ({
                 className={cs(
                     styles.input,
                     {
-                        [styles.inputWarning]: meta.warning,
-                        [styles.inputError]: meta.error,
+                        [styles.inputWarning]: !!meta.warning,
+                        [styles.inputError]: !!meta.error,
                         required,
                         disabled,
                     },

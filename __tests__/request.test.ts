@@ -1,23 +1,23 @@
 import { describe, it, expect, vi } from 'vitest';
 
-import RequestBuilder from './request';
+import RequestBuilder from '../services/request';
 
-const jsonResponse = (body, status = 200) =>
+const jsonResponse = (body: object, status = 200) =>
     new Response(JSON.stringify(body), {
         status,
         headers: { 'Content-Type': 'application/json' },
     });
 
 // backoffFactor 0 keeps retries instant; maxRetries 2 => up to 3 total attempts.
-const buildRequest = (mockFetch) =>
-    new RequestBuilder().setFetch(mockFetch).setRetryConfig({ backoffFactor: 0, maxRetries: 2 }).build();
+const buildRequest = (mockFetch: typeof fetch) =>
+    new RequestBuilder('https://api.test').setFetch(mockFetch).setRetryConfig({ backoffFactor: 0, maxRetries: 2 }).build();
 
 describe('RequestBuilder', () => {
     it('resolves with data and no error on a successful response', async () => {
         const mockFetch = vi.fn().mockResolvedValue(jsonResponse({ id: 1, title: 'todo' }));
         const request = buildRequest(mockFetch);
 
-        const { error, data } = await request('https://api.test/todos/1', {
+        const { error, data } = await request('/todos/1', {
             headers: { 'content-type': 'application/json' },
         });
 
@@ -30,7 +30,7 @@ describe('RequestBuilder', () => {
         const mockFetch = vi.fn().mockResolvedValue(jsonResponse({ message: 'Too Many Requests' }, 429));
         const request = buildRequest(mockFetch);
 
-        const { error } = await request('https://api.test/rate-limited', {
+        const { error } = await request('/rate-limited', {
             headers: { 'content-type': 'application/json' },
         });
 

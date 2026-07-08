@@ -98,6 +98,10 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
 
     const filterOptions = useCallback(
         (searchValue: string) => {
+            if (searchValue === '') {
+                return options;
+            }
+
             return options.filter((opt) => {
                 // If searchExtractor is provided, use it for filtering
                 if (searchExtractor) {
@@ -130,6 +134,17 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
         }
     }, []);
 
+    const getFocusedItem = useCallback((options: T[]): T => {
+        const targetItem = value ?? defaultValue;
+        if (!targetItem) return options[0];
+
+        const targetKey = keyExtractor(targetItem, -1);
+
+        const hasTargetInOptions = options.some((opt, idx) => keyExtractor(opt, idx) === targetKey);
+
+        return hasTargetInOptions ? targetItem : options[0];
+    }, [value, defaultValue, keyExtractor]);
+
     const handleInputChange = useCallback(
         ({ value: changedValue }: { value: string }) => {
             if (onInputChange) {
@@ -138,7 +153,7 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
 
             setSelectState((prev) => {
                 const filteredOptions = onInputChange ? prev.options : filterOptions(changedValue);
-                const updatedFocusedItem = value ?? defaultValue ?? filteredOptions[0];
+                const updatedFocusedItem = getFocusedItem(filteredOptions);
 
                 return {
                     ...prev,
@@ -152,7 +167,7 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
                 showOption();
             }
         },
-        [value, defaultValue, filterOptions, onInputChange, showOption],
+        [filterOptions, getFocusedItem, onInputChange, showOption],
     );
 
     const hideOption = useCallback(() => {
@@ -291,12 +306,17 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
 
         optionsRef.current = options;
 
-        setSelectState((prev) => ({
-            ...prev,
-            options: onInputChange ? filterOptions(prev.searchValue) : options,
-            focusedItem: value ?? defaultValue ?? options[0],
-        }))
-    },[defaultValue, options, value, filterOptions, onInputChange]);
+        setSelectState((prev) => {
+            const updatedOptions = onInputChange ? options : filterOptions(prev.searchValue);
+            const updatedFocusedItem = getFocusedItem(updatedOptions);
+
+            return {
+                ...prev,
+                options: onInputChange ? options : filterOptions(prev.searchValue),
+                focusedItem: updatedFocusedItem,
+            };
+        });
+    },[options, getFocusedItem, filterOptions, onInputChange]);
 
     useEffect(() => {
         updateSelectValue();
@@ -336,6 +356,7 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
                     <div className={cs(styles.selectValue, 'select-value')}>
                         {searchable && (
                             <Input
+                                disabled={disabled}
                                 inputRef={inputRef}
                                 value={selectState.searchValue}
                                 className={styles.input}

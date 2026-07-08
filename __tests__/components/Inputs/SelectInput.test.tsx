@@ -1,4 +1,5 @@
 import { act, render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
@@ -122,6 +123,21 @@ describe('SelectInput', () => {
             expect(wrapper).toHaveClass(styles.disabled);
             expect(wrapper).not.toHaveAttribute('tabindex');
         });
+
+        it('disables the search input so it cannot be focused or typed into when disabled', async () => {
+            const { container } = renderSelect({ disabled: true });
+
+            const searchInput = container.querySelector('input') as HTMLInputElement;
+            expect(searchInput).toBeDisabled();
+            expect(searchInput).not.toHaveFocus();
+
+            searchInput.focus();
+            expect(searchInput).not.toHaveFocus();
+
+            const user = userEvent.setup();
+            await user.type(searchInput, 'B');
+            expect(searchInput).not.toHaveValue();
+        });
     });
 
     describe('clear functionality', () => {
@@ -157,6 +173,28 @@ describe('SelectInput', () => {
             expect(screen.queryByText('Option A')).toBeInTheDocument();
         });
 
+        it('does not internally filter options when onInputChange is provided', async () => {
+            const onInputChange = vi.fn();
+            const { container } = renderSelect({ onInputChange });
+
+            const wrapper = container.querySelector(`.${styles.selectContainer}`);
+            if (!wrapper) throw new Error('Select container not found');
+            await act(async () => {
+                fireEvent.click(wrapper);
+            });
+
+            const searchInput = container.querySelector('input');
+            if (!searchInput) throw new Error('Search input not found');
+            await act(async () => {
+                fireEvent.change(searchInput, { target: { value: 'B' } });
+            });
+
+            expect(onInputChange).toHaveBeenCalledWith('B');
+            expect(screen.getByText('Option A')).toBeInTheDocument();
+            expect(screen.getByText('Option B')).toBeInTheDocument();
+            expect(screen.getByText('Option C')).toBeInTheDocument();
+        });
+
         it('internally filters dropdown list items when typing without onInputChange', async () => {
             const { container } = renderSelect();
 
@@ -174,6 +212,30 @@ describe('SelectInput', () => {
 
             expect(await screen.findByText('Option B')).toBeInTheDocument();
             expect(screen.queryByText('Option A')).not.toBeInTheDocument();
+        });
+
+        it('restores the full options list when the search input is cleared after filtering', async () => {
+            const { container } = renderSelect();
+
+            const wrapper = container.querySelector(`.${styles.selectContainer}`);
+            if (!wrapper) throw new Error('Select container not found');
+            await act(async () => {
+                fireEvent.click(wrapper);
+            });
+
+            const searchInput = container.querySelector('input');
+            if (!searchInput) throw new Error('Search input not found');
+            await act(async () => {
+                fireEvent.change(searchInput, { target: { value: 'B' } });
+            });
+            expect(screen.queryByText('Option A')).not.toBeInTheDocument();
+
+            await act(async () => {
+                fireEvent.change(searchInput, { target: { value: '' } });
+            });
+            expect(await screen.findByText('Option A')).toBeInTheDocument();
+            expect(screen.getByText('Option B')).toBeInTheDocument();
+            expect(screen.getByText('Option C')).toBeInTheDocument();
         });
     });
 

@@ -30,6 +30,11 @@ export interface SelectInputProps<T, V extends ReactNode> {
     showRequired?: boolean;
     keyExtractor: KeyExtractor<T>;
     valueExtractor: ValueExtractor<T, V>;
+    /*
+     * Extracts the string used to filter options when searching
+     * Ignored when onInputChange is passed, since internal filtering is disabled
+     * When not provided, valueExtractor is used instead (only when it returns a string)
+     */
     searchExtractor?: SearchExtractor<T>;
     isDisabledExtractor?: IsDisabledExtractor<T>;
     onChange?: SelectInputChangeCallback<T>;

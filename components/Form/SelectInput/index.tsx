@@ -349,7 +349,7 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
                         'select-control',
                         controlClassName,
                         [styles.selected, selectState.expanded],
-                        [styles.warning, selectState.meta.warning],
+                        [styles.warning, !!selectState.meta.warning],
                         [styles.error, !!errMsg],
                     )}
                 >

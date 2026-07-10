@@ -91,7 +91,7 @@ export interface DragDropFileInputProps extends Omit<InputProps, 'onChange' | 't
     /**
      * Component that is rendered inside the dropzone.
      */
-    DropZoneComponent?: React.ReactNode | React.ElementType;
+    DropZoneComponent?: React.ComponentType | React.ReactElement;
     /**
      * Whether or not the component is required.
      */

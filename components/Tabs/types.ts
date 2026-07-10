@@ -1,6 +1,6 @@
 import React, { type HTMLAttributes, type PropsWithChildren, type ReactElement } from 'react';
 
-type ElementOrElementType = React.ReactElement | React.ElementType;
+import type { ListProps } from '../List';
 
 export type TabChangeCallback = (payload: { activeTab: string; previousTab: string }) => void;
 export type HeaderClickCallback = (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -75,11 +75,11 @@ export interface TabsProps {
     /**
      * Component before the header component
      */
-    PreHeaderComponent?: ElementOrElementType;
+    PreHeaderComponent?: ListProps<ReactElement>['HeaderComponent'];
     /**
      * Component after the header component
      */
-    PostHeaderComponent?: ElementOrElementType;
+    PostHeaderComponent?: ListProps<ReactElement>['FooterComponent'];
     /**
      * Classname for each header item
      */

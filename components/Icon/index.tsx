@@ -8,7 +8,7 @@ const Icon: React.FC<IconProps> = (props) => {
     const { name, className: _className = '', onClick } = props;
 
     const className = cs(name, styles.icon, _className, {
-        [styles.clickable]: onClick,
+        [styles.clickable]: !!onClick,
     });
 
     return <span className={className} onClick={onClick} />;

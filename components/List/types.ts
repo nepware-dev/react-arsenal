@@ -20,8 +20,8 @@ export interface ListProps<T> {
     onClick?: React.MouseEventHandler;
     onItemClick?: React.MouseEventHandler;
     component?: keyof JSX.IntrinsicElements | typeof React.Fragment;
-    EmptyComponent?: React.ReactNode | React.ElementType;
-    LoadingComponent?: React.ReactNode | React.ElementType;
-    HeaderComponent?: React.ReactNode | React.ElementType;
-    FooterComponent?: React.ReactNode | React.ElementType;
+    EmptyComponent?: React.ComponentType | React.ReactElement | null;
+    LoadingComponent?: React.ComponentType | React.ReactElement | null;
+    HeaderComponent?: React.ComponentType | React.ReactElement | null;
+    FooterComponent?: React.ComponentType | React.ReactElement | null;
 }

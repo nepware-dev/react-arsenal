@@ -257,8 +257,8 @@ const DragDropFileInput: React.FC<DragDropFileInputProps> = (props) => {
                     [styles.dropZoneDisabled]: disabled,
                     [dragOverFrameClassName]: !isDragOverTarget && isDragOverFrame && !disabled,
                     [activeDropZoneClassName]: isDragOverTarget && !disabled,
-                    [styles.dropZoneWarning]: meta.warning,
-                    [styles.dropZoneError]: meta.error,
+                    [styles.dropZoneWarning]: !!meta.warning,
+                    [styles.dropZoneError]: !!meta.error,
                 })}
             >
                 <FileInput

@@ -1,4 +1,4 @@
-export const getErrorMessage = (error) => {
+export const getErrorMessage = (error: any) => {
     if(error.error) {
         return error.error;
     }

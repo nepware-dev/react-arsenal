@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import type { KeyExtractor, ListRenderItem } from '../../List';
+import type { KeyExtractor, ListProps, ListRenderItem } from '../../List';
 import type { OriginPosition } from '../../Popup';
 import { type IsDisabledExtractor } from '../SelectInput/types';
 
@@ -57,10 +57,10 @@ export interface MultiSelectInputProps<T, V extends React.ReactNode> {
     renderOptionLabel?: RenderOptionLabelCallback<T>;
     renderControl?: RenderControlCallback<T, V>;
     renderControlLabel?: ListRenderItem<T>;
-    LoadingComponent?: React.ReactNode;
-    FilterEmptyComponent?: React.ReactNode;
-    EmptyComponent?: React.ReactNode;
-    FooterComponent?: React.ReactNode;
+    LoadingComponent?: ListProps<T>['LoadingComponent'];
+    FilterEmptyComponent?: ListProps<T>['EmptyComponent'];
+    EmptyComponent?: ListProps<T>['EmptyComponent'];
+    FooterComponent?: ListProps<T>['FooterComponent'];
     showRequired?: boolean;
     onOptionsEndReach?: () => void;
     onEndReachedThreshold?: number;

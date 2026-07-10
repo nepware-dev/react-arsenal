@@ -10,7 +10,7 @@ import useSize from '../../hooks/useSize';
 
 //TODO: improve this so we can add more complex padding (e.g. percentage, comma separated, etc
 const resolvePadding = (padding: MaskProps['padding']) => {
-    const [x, y] = padding;
+    const [x, y] = padding || [0, 0];
     return [x, y];
 };
 

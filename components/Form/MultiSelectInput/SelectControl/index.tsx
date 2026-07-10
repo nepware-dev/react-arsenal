@@ -33,7 +33,7 @@ export function Label<T, V extends React.ReactNode>({ item, valueExtractor, edit
 function SelectControl<T, V extends React.ReactNode>({
     placeholder,
     controlClassName,
-    expanded,
+    expanded = false,
     selectedItems,
     loading,
     handleCaretClick,
@@ -41,7 +41,7 @@ function SelectControl<T, V extends React.ReactNode>({
     valueExtractor,
     onItemRemove,
     maxItems = 50,
-    editable,
+    editable = false,
     renderControlLabel,
 }: SelectControlProps<T, V>) {
     const spillOverCount = selectedItems.length - maxItems;

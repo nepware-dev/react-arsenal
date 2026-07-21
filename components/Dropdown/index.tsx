@@ -20,7 +20,7 @@ const Dropdown = (props: DropdownProps) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const labelRef = useRef<HTMLButtonElement>(null);
-    const clickTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+    const clickTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     const hideDropdown = useCallback(
         (event?: MouseEvent) => {

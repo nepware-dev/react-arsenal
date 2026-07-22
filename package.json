@@ -1,13 +1,59 @@
 {
-    "name": "react-arsenal",
-    "version": "0.0.0",
+    "name": "@nepware/react-arsenal",
+    "version": "0.0.0-semantic-release",
     "description": "Shared React component and utility library.",
     "license": "MIT",
     "type": "module",
+    "repository": "nepware-dev/react-arsenal",
+    "files": [
+        "dist",
+        "styles"
+    ],
+    "sideEffects": [
+        "**/*.css",
+        "**/*.scss"
+    ],
+    "exports": {
+        "./package.json": "./package.json",
+        "./cs": {
+            "types": "./dist/cs.d.ts",
+            "default": "./dist/cs.js"
+        },
+        "./components/*": {
+            "types": "./dist/components/*/index.d.ts",
+            "default": "./dist/components/*/index.js"
+        },
+        "./hooks/*": {
+            "types": "./dist/hooks/*.d.ts",
+            "default": "./dist/hooks/*.js"
+        },
+        "./services/*": {
+            "types": "./dist/services/*.d.ts",
+            "default": "./dist/services/*.js"
+        },
+        "./utils": {
+            "types": "./dist/utils/index.d.ts",
+            "default": "./dist/utils/index.js"
+        },
+        "./utils/*": {
+            "types": "./dist/utils/*.d.ts",
+            "default": "./dist/utils/*.js"
+        },
+        "./auth/*": {
+            "types": "./dist/auth/*.d.ts",
+            "default": "./dist/auth/*.js"
+        },
+        "./styles/*": "./styles/*"
+    },
     "scripts": {
         "test": "vitest",
         "test:run": "vitest run",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "build": "vite build",
+        "prepack": "vite build && clean-pkg-json --published-only=false"
+    },
+    "publishConfig": {
+        "access": "public"
     },
     "peerDependencies": {
         "react": ">=18",
@@ -28,21 +74,28 @@
         "yet-another-abortcontroller-polyfill": "^0.0.4"
     },
     "devDependencies": {
+        "@semantic-release/changelog": "6.0.3",
+        "@semantic-release/git": "10.0.1",
         "@testing-library/jest-dom": "6.9.1",
         "@testing-library/react": "16.3.2",
         "@testing-library/user-event": "14.6.1",
         "@types/hoist-non-react-statics": "3.3.7",
+        "@types/node": "24.13.3",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@types/react-router-dom": "^5.3.3",
-        "@vitejs/plugin-react": "5.2.0",
+        "@vitejs/plugin-react": "6.0.3",
+        "clean-pkg-json": "2.0.0",
         "jsdom": "29.1.1",
         "react": "19.2.4",
         "react-dom": "19.2.4",
         "react-router-dom": "^5.0.0",
         "sass": "1.98.0",
+        "tinyglobby": "0.2.17",
         "typescript": "5.9.3",
-        "vite": "7.3.5",
-        "vitest": "3.2.6"
+        "vite": "8.1.5",
+        "vite-plugin-dts": "5.0.3",
+        "vite-plugin-lib-inject-css": "2.2.2",
+        "vitest": "4.1.10"
     }
 }

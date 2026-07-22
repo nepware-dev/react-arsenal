@@ -1,6 +1,5 @@
-/// <reference types="vitest/config" />
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 // Standalone test harness for react-arsenal.
 export default defineConfig({

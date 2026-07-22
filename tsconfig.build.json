@@ -1,0 +1,13 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "noEmit": false,
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "declarationMap": true,
+        "outDir": "dist",
+        "types": ["node"]
+    },
+    "include": ["auth", "components", "hooks", "services", "utils", "cs.ts", "scss.d.ts"],
+    "exclude": ["__tests__", "**/*.test.*", "**/*.spec.*", "vite.config.ts", "vitest.config.ts", "node_modules", "dist"]
+}

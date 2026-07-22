@@ -1,3 +1,6 @@
+// @vitest-environment node
+// Runs in node so the native Request pairs with the native AbortSignal; under
+// jsdom the two clash on Node 24 (jsdom AbortSignal vs native Request).
 import { describe, it, expect, vi } from 'vitest';
 
 import RequestBuilder from '../services/request';

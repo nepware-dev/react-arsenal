@@ -1,20 +1,25 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from "react";
 
-import styles from './styles.module.scss';
-import type { ListRenderItemProps, KeyExtractor, ListRenderItem, ListProps } from './types';
-import { getElement } from './utils';
-import { throttle, transformToElement } from '../../utils';
+import styles from "./styles.module.scss";
+import type {
+    ListRenderItemProps,
+    KeyExtractor,
+    ListRenderItem,
+    ListProps,
+} from "./types";
+import { getElement } from "./utils";
+import { throttle, transformToElement } from "../../utils";
 
 const List = <T,>(props: ListProps<T>) => {
     const {
         data,
         renderItem: _renderItem,
         keyExtractor,
-        className = '',
+        className = "",
         contentContainerClassName,
         style,
         ref: _ref,
-        component: Component = 'div',
+        component: Component = "div",
         loading = false,
         LoadingComponent: _LoadingComponent,
         EmptyComponent: _EmptyComponent,
@@ -38,7 +43,9 @@ const List = <T,>(props: ListProps<T>) => {
                     if (!element) return;
 
                     const distanceFromEnd =
-                        element.scrollHeight - element.scrollTop - element.offsetHeight;
+                        element.scrollHeight -
+                        element.scrollTop -
+                        element.offsetHeight;
 
                     if (onEndReachedThreshold > distanceFromEnd) {
                         if (!loading && onEndReached) {
@@ -67,7 +74,7 @@ const List = <T,>(props: ListProps<T>) => {
             } = props;
 
             // @ts-ignore: Item may have its own render method
-            const listRenderItem = item.render || _renderItem;
+            const listRenderItem = item?.render || _renderItem;
 
             // TODO: Only send ListRenderItemProps as props
             const listItem = listRenderItem({
@@ -110,43 +117,54 @@ const List = <T,>(props: ListProps<T>) => {
             renderedList.push(<LoadingComponent key="loading" />);
         }
         return renderedList;
-    }, [loading, EmptyComponent, LoadingComponent, data, renderItem, onEndReached]);
+    }, [
+        loading,
+        EmptyComponent,
+        LoadingComponent,
+        data,
+        renderItem,
+        onEndReached,
+    ]);
 
     const [ContainerComponent, containerProps] = useMemo(() => {
         if (contentContainerClassName) {
-            return ['div', { className: contentContainerClassName }];
+            return ["div", { className: contentContainerClassName }];
         }
         return [React.Fragment, {}];
     }, [contentContainerClassName]);
 
-    const [ListComponent, componentProps]: [React.ElementType, Record<string, unknown>] =
-        useMemo(() => {
-            if (Component === React.Fragment) {
-                const hasComponentProps = className || ref || style || onEndReached;
+    const [ListComponent, componentProps]: [
+        React.ElementType,
+        Record<string, unknown>,
+    ] = useMemo(() => {
+        if (Component === React.Fragment) {
+            const hasComponentProps = className || ref || style || onEndReached;
 
-                if (hasComponentProps) {
-                    console.warn(
-                        'List: You cannot use className, style, ref, or onEndReached when using React.Fragment as the component. Please wrap your list with a container element.',
-                    );
-                }
-
-                return [React.Fragment, {}];
+            if (hasComponentProps) {
+                console.warn(
+                    "List: You cannot use className, style, ref, or onEndReached when using React.Fragment as the component. Please wrap your list with a container element.",
+                );
             }
 
-            const componentProps = {
-                className,
-                ref,
-                style,
-                onScroll: onEndReached ? handleItemScroll : undefined,
-            };
+            return [React.Fragment, {}];
+        }
 
-            return [Component, componentProps];
-        }, [Component, className, ref, style, handleItemScroll, onEndReached]);
+        const componentProps = {
+            className,
+            ref,
+            style,
+            onScroll: onEndReached ? handleItemScroll : undefined,
+        };
+
+        return [Component, componentProps];
+    }, [Component, className, ref, style, handleItemScroll, onEndReached]);
 
     return (
         <ContainerComponent {...containerProps}>
             {HeaderComponent && transformToElement(HeaderComponent)}
-            <ListComponent {...componentProps}>{handleRenderList()}</ListComponent>
+            <ListComponent {...componentProps}>
+                {handleRenderList()}
+            </ListComponent>
             {FooterComponent && transformToElement(FooterComponent)}
         </ContainerComponent>
     );

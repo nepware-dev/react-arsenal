@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Language } from './types';
 
-import { I18nContext, useI18nContext, defaultContext } from './i18nContext';
+import { I18nContext, useI18nContext, defaultContext, defaultLocalizer } from './i18nContext';
 import Localize from './Localize';
 import type { I18nProviderProps } from './types';
 
@@ -34,6 +34,6 @@ const I18nProvider = (props: I18nProviderProps) => {
     return <I18nContext.Provider value={contextValue}>{children}</I18nContext.Provider>;
 };
 
-export { useI18nContext, Localize };
+export { useI18nContext, Localize, defaultLocalizer };
 
 export default I18nProvider;

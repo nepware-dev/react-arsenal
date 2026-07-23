@@ -1,3 +1,10 @@
+# [1.0.0-beta.2](https://github.com/nepware-dev/react-arsenal/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2026-07-23)
+
+
+### Bug Fixes
+
+* **build:** ship plain css and expose used internals ([ab76561](https://github.com/nepware-dev/react-arsenal/commit/ab76561572376dbf3e2da3332d1995bf45c1eec8))
+
 # 1.0.0-beta.1 (2026-07-22)
 
 

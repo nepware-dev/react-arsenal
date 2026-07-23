@@ -451,4 +451,5 @@ function SliderInput<T extends string | number>(props: SliderInputProps<T>) {
 
 export default SliderInput;
 
+export { default as useDrag } from './useDrag';
 export type { SliderInputProps } from './types';

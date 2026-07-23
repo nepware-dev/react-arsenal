@@ -3,11 +3,30 @@ import { fileURLToPath } from 'node:url';
 
 import react from '@vitejs/plugin-react';
 import { globSync } from 'tinyglobby';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import dts from 'vite-plugin-dts';
 import { libInjectCss } from 'vite-plugin-lib-inject-css';
 
 const root = dirname(fileURLToPath(import.meta.url));
+
+// Aggregate every per-component stylesheet into a single `dist/styles.css`.
+const bundleStyles = (): Plugin => ({
+    name: 'ra-bundle-styles',
+    generateBundle(_options, bundle) {
+        const css = Object.keys(bundle)
+            .filter((fileName) => fileName.endsWith('.css'))
+            .sort()
+            .map((fileName) => {
+                const asset = bundle[fileName];
+                if (asset.type !== 'asset') return '';
+                return typeof asset.source === 'string' ? asset.source : new TextDecoder().decode(asset.source);
+            })
+            .join('\n');
+        if (css) {
+            this.emitFile({ type: 'asset', fileName: 'styles.css', source: css });
+        }
+    },
+});
 
 // Every public source file becomes its own entry so the built `dist/` mirrors
 // the source tree and consumers keep importing by subpath
@@ -25,6 +44,7 @@ export default defineConfig({
     plugins: [
         react(),
         libInjectCss(),
+        bundleStyles(),
         dts({
             tsconfigPath: 'tsconfig.build.json',
             include: ['auth', 'components', 'hooks', 'services', 'utils', 'cs.ts', 'scss.d.ts'],
@@ -54,7 +74,14 @@ export default defineConfig({
                 preserveModules: true,
                 preserveModulesRoot: root,
                 entryFileNames: '[name].js',
-                assetFileNames: 'assets/[name][extname]',
+                // Drop `.module` so consumer bundlers do not re-scope pre-compiled styles.
+                assetFileNames: (info) => {
+                    const name = info.name ?? '';
+                    if (name.endsWith('.css')) {
+                        return `assets/${name.replace(/\.module\.css$/, '.css')}`;
+                    }
+                    return 'assets/[name][extname]';
+                },
             },
         },
     },

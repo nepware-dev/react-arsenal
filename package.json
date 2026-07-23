@@ -15,6 +15,7 @@
     ],
     "exports": {
         "./package.json": "./package.json",
+        "./styles.css": "./dist/styles.css",
         "./cs": {
             "types": "./dist/cs.d.ts",
             "default": "./dist/cs.js"

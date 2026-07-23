@@ -15,6 +15,7 @@
     ],
     "exports": {
         "./package.json": "./package.json",
+        "./styles.css": "./dist/styles.css",
         "./cs": {
             "types": "./dist/cs.d.ts",
             "default": "./dist/cs.js"
@@ -67,7 +68,6 @@
     },
     "dependencies": {
         "hoist-non-react-statics": "3.3.2",
-        "prop-types": "15.8.1",
         "react-focus-lock": "2.13.7",
         "react-icons": "5.6.0",
         "whatwg-fetch": "^3.6.20",

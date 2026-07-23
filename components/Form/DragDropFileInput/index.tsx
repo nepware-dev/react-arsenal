@@ -282,4 +282,5 @@ const DragDropFileInput: React.FC<DragDropFileInputProps> = (props) => {
 
 export default DragDropFileInput;
 
+export { fileMatchSize } from './utils';
 export * from './types';

@@ -7,11 +7,14 @@ import type {
     Hierarchical,
     HierarchicalTableProps,
     KeyExtractor,
+    SortState,
     TableRenderDataItem,
     TableRowRenderer,
 } from './types';
 import Table from '..';
+import { getSortedHierarchicalData } from '../sort';
 import cs from '../../../cs';
+import useControlledState from '../../../hooks/useControlledState';
 
 /**
  * Recursively collects keys of items that should be initially expanded based on initialExpandedLevel.
@@ -54,6 +57,7 @@ function HierarchicalTable<T, C extends string = 'children', L extends string = 
 ) {
     const {
         data,
+        columns,
         bodyRowParentClassName,
         bodyRowChildClassName,
         bodyRowLastChildClassName,
@@ -66,6 +70,10 @@ function HierarchicalTable<T, C extends string = 'children', L extends string = 
         bodyRowClassName,
         dataClassName,
         rowSpacingHeight,
+        sort,
+        defaultSort = null,
+        onSortChange,
+        manualSort = false,
         ...tableProps
     } = props;
 
@@ -89,6 +97,18 @@ function HierarchicalTable<T, C extends string = 'children', L extends string = 
 
         return data as Hierarchical<T, C, L>[];
     }, [hierarchyOptions, data, levelKey, childrenKey, keyExtractor]);
+
+    const [sortState, setSortState] = useControlledState<SortState | null>(defaultSort, {
+        value: sort,
+        onChange: onSortChange,
+    });
+
+    const sortedTableData = useMemo(() => {
+        if (manualSort) {
+            return tableData;
+        }
+        return getSortedHierarchicalData(tableData, sortState, columns, childrenKey);
+    }, [tableData, sortState, columns, childrenKey, manualSort]);
 
     const [expandedKeys, setExpandedKeys] = useState(() =>
         collectInitiallyExpandedKeys(
@@ -181,7 +201,8 @@ function HierarchicalTable<T, C extends string = 'children', L extends string = 
     return (
         <Table
             {...tableProps}
-            data={tableData}
+            columns={columns}
+            data={sortedTableData}
             rowRenderer={renderHierarchicalRow}
             keyExtractor={keyExtractor}
             onRowClick={onRowClick}
@@ -189,6 +210,9 @@ function HierarchicalTable<T, C extends string = 'children', L extends string = 
             bodyRowClassName={bodyRowClassName}
             dataClassName={dataClassName}
             rowSpacingHeight={rowSpacingHeight}
+            sort={sortState}
+            onSortChange={setSortState}
+            manualSort
         />
     );
 }
@@ -221,7 +245,7 @@ function HierarchicalRow<T, C extends string = 'children', L extends string = 'l
     item: Hierarchical<T, C, L>;
     index: number;
     onClick?: (item: Hierarchical<T, C, L>) => void;
-    columns: Column[];
+    columns: Column<Hierarchical<T, C, L>>[];
     className?: string;
     dataClassName?: string;
     parentClassName?: string;

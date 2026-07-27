@@ -1,10 +1,14 @@
 import React, { useMemo, useCallback, useRef, useEffect, type JSX } from 'react';
 
+import { MdArrowDownward, MdArrowUpward, MdUnfoldMore } from 'react-icons/md';
+
 import styles from './styles.module.scss';
-import type { TableProps, TableRenderDataItem } from './types';
+import { getNextSortDirection, getSortedData } from './sort';
+import type { Column, SortDirection, SortState, TableProps, TableRenderDataItem } from './types';
 import CheckboxInput from '../Form/CheckboxInput';
 import List, { type ListRenderItem } from '../List';
 import cs from '../../cs';
+import useControlledState from '../../hooks/useControlledState';
 
 const tableDataStyle = {
     '--row-level': '0rem',
@@ -59,6 +63,49 @@ function Row<T>({
     );
 }
 
+const ariaSortValues = {
+    asc: 'ascending',
+    desc: 'descending',
+} as const;
+
+const sortIcons = {
+    asc: MdArrowUpward,
+    desc: MdArrowDownward,
+};
+
+function SortableHeaderItem({
+    column,
+    sortDirection,
+    onToggleSort,
+    iconClassName,
+    children,
+}: {
+    column: Column;
+    sortDirection: SortDirection | null;
+    onToggleSort: (accessor: string) => void;
+    iconClassName?: string;
+    children: React.ReactNode;
+}) {
+    const handleClick = useCallback(
+        () => onToggleSort(column.accessor),
+        [onToggleSort, column.accessor],
+    );
+
+    const SortIcon = sortDirection ? sortIcons[sortDirection] : MdUnfoldMore;
+
+    return (
+        <button type="button" className={styles.sortButton} onClick={handleClick}>
+            {children}
+            <SortIcon
+                aria-hidden
+                className={cs(styles.sortIcon, iconClassName, {
+                    [styles.sortIconInactive]: !sortDirection,
+                })}
+            />
+        </button>
+    );
+}
+
 function Table<T>(props: TableProps<T>) {
     const {
         className,
@@ -88,7 +135,26 @@ function Table<T>(props: TableProps<T>) {
         selectedItems = [],
         onSelectedItemsChange,
         selectedRowClassName = '',
+        sort,
+        defaultSort = null,
+        onSortChange,
+        manualSort = false,
+        sortIconClassName,
     } = props;
+
+    const [sortState, setSortState] = useControlledState<SortState | null>(defaultSort, {
+        value: sort,
+        onChange: onSortChange,
+    });
+
+    const handleToggleSort = useCallback(
+        (accessor: string) => {
+            const currentDirection = sortState?.accessor === accessor ? sortState.direction : null;
+            const nextDirection = getNextSortDirection(currentDirection);
+            setSortState(nextDirection ? { accessor, direction: nextDirection } : null);
+        },
+        [sortState, setSortState],
+    );
 
     const tableColumns = useMemo(() => {
         if (!selectable) {
@@ -97,13 +163,20 @@ function Table<T>(props: TableProps<T>) {
         return [{ Header: '', accessor: 'select' }, ...columns];
     }, [columns, selectable]);
 
-    const visibleData = useMemo(() => {
-        if (controlled) {
+    const sortedData = useMemo(() => {
+        if (manualSort || !sortState) {
             return data;
         }
+        return getSortedData(data, sortState, columns);
+    }, [data, columns, sortState, manualSort]);
+
+    const visibleData = useMemo(() => {
+        if (controlled) {
+            return sortedData;
+        }
         const initIndex = (page - 1) * maxRows;
-        return data.slice(initIndex, initIndex + maxRows);
-    }, [controlled, data, maxRows, page]);
+        return sortedData.slice(initIndex, initIndex + maxRows);
+    }, [controlled, sortedData, maxRows, page]);
 
     useEffect(() => {
         if (page && maxRows && selectable) {
@@ -137,7 +210,11 @@ function Table<T>(props: TableProps<T>) {
     const headerCheckboxRef = useRef<HTMLInputElement>(null);
     const Header = useMemo(() => {
         if (renderHeader) {
-            return renderHeader({ columns: tableColumns });
+            return renderHeader({
+                columns: tableColumns,
+                sort: sortState,
+                onSortChange: setSortState,
+            });
         }
         return (
             <thead className={cs(styles.head, headerClassName)}>
@@ -161,9 +238,35 @@ function Table<T>(props: TableProps<T>) {
                                 </th>
                             );
                         }
+                        const content = renderHeaderItem
+                            ? renderHeaderItem({ column: col })
+                            : col.Header;
+
+                        if (!col.sortable) {
+                            return (
+                                <th key={idx} className={cs(styles.data, headerItemClassName)}>
+                                    {content}
+                                </th>
+                            );
+                        }
+
+                        const sortDirection =
+                            sortState?.accessor === col.accessor ? sortState.direction : null;
+
                         return (
-                            <th key={idx} className={cs(styles.data, headerItemClassName)}>
-                                {renderHeaderItem ? renderHeaderItem({ column: col }) : col.Header}
+                            <th
+                                key={idx}
+                                className={cs(styles.data, headerItemClassName)}
+                                aria-sort={sortDirection ? ariaSortValues[sortDirection] : 'none'}
+                            >
+                                <SortableHeaderItem
+                                    column={col}
+                                    sortDirection={sortDirection}
+                                    onToggleSort={handleToggleSort}
+                                    iconClassName={sortIconClassName}
+                                >
+                                    {content}
+                                </SortableHeaderItem>
                             </th>
                         );
                     })}
@@ -181,6 +284,10 @@ function Table<T>(props: TableProps<T>) {
         handleAllRowsSelectedChange,
         renderHeader,
         renderHeaderItem,
+        sortState,
+        setSortState,
+        handleToggleSort,
+        sortIconClassName,
     ]);
 
     const renderTableDataItem: TableRenderDataItem<T> = useCallback(

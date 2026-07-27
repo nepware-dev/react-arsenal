@@ -4,18 +4,60 @@ import type { ListRenderItemProps, KeyExtractor, ListProps } from '../List';
 
 export type { KeyExtractor };
 
-export interface Column {
-    Header: string;
+/**
+ * Direction a sorted column is ordered in.
+ * `asc` is ascending, `desc` is descending.
+ */
+export type SortDirection = 'asc' | 'desc';
+
+/**
+ * Current sort applied to the table.
+ * `accessor` identifies the sorted column and `direction` its order.
+ */
+export interface SortState {
     accessor: string;
+    direction: SortDirection;
 }
 
-export type TableRenderHeader = ({ columns }: { columns: Column[] }) => React.ReactNode;
-export type TableRenderHeaderItem = ({ column }: { column: Column }) => React.ReactNode | string;
+export interface Column<T = any> {
+    Header: string;
+    accessor: string;
+    /**
+     * Whether this column can be sorted by clicking its header.
+     * Defaults to false.
+     */
+    sortable?: boolean;
+    /**
+     * Value compared by the default comparator.
+     * Defaults to `item[accessor]`.
+     */
+    sortAccessor?: (item: T) => unknown;
+    /**
+     * Ascending comparator for this column.
+     * Takes precedence over `sortAccessor` when both are provided.
+     */
+    sortComparator?: (firstItem: T, secondItem: T) => number;
+}
+
+export type TableRenderHeader<T = any> = ({
+    columns,
+    sort,
+    onSortChange,
+}: {
+    columns: Column<T>[];
+    sort?: SortState | null;
+    onSortChange?: (sort: SortState | null) => void;
+}) => React.ReactNode;
+export type TableRenderHeaderItem<T = any> = ({
+    column,
+}: {
+    column: Column<T>;
+}) => React.ReactNode | string;
 
 export type TableRenderDataItemProps<T> = {
     item: T;
     index: number;
-    column: Column;
+    column: Column<T>;
     path?: (string | number)[];
 };
 export type TableRenderDataItem<T> = ({
@@ -26,7 +68,7 @@ export type TableRenderDataItem<T> = ({
 }: TableRenderDataItemProps<T>) => React.ReactNode | string;
 
 export type TableRowRendererProps<T> = ListRenderItemProps<T> & {
-    columns: Column[];
+    columns: Column<T>[];
     isSelected: boolean;
 };
 export type TableRowRenderer<T> = (props: TableRowRendererProps<T>) => React.ReactNode | string;
@@ -72,7 +114,7 @@ export interface TableProps<T> {
      * Array of columns for the table.
      * Requires Header and accessor keys for each column
      */
-    columns: Column[];
+    columns: Column<T>[];
     /*
      * Extract key from data items.
      * Note: Avoid using index as the key for tables
@@ -83,12 +125,12 @@ export interface TableProps<T> {
      * Renderer for header.
      * @param {{columns: array}} payload - Contains the columns array of table for rendering header.
      */
-    renderHeader?: TableRenderHeader;
+    renderHeader?: TableRenderHeader<T>;
     /*
      * Renderer for each data item in header.
      * Appears as a direct child of td element.
      */
-    renderHeaderItem?: TableRenderHeaderItem;
+    renderHeaderItem?: TableRenderHeaderItem<T>;
     /*
      * Renderer for each data item in body.
      * Appears as a direct child of td element.
@@ -154,4 +196,28 @@ export interface TableProps<T> {
      * Class applied to selected row.
      */
     selectedRowClassName?: string;
+    /**
+     * Current sort state of the table. Passing this prop makes sorting controlled.
+     * `null` means controlled-and-unsorted; `undefined` leaves sorting uncontrolled.
+     */
+    sort?: SortState | null;
+    /**
+     * Sort state the table starts with when sorting is uncontrolled.
+     * Defaults to `null` (unsorted).
+     */
+    defaultSort?: SortState | null;
+    /**
+     * Called with the new sort state whenever the user changes it, or `null` once sorting is cleared.
+     */
+    onSortChange?: (sort: SortState | null) => void;
+    /**
+     * Whether `data` already arrives sorted, so the table only renders sort indicators
+     * and header interactions without reordering rows itself. Use for server-side sorting.
+     * Defaults to false.
+     */
+    manualSort?: boolean;
+    /**
+     * Class applied to the sort indicator icon in a sortable column header.
+     */
+    sortIconClassName?: string;
 }

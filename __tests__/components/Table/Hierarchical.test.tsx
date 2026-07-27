@@ -5,6 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import HierarchicalTable, {
     type Column,
     type Hierarchical,
+    type HierarchicalTableProps,
 } from '../../../components/Table/Hierarchical';
 import { buildHierarchy } from '../../../utils';
 
@@ -580,6 +581,276 @@ describe('HierarchicalTable', () => {
             );
 
             expect(screen.getByText('No item to display')).toBeInTheDocument();
+        });
+    });
+
+    describe('Sorting', () => {
+        const sortableColumns: Column<Hierarchical<OrgNode>>[] = [
+            { Header: 'Title', accessor: 'title', sortable: true },
+            { Header: 'Count', accessor: 'count', sortable: true },
+            { Header: 'Info', accessor: 'info' },
+        ];
+
+        const buildSortableData = (): Hierarchical<OrgNode>[] => [
+            {
+                id: 1,
+                title: 'Engineering',
+                count: 42,
+                active: true,
+                tags: ['eng'],
+                info: { code: 'ENG' },
+                level: 0,
+                children: [
+                    {
+                        id: 2,
+                        title: 'Frontend',
+                        count: 10,
+                        active: false,
+                        tags: [],
+                        info: null,
+                        level: 1,
+                        children: [],
+                    },
+                    {
+                        id: 3,
+                        title: 'Backend',
+                        count: 12,
+                        active: true,
+                        tags: ['api'],
+                        info: { code: 'BE' },
+                        level: 1,
+                        children: [
+                            {
+                                id: 4,
+                                title: 'Platform',
+                                count: 3,
+                                active: true,
+                                tags: [],
+                                info: null,
+                                level: 2,
+                                children: [],
+                            },
+                            {
+                                id: 5,
+                                title: 'Database',
+                                count: 9,
+                                active: true,
+                                tags: [],
+                                info: null,
+                                level: 2,
+                                children: [],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 6,
+                title: 'Sales',
+                count: 8,
+                active: false,
+                tags: [],
+                info: null,
+                level: 0,
+                children: [],
+            },
+        ];
+
+        const dataRows = () => screen.getAllByRole('row').slice(1);
+        const renderedTitles = () =>
+            dataRows().map((row) => row.querySelectorAll('td')[0].textContent);
+        const renderedLevels = () =>
+            dataRows().map((row) =>
+                row.querySelectorAll('td')[0].style.getPropertyValue('--row-level'),
+            );
+
+        const renderSortableTable = (
+            props: Partial<HierarchicalTableProps<OrgNode>> = {},
+            sortableData: Hierarchical<OrgNode>[] = buildSortableData(),
+        ) =>
+            render(
+                <HierarchicalTable
+                    data={sortableData}
+                    columns={sortableColumns}
+                    keyExtractor={keyExtractor}
+                    renderDataItem={renderDataItem}
+                    hierarchyOptions={{ initialExpandedLevel: 2 }}
+                    {...props}
+                />,
+            );
+
+        it('leaves every level in its original order until a column is sorted', () => {
+            renderSortableTable();
+
+            expect(renderedTitles()).toEqual([
+                'Engineering',
+                'Frontend',
+                'Backend',
+                'Platform',
+                'Database',
+                'Sales',
+            ]);
+            expect(
+                screen.getByRole('columnheader', { name: /Title/ }),
+            ).toHaveAttribute('aria-sort', 'none');
+        });
+
+        it('sorts root nodes when a sortable header is clicked', () => {
+            renderSortableTable({ hierarchyOptions: { initialExpandedLevel: 0 } });
+
+            fireEvent.click(screen.getByRole('button', { name: /Count/ }));
+
+            expect(renderedTitles()).toEqual(['Sales', 'Engineering']);
+            expect(screen.getByRole('columnheader', { name: /Count/ })).toHaveAttribute(
+                'aria-sort',
+                'ascending',
+            );
+        });
+
+        it('sorts siblings at every depth with the same sort state', () => {
+            renderSortableTable();
+
+            fireEvent.click(screen.getByRole('button', { name: /Title/ }));
+
+            expect(renderedTitles()).toEqual([
+                'Engineering',
+                'Backend',
+                'Database',
+                'Platform',
+                'Frontend',
+                'Sales',
+            ]);
+        });
+
+        it('reverses siblings at every depth on the descending step of the cycle', () => {
+            renderSortableTable();
+            const titleSortButton = screen.getByRole('button', { name: /Title/ });
+
+            fireEvent.click(titleSortButton);
+            fireEvent.click(titleSortButton);
+
+            expect(renderedTitles()).toEqual([
+                'Sales',
+                'Engineering',
+                'Frontend',
+                'Backend',
+                'Platform',
+                'Database',
+            ]);
+
+            fireEvent.click(titleSortButton);
+            expect(renderedTitles()).toEqual([
+                'Engineering',
+                'Frontend',
+                'Backend',
+                'Platform',
+                'Database',
+                'Sales',
+            ]);
+        });
+
+        it('keeps children nested under their own parent when sorting', () => {
+            renderSortableTable();
+
+            fireEvent.click(screen.getByRole('button', { name: /Title/ }));
+
+            expect(renderedLevels()).toEqual(['0rem', '1rem', '2rem', '2rem', '1rem', '0rem']);
+
+            const backendRow = screen.getByText('Backend').closest('tr') as HTMLElement;
+            fireEvent.click(getToggleIcon(backendRow)!);
+            expect(screen.queryByText('Database')).not.toBeInTheDocument();
+            expect(screen.queryByText('Platform')).not.toBeInTheDocument();
+            expect(renderedTitles()).toEqual([
+                'Engineering',
+                'Backend',
+                'Frontend',
+                'Sales',
+            ]);
+        });
+
+        it('ignores sort state pointing at a column that is not sortable', () => {
+            renderSortableTable({ defaultSort: { accessor: 'info', direction: 'asc' } });
+
+            expect(screen.getAllByRole('button')).toHaveLength(2);
+            expect(screen.getByRole('columnheader', { name: /Info/ })).not.toHaveAttribute(
+                'aria-sort',
+            );
+            expect(renderedTitles()).toEqual([
+                'Engineering',
+                'Frontend',
+                'Backend',
+                'Platform',
+                'Database',
+                'Sales',
+            ]);
+        });
+
+        it('orders every level from defaultSort on the first render', () => {
+            renderSortableTable({ defaultSort: { accessor: 'count', direction: 'desc' } });
+
+            expect(renderedTitles()).toEqual([
+                'Engineering',
+                'Backend',
+                'Database',
+                'Platform',
+                'Frontend',
+                'Sales',
+            ]);
+        });
+
+        it('honours a custom sortAccessor at every depth', () => {
+            renderSortableTable({
+                columns: [
+                    {
+                        Header: 'Info',
+                        accessor: 'info.code',
+                        sortable: true,
+                        sortAccessor: (item) => item.info?.code ?? null,
+                    },
+                ],
+                defaultSort: { accessor: 'info.code', direction: 'asc' },
+            });
+
+            expect(renderedTitles()).toEqual([
+                'Engineering',
+                'Backend',
+                'Platform',
+                'Database',
+                'Frontend',
+                'Sales',
+            ]);
+        });
+
+        it('reports sort changes and leaves data untouched when manualSort is set', () => {
+            const handleSortChange = vi.fn();
+            renderSortableTable({ manualSort: true, onSortChange: handleSortChange });
+
+            fireEvent.click(screen.getByRole('button', { name: /Title/ }));
+
+            expect(handleSortChange).toHaveBeenCalledWith({
+                accessor: 'title',
+                direction: 'asc',
+            });
+            expect(renderedTitles()).toEqual([
+                'Engineering',
+                'Frontend',
+                'Backend',
+                'Platform',
+                'Database',
+                'Sales',
+            ]);
+        });
+
+        it('does not mutate the data it was given', () => {
+            const sortableData = buildSortableData();
+            const originalData = JSON.stringify(sortableData);
+
+            renderSortableTable({}, sortableData);
+            const titleSortButton = screen.getByRole('button', { name: /Title/ });
+            fireEvent.click(titleSortButton);
+            fireEvent.click(titleSortButton);
+
+            expect(JSON.stringify(sortableData)).toBe(originalData);
         });
     });
 });

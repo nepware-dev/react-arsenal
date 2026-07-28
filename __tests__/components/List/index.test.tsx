@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import List, { KeyExtractor, ListProps, ListRenderItem } from '../../components/List';
+import List, { KeyExtractor, ListProps, ListRenderItem } from '../../../components/List';
 
 interface TestItem {
     id: number;

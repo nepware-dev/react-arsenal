@@ -21,7 +21,6 @@ import Dropdown from '@nepware/react-arsenal/components/Dropdown';
 import Modal from '@nepware/react-arsenal/components/Modal';
 import { defaultLocalizer } from '@nepware/react-arsenal/components/I18n';
 ```
-
 ## Styling
 
 Component styles are pre-compiled with scoped class names baked into the shipped

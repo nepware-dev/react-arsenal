@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/nepware-dev/react-arsenal/compare/v1.1.0...v1.2.0) (2026-07-28)
+
+
+### Features
+
+* **table:** add opt-in column sorting ([778e47b](https://github.com/nepware-dev/react-arsenal/commit/778e47bab0f152e362e6072c26b1b741a9a83565))
+
 # [1.1.0](https://github.com/nepware-dev/react-arsenal/compare/v1.0.0...v1.1.0) (2026-07-23)
 
 

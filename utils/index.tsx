@@ -152,6 +152,9 @@ export const isIntersectionObserverAvailable = () =>
   "IntersectionObserver" in window &&
   "isIntersecting" in window.IntersectionObserverEntry.prototype;
 
+export const isResizeObserverAvailable = () =>
+  typeof ResizeObserver !== "undefined";
+
 export const scrollToElement = (element: Element) => {
   if (!element) {
     return;
@@ -317,4 +320,8 @@ export const formatFileSize = (
   const prefix = prefixes[e] ?? "";
   const size = (bytes / Math.pow(base, e)).toFixed(numFixed);
   return `${size} ${prefix}B`.replace("  ", " ");
+};
+
+export const isNullOrUndefined = (value: unknown): value is null | undefined => {
+  return value === null || value === undefined;
 };

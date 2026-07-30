@@ -7,5 +7,5 @@
     background-color: var(--color-background);
     max-height: 96vh;
     z-index: 9999;
-    transition: all 0.3s;
+    transition: background-color 0.3s, box-shadow 0.3s;
 }

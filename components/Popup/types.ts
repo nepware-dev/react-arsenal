@@ -45,6 +45,11 @@ export interface PopupProps<T extends HTMLElement | null> {
      */
     closeOnEscape?: boolean;
     /**
+     * DOM node the popup is portalled into
+     * Defaults to document.body
+     */
+    container?: Element | DocumentFragment;
+    /**
      * Disable focus capture
      */
     disableFocusLock?: boolean;

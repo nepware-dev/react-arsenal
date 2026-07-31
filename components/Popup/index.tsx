@@ -1,7 +1,11 @@
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { useCallback, useContext, useMemo, useState, useEffect, useRef } from 'react';
 import FocusLock from 'react-focus-lock';
 
 import styles from './styles.module.scss';
+import PopupNestingContext, {
+    type PopupContainsNode,
+    type PopupNestingContextValue,
+} from './PopupNestingContext';
 import type { PopupProps } from './types';
 import Portal from '../Portal';
 import withVisibleCheck from '../WithVisibleCheck';
@@ -19,6 +23,7 @@ function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
         className: _className,
         closeOnEscape = false,
         closeOnOutsideClick = true,
+        container,
         disableFocusLock = false,
         onClose = noop,
     } = props;
@@ -27,23 +32,58 @@ function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
     const [wrapperRect, setWrapperRect] = useState<React.CSSProperties>();
     const anchorRect = useRect(anchor.current);
 
+    const parentNesting = useContext(PopupNestingContext);
+    const nestedPopupsRef = useRef<Set<PopupContainsNode>>(new Set());
+
     const className = cs(styles.popup, 'popup', _className);
+
+    const containsNode = useCallback(
+        (node: Node) => {
+            if (wrapperRef.current?.contains(node) || anchor?.current?.contains(node)) {
+                return true;
+            }
+            for (const nestedContainsNode of nestedPopupsRef.current) {
+                if (nestedContainsNode(node)) {
+                    return true;
+                }
+            }
+            return false;
+        },
+        [anchor],
+    );
+
+    const containsNodeRef = useRef(containsNode);
+    containsNodeRef.current = containsNode;
+
+    const reportContainsNode = useCallback((node: Node) => containsNodeRef.current(node), []);
+
+    const nestingContextValue = useMemo<PopupNestingContextValue>(
+        () => ({
+            registerNestedPopup: (nestedContainsNode) => {
+                nestedPopupsRef.current.add(nestedContainsNode);
+                return () => {
+                    nestedPopupsRef.current.delete(nestedContainsNode);
+                };
+            },
+        }),
+        [],
+    );
+
+    useEffect(
+        () => parentNesting?.registerNestedPopup(reportContainsNode),
+        [parentNesting, reportContainsNode],
+    );
 
     const handleClickOutside = useCallback(
         (event: MouseEvent) => {
             const { current: wrapper } = wrapperRef;
 
-            if (
-                closeOnOutsideClick &&
-                wrapper &&
-                !wrapper.contains(event.target as Node) &&
-                !anchor?.current?.contains(event.target as Node)
-            ) {
+            if (closeOnOutsideClick && wrapper && !containsNode(event.target as Node)) {
                 event.stopPropagation();
                 onClose(event);
             }
         },
-        [closeOnOutsideClick, onClose, anchor],
+        [closeOnOutsideClick, onClose, containsNode],
     );
 
     const handleKeyPressed = useCallback(
@@ -110,18 +150,23 @@ function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
     }, [anchorRect, transformWrapperRect]);
 
     return (
-        <Portal>
-            <FocusLock disabled={disableFocusLock} returnFocus>
-                {wrapperRect && (
-                    <div ref={wrapperRef} className={className} style={wrapperRect}>
-                        {children}
-                    </div>
-                )}
-            </FocusLock>
+        <Portal container={container}>
+            <PopupNestingContext.Provider value={nestingContextValue}>
+                <FocusLock disabled={disableFocusLock} returnFocus>
+                    {wrapperRect && (
+                        <div ref={wrapperRef} className={className} style={wrapperRect}>
+                            {children}
+                        </div>
+                    )}
+                </FocusLock>
+            </PopupNestingContext.Provider>
         </Portal>
     );
 }
 
 export default withVisibleCheck(Popup);
+
+export { default as PopupNestingContext } from './PopupNestingContext';
+export type { PopupContainsNode, PopupNestingContextValue } from './PopupNestingContext';
 
 export type { OriginPosition, PopupProps } from './types';

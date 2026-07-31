@@ -14,6 +14,7 @@ import type {
     CalendarDayInfo,
     CalendarProps,
     CalendarSystem,
+    CalendarWeekday,
 } from "./types";
 import SelectInput from "../Form/SelectInput";
 import { useI18nContext } from "../I18n";
@@ -44,7 +45,7 @@ import List, {
     ListRenderItemProps,
 } from "../List";
 
-const WEEKDAY_INDICES = [0, 1, 2, 3, 4, 5, 6];
+const DAYS_IN_WEEK = 7;
 
 const MINIMUM_GREGORIAN_YEAR = 1900;
 const MAXIMUM_GREGORIAN_YEAR = 2100;
@@ -99,8 +100,55 @@ const navigationOptionKeyExtractor = (option: NavigationOption) => option.value;
 const navigationOptionValueExtractor = (option: NavigationOption) =>
     option.label;
 
-const dayKeyExtractor: KeyExtractor<number | null> = (item, index) =>
-    item === null ? `empty-${index}` : String(item);
+type CalendarCell =
+    | { type: "empty" }
+    | { type: "day"; day: number }
+    | { type: "outside"; year: number; month: number; day: number };
+
+const dayKeyExtractor: KeyExtractor<CalendarCell> = (item, index) => {
+    if (item.type === "empty") {
+        return `empty-${index}`;
+    }
+    if (item.type === "outside") {
+        return `outside-${item.year}-${item.month}-${item.day}`;
+    }
+    return String(item.day);
+};
+
+interface AdjacentMonth {
+    year: number;
+    month: number;
+    daysInMonth: number;
+}
+
+// Returns null past the date system's supported years, where day counts are unavailable.
+const getAdjacentMonth = (
+    dateSystem: CalendarDateSystem,
+    year: number,
+    month: number,
+    offset: -1 | 1,
+): AdjacentMonth | null => {
+    let targetYear = year;
+    let targetMonth = month + offset;
+    if (targetMonth < 1) {
+        targetYear -= 1;
+        targetMonth = 12;
+    } else if (targetMonth > 12) {
+        targetYear += 1;
+        targetMonth = 1;
+    }
+    if (
+        targetYear < dateSystem.minimumYear ||
+        targetYear > dateSystem.maximumYear
+    ) {
+        return null;
+    }
+    return {
+        year: targetYear,
+        month: targetMonth,
+        daysInMonth: dateSystem.getDaysInMonth(targetYear, targetMonth),
+    };
+};
 
 const Calendar: React.FC<CalendarProps> = (props) => {
     const {
@@ -115,6 +163,9 @@ const Calendar: React.FC<CalendarProps> = (props) => {
         language: languageProp,
         enableYearDropdown = false,
         enableMonthDropdown = false,
+        weekStartsOn = 0,
+        showOutsideDays = true,
+        hideYearNavigation = false,
         isDateDisabled,
         renderDay,
     } = props;
@@ -219,7 +270,17 @@ const Calendar: React.FC<CalendarProps> = (props) => {
     const canShowPreviousYear = visibleYear > minimumBound.year;
     const canShowNextYear = visibleYear < maximumBound.year;
 
-    const dayCells = useMemo(() => {
+    const weekdayIndices = useMemo<CalendarWeekday[]>(
+        () =>
+            Array.from(
+                { length: DAYS_IN_WEEK },
+                (_, index) =>
+                    ((weekStartsOn + index) % DAYS_IN_WEEK) as CalendarWeekday,
+            ),
+        [weekStartsOn],
+    );
+
+    const dayCells = useMemo<CalendarCell[]>(() => {
         const firstWeekdayIndex = dateSystem.firstWeekdayIndex(
             visibleYear,
             visibleMonth,
@@ -228,20 +289,66 @@ const Calendar: React.FC<CalendarProps> = (props) => {
             visibleYear,
             visibleMonth,
         );
-        const leadingCells: null[] = Array.from(
-            { length: firstWeekdayIndex },
-            () => null,
-        );
-        const dayNumbers = Array.from(
+        const leadingCount =
+            (firstWeekdayIndex - weekStartsOn + DAYS_IN_WEEK) % DAYS_IN_WEEK;
+        const monthCells: CalendarCell[] = Array.from(
             { length: daysInMonth },
-            (_, index) => index + 1,
+            (_, index) => ({ type: "day", day: index + 1 }),
         );
-        return [...leadingCells, ...dayNumbers];
-    }, [dateSystem, visibleYear, visibleMonth]);
+
+        if (!showOutsideDays) {
+            const emptyCells: CalendarCell[] = Array.from(
+                { length: leadingCount },
+                () => ({ type: "empty" }),
+            );
+            return [...emptyCells, ...monthCells];
+        }
+
+        const previousMonth = getAdjacentMonth(
+            dateSystem,
+            visibleYear,
+            visibleMonth,
+            -1,
+        );
+        const firstLeadingDay = previousMonth
+            ? previousMonth.daysInMonth - leadingCount + 1
+            : 0;
+        const leadingCells: CalendarCell[] = previousMonth
+            ? Array.from({ length: leadingCount }, (_, index) => ({
+                  type: "outside" as const,
+                  year: previousMonth.year,
+                  month: previousMonth.month,
+                  day: firstLeadingDay + index,
+              }))
+            : Array.from({ length: leadingCount }, () => ({
+                  type: "empty" as const,
+              }));
+
+        const nextMonth = getAdjacentMonth(
+            dateSystem,
+            visibleYear,
+            visibleMonth,
+            1,
+        );
+        const trailingCount =
+            (DAYS_IN_WEEK - ((leadingCount + daysInMonth) % DAYS_IN_WEEK)) %
+            DAYS_IN_WEEK;
+        const trailingCells: CalendarCell[] = nextMonth
+            ? Array.from({ length: trailingCount }, (_, index) => ({
+                  type: "outside" as const,
+                  year: nextMonth.year,
+                  month: nextMonth.month,
+                  day: index + 1,
+              }))
+            : Array.from({ length: trailingCount }, () => ({
+                  type: "empty" as const,
+              }));
+
+        return [...leadingCells, ...monthCells, ...trailingCells];
+    }, [dateSystem, visibleYear, visibleMonth, weekStartsOn, showOutsideDays]);
 
     const isDayDisabled = useCallback(
-        (day: number) => {
-            const date = { year: visibleYear, month: visibleMonth, day };
+        (date: CalendarDate) => {
             if (
                 dateSystem.compare(date, minimumBound) < 0 ||
                 dateSystem.compare(date, maximumBound) > 0
@@ -250,22 +357,16 @@ const Calendar: React.FC<CalendarProps> = (props) => {
             }
             return isDateDisabled ? isDateDisabled(date) : false;
         },
-        [
-            dateSystem,
-            visibleYear,
-            visibleMonth,
-            minimumBound,
-            maximumBound,
-            isDateDisabled,
-        ],
+        [dateSystem, minimumBound, maximumBound, isDateDisabled],
     );
 
     const handleDayClick = useCallback(
         (day: number) => {
-            if (isDayDisabled(day)) {
+            const date = { year: visibleYear, month: visibleMonth, day };
+            if (isDayDisabled(date)) {
                 return;
             }
-            onChange?.({ year: visibleYear, month: visibleMonth, day });
+            onChange?.(date);
         },
         [onChange, visibleYear, visibleMonth, isDayDisabled],
     );
@@ -334,7 +435,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
         [navigateToMonth, visibleMonth, visibleYear],
     );
 
-    const renderDayCell: ListRenderItem<number | null> = useCallback(
+    const renderDayCell: ListRenderItem<CalendarCell> = useCallback(
         (listProps) => {
             return (
                 <DayCellItem
@@ -383,25 +484,29 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                     classNames?.header,
                 )}
             >
+                {!hideYearNavigation && (
+                    <button
+                        type="button"
+                        className={cs(
+                            styles.navigationButton,
+                            "calendar-nav-button",
+                            classNames?.navigationButton,
+                            classNames?.previousYearButton,
+                        )}
+                        aria-label="Previous year"
+                        disabled={!canShowPreviousYear}
+                        onClick={handleGoToPreviousYear}
+                    >
+                        <FiChevronsLeft />
+                    </button>
+                )}
                 <button
                     type="button"
                     className={cs(
                         styles.navigationButton,
                         "calendar-nav-button",
                         classNames?.navigationButton,
-                    )}
-                    aria-label="Previous year"
-                    disabled={!canShowPreviousYear}
-                    onClick={handleGoToPreviousYear}
-                >
-                    <FiChevronsLeft />
-                </button>
-                <button
-                    type="button"
-                    className={cs(
-                        styles.navigationButton,
-                        "calendar-nav-button",
-                        classNames?.navigationButton,
+                        classNames?.previousMonthButton,
                     )}
                     aria-label="Previous month"
                     disabled={!canShowPreviousMonth}
@@ -474,6 +579,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                         styles.navigationButton,
                         "calendar-nav-button",
                         classNames?.navigationButton,
+                        classNames?.nextMonthButton,
                     )}
                     aria-label="Next month"
                     disabled={!canShowNextMonth}
@@ -481,19 +587,22 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                 >
                     <FiChevronRight />
                 </button>
-                <button
-                    type="button"
-                    className={cs(
-                        styles.navigationButton,
-                        "calendar-nav-button",
-                        classNames?.navigationButton,
-                    )}
-                    aria-label="Next year"
-                    disabled={!canShowNextYear}
-                    onClick={handleGoToNextYear}
-                >
-                    <FiChevronsRight />
-                </button>
+                {!hideYearNavigation && (
+                    <button
+                        type="button"
+                        className={cs(
+                            styles.navigationButton,
+                            "calendar-nav-button",
+                            classNames?.navigationButton,
+                            classNames?.nextYearButton,
+                        )}
+                        aria-label="Next year"
+                        disabled={!canShowNextYear}
+                        onClick={handleGoToNextYear}
+                    >
+                        <FiChevronsRight />
+                    </button>
+                )}
             </div>
             <div
                 className={cs(
@@ -502,7 +611,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                     classNames?.weekdays,
                 )}
             >
-                {WEEKDAY_INDICES.map((weekdayIndex) => (
+                {weekdayIndices.map((weekdayIndex) => (
                     <div
                         key={weekdayIndex}
                         className={cs(
@@ -526,14 +635,14 @@ const Calendar: React.FC<CalendarProps> = (props) => {
 };
 
 function DayCellItem(
-    props: ListRenderItemProps<number | null> & {
+    props: ListRenderItemProps<CalendarCell> & {
         classNames: CalendarProps["classNames"];
         visibleYear: number;
         visibleMonth: number;
         dateSystem: CalendarDateSystem;
         today: CalendarDate;
         value: CalendarProps["value"];
-        isDayDisabled: (day: number) => boolean;
+        isDayDisabled: (date: CalendarDate) => boolean;
         onDayClick: (day: number) => void;
         formatNumberLabel: (arg: number) => string;
         renderDay?: (date: CalendarDate, info: CalendarDayInfo) => React.ReactNode;
@@ -554,12 +663,12 @@ function DayCellItem(
     } = props;
 
     const handleDayClick = useCallback(() => {
-        if (item !== null) {
-            onDayClick(item);
+        if (item.type === "day") {
+            onDayClick(item.day);
         }
     }, [item, onDayClick]);
 
-    if (item === null) {
+    if (item.type === "empty") {
         return (
             <div
                 className={cs(
@@ -570,12 +679,45 @@ function DayCellItem(
             />
         );
     }
-    const date = { year: visibleYear, month: visibleMonth, day: item };
+
+    const date =
+        item.type === "outside"
+            ? { year: item.year, month: item.month, day: item.day }
+            : { year: visibleYear, month: visibleMonth, day: item.day };
     const isSelected =
         dateSystem.isValid(value) &&
         dateSystem.compare(date, value as CalendarDate) === 0;
     const isToday = dateSystem.compare(date, today) === 0;
-    const disabled = isDayDisabled(item);
+    const disabled = isDayDisabled(date);
+    const dayInfo: CalendarDayInfo = {
+        isSelected,
+        isDisabled: disabled,
+        isToday,
+        isOutsideMonth: item.type === "outside",
+    };
+    const label = renderDay
+        ? renderDay(date, dayInfo)
+        : formatNumberLabel(item.day);
+
+    // A disabled button, not a div, so the cell shares the in-month day's font metrics.
+    if (item.type === "outside") {
+        return (
+            <button
+                type="button"
+                className={cs(
+                    styles.outsideDay,
+                    "calendar-outside-day",
+                    classNames?.outsideDay,
+                )}
+                disabled
+                tabIndex={-1}
+                aria-hidden="true"
+            >
+                {label}
+            </button>
+        );
+    }
+
     return (
         <button
             type="button"
@@ -591,13 +733,12 @@ function DayCellItem(
                 isSelected && classNames?.selectedDay,
                 isToday && "calendar-day-today",
                 isToday && classNames?.today,
+                disabled && classNames?.disabledDay,
             )}
             disabled={disabled}
             onClick={handleDayClick}
         >
-            {renderDay
-                ? renderDay(date, { isSelected, isDisabled: disabled, isToday })
-                : formatNumberLabel(item)}
+            {label}
         </button>
     );
 }

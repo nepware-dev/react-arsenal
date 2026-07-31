@@ -93,5 +93,15 @@
                 cursor: default;
             }
         }
+
+        .outsideDay {
+            padding: 0.4em 0;
+            border: none;
+            background: none;
+            cursor: default;
+            text-align: center;
+            color: var(--calendar-outside-text-color, var(--color-text-light));
+            opacity: 0.65;
+        }
     }
 }

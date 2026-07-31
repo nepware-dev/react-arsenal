@@ -161,6 +161,7 @@ const DatePickerInput: React.FC<DatePickerInputProps> = (props) => {
                     )}
                 >
                     <input
+                        ref={field.inputRef}
                         type="text"
                         className={cs(
                             styles.dateInput,
@@ -170,7 +171,7 @@ const DatePickerInput: React.FC<DatePickerInputProps> = (props) => {
                         value={field.inputText}
                         placeholder={placeholder}
                         disabled={disabled}
-                        onFocus={field.showCalendar}
+                        onFocus={field.handleInputFocus}
                         onChange={field.handleInputChange}
                         onBlur={field.commitTypedValue}
                         onKeyDown={field.handleKeyDown}
@@ -222,7 +223,7 @@ const DatePickerInput: React.FC<DatePickerInputProps> = (props) => {
                     anchor={field.controlRef}
                     anchorOrigin="bottom left"
                     transformOrigin="top left"
-                    onClose={field.hideCalendar}
+                    onClose={field.dismissCalendar}
                 >
                     <div className={styles.pickerPopup}>{field.calendar}</div>
                 </Popup>

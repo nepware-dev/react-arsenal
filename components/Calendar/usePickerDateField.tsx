@@ -94,11 +94,23 @@ export interface PickerDateField<Model> {
     warning: string | null;
     errorText: any;
     controlRef: React.RefObject<HTMLDivElement | null>;
+    inputRef: React.RefObject<HTMLInputElement | null>;
     Wrapper: React.ElementType;
     wrapperProps: { className?: string };
     showCalendar: () => void;
+    /**
+     * Closes the calendar and returns focus to the text input.
+     * Use for user-triggered closes from within the picker (selection, Enter, Escape) so focus never
+     * falls back to the document body, where an ancestor focus lock would recapture it.
+     */
     hideCalendar: () => void;
+    /**
+     * Closes the calendar without touching focus.
+     * Use for user-triggered closes from outside the picker, where the click target owns focus.
+     */
+    dismissCalendar: () => void;
     toggleCalendar: () => void;
+    handleInputFocus: () => void;
     handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
     commitTypedValue: () => "committed" | "reset";
@@ -173,6 +185,8 @@ const usePickerDateField = <Model,>(
     const [warning, setWarning] = useState<string | null>(null);
 
     const controlRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const restoringFocusRef = useRef(false);
 
     useEffect(() => {
         if (value !== undefined) {
@@ -198,12 +212,40 @@ const usePickerDateField = <Model,>(
         }
     }, [showRequired, required, selected]);
 
-    const hideCalendar = useCallback(() => setExpanded(false), []);
+    const dismissCalendar = useCallback(() => setExpanded(false), []);
+
+    // Flagged so the input's own focus handler can tell this apart from a user focus and not reopen.
+    const restoreInputFocus = useCallback(() => {
+        const input = inputRef.current;
+        if (disabled || !input || document.activeElement === input) {
+            return;
+        }
+        restoringFocusRef.current = true;
+        try {
+            input.focus();
+        } finally {
+            restoringFocusRef.current = false;
+        }
+    }, [disabled]);
+
+    const hideCalendar = useCallback(() => {
+        setExpanded(false);
+        restoreInputFocus();
+    }, [restoreInputFocus]);
+
     const showCalendar = useCallback(() => {
         if (!disabled) {
             setExpanded(true);
         }
     }, [disabled]);
+
+    const handleInputFocus = useCallback(() => {
+        if (restoringFocusRef.current) {
+            return;
+        }
+        showCalendar();
+    }, [showCalendar]);
+
     const toggleCalendar = useCallback(() => {
         setExpanded((previouslyExpanded) =>
             disabled ? previouslyExpanded : !previouslyExpanded,
@@ -477,11 +519,14 @@ const usePickerDateField = <Model,>(
         warning,
         errorText,
         controlRef,
+        inputRef,
         Wrapper,
         wrapperProps,
         showCalendar,
         hideCalendar,
+        dismissCalendar,
         toggleCalendar,
+        handleInputFocus,
         handleInputChange,
         handleKeyDown,
         commitTypedValue,

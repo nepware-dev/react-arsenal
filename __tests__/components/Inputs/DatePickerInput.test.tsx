@@ -265,4 +265,52 @@ describe('DatePickerInput customization hooks', () => {
         expect(screen.getByTestId('day-20')).toHaveAttribute('data-disabled', 'true');
         expect(screen.getByTestId('day-19')).toHaveAttribute('data-disabled', 'false');
     });
+
+    it('shows the default calendar layout when no calendarProps are passed', () => {
+        const { container } = render(
+            <DatePickerInput value="2024-01-15" onChange={onChange} />,
+        );
+
+        fireEvent.focus(container.querySelector('input') as HTMLInputElement);
+
+        expect(container.querySelectorAll('.calendar-nav-button')).toHaveLength(4);
+        // Outside days render by default; a consumer opts out with `showOutsideDays: false`.
+        expect(container.querySelector('.calendar-outside-day')).toBeInTheDocument();
+        expect(container.querySelectorAll('.calendar-weekday')[0]).toHaveTextContent('Sun');
+    });
+
+    it('hides adjacent-month days when calendarProps opts out of showOutsideDays', () => {
+        const { container } = render(
+            <DatePickerInput
+                value="2024-01-15"
+                calendarProps={{ showOutsideDays: false }}
+                onChange={onChange}
+            />,
+        );
+
+        fireEvent.focus(container.querySelector('input') as HTMLInputElement);
+
+        expect(container.querySelector('.calendar-outside-day')).not.toBeInTheDocument();
+    });
+
+    it('forwards the calendar design props through calendarProps', () => {
+        const { container } = render(
+            <DatePickerInput
+                value="2024-01-15"
+                calendarProps={{
+                    weekStartsOn: 1,
+                    showOutsideDays: true,
+                    hideYearNavigation: true,
+                    classNames: { outsideDay: 'my-outside-day' },
+                }}
+                onChange={onChange}
+            />,
+        );
+
+        fireEvent.focus(container.querySelector('input') as HTMLInputElement);
+
+        expect(container.querySelectorAll('.calendar-nav-button')).toHaveLength(2);
+        expect(container.querySelectorAll('.calendar-weekday')[0]).toHaveTextContent('Mon');
+        expect(container.querySelectorAll('.my-outside-day').length).toBeGreaterThan(0);
+    });
 });

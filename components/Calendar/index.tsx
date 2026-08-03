@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 
 import {
     FiChevronLeft,
@@ -26,6 +32,7 @@ import {
     compareBikramSambatDates,
     compareGregorianDates,
     convertBikramSambatToGregorian,
+    convertGregorianToBikramSambat,
     getBikramSambatMonthLabel,
     getBikramSambatWeekdayLabel,
     getDaysInBikramSambatMonth,
@@ -37,6 +44,7 @@ import {
     isNepaliLanguage,
     isValidBikramSambatDate,
     isValidGregorianDate,
+    jsDateToGregorian,
     toNepaliDigits,
 } from "../../utils/date";
 import List, {
@@ -91,6 +99,76 @@ const VARIANT_CLASS_NAMES: Record<CalendarSystem, string> = {
     nepali: "nepali-calendar",
 };
 
+// BS's real convertible span is narrower than Gregorian's declared 1900-2100 range.
+const BIKRAM_SAMBAT_SUPPORTED_GREGORIAN_RANGE = {
+    minimum: convertBikramSambatToGregorian({
+        year: MINIMUM_BIKRAM_SAMBAT_YEAR,
+        month: 1,
+        day: 1,
+    }),
+    maximum: convertBikramSambatToGregorian({
+        year: MAXIMUM_BIKRAM_SAMBAT_YEAR,
+        month: 12,
+        day: getDaysInBikramSambatMonth(MAXIMUM_BIKRAM_SAMBAT_YEAR, 12),
+    }),
+};
+
+const convertViewDate = (
+    fromSystem: CalendarSystem,
+    toSystem: CalendarSystem,
+    date: CalendarDate,
+): CalendarDate => {
+    if (fromSystem === toSystem) {
+        return date;
+    }
+    if (fromSystem === "nepali") {
+        return jsDateToGregorian(convertBikramSambatToGregorian(date));
+    }
+    const asJsDate = gregorianToJsDate(date);
+    if (asJsDate < BIKRAM_SAMBAT_SUPPORTED_GREGORIAN_RANGE.minimum) {
+        return { year: MINIMUM_BIKRAM_SAMBAT_YEAR, month: 1, day: 1 };
+    }
+    if (asJsDate > BIKRAM_SAMBAT_SUPPORTED_GREGORIAN_RANGE.maximum) {
+        return { year: MAXIMUM_BIKRAM_SAMBAT_YEAR, month: 12, day: 1 };
+    }
+    return convertGregorianToBikramSambat(asJsDate);
+};
+
+// Clamps a year/month into [minimumBound, maximumBound], carrying month over/underflow into the year first.
+const clampMonthToBounds = (
+    year: number,
+    month: number,
+    minimumBound: CalendarDate,
+    maximumBound: CalendarDate,
+): { year: number; month: number } => {
+    if (month < 1) {
+        year -= 1;
+        month = 12;
+    } else if (month > 12) {
+        year += 1;
+        month = 1;
+    }
+    if (
+        year < minimumBound.year ||
+        (year === minimumBound.year && month < minimumBound.month)
+    ) {
+        return { year: minimumBound.year, month: minimumBound.month };
+    }
+    if (
+        year > maximumBound.year ||
+        (year === maximumBound.year && month > maximumBound.month)
+    ) {
+        return { year: maximumBound.year, month: maximumBound.month };
+    }
+    return { year, month };
+};
+
+interface VisibleWindow {
+    system: CalendarSystem;
+    year: number;
+    month: number;
+}
+
 interface NavigationOption {
     value: number;
     label: string;
@@ -121,7 +199,6 @@ interface AdjacentMonth {
     daysInMonth: number;
 }
 
-// Returns null past the date system's supported years, where day counts are unavailable.
 const getAdjacentMonth = (
     dateSystem: CalendarDateSystem,
     year: number,
@@ -209,42 +286,61 @@ const Calendar: React.FC<CalendarProps> = (props) => {
         return today;
     }, [dateSystem, value, today, minimumBound, maximumBound]);
 
-    const [visibleYear, setVisibleYear] = useState(initialDate.year);
-    const [visibleMonth, setVisibleMonth] = useState(initialDate.month);
+    const [visibleWindow, setVisibleWindow] = useState<VisibleWindow>(() => ({
+        system,
+        year: initialDate.year,
+        month: initialDate.month,
+    }));
+
+    const windowAnchorRef = useRef<{ system: CalendarSystem; date: CalendarDate }>({
+        system,
+        date: initialDate,
+    });
+
+    let visibleYear = visibleWindow.year;
+    let visibleMonth = visibleWindow.month;
+    if (visibleWindow.system !== system) {
+        const anchor = windowAnchorRef.current;
+        const target = dateSystem.isValid(value)
+            ? (value as CalendarDate)
+            : convertViewDate(anchor.system, system, anchor.date);
+        const clamped = clampMonthToBounds(
+            target.year,
+            target.month,
+            minimumBound,
+            maximumBound,
+        );
+        visibleYear = clamped.year;
+        visibleMonth = clamped.month;
+        setVisibleWindow({ system, year: visibleYear, month: visibleMonth });
+    }
 
     useEffect(() => {
         if (dateSystem.isValid(value)) {
-            setVisibleYear((value as CalendarDate).year);
-            setVisibleMonth((value as CalendarDate).month);
+            const selected = value as CalendarDate;
+            windowAnchorRef.current = { system, date: selected };
+            setVisibleWindow({
+                system,
+                year: selected.year,
+                month: selected.month,
+            });
         }
-    }, [dateSystem, value]);
+    }, [dateSystem, system, value]);
 
     const navigateToMonth = useCallback(
         (year: number, month: number) => {
-            if (month < 1) {
-                year -= 1;
-                month = 12;
-            } else if (month > 12) {
-                year += 1;
-                month = 1;
-            }
-            if (
-                year < minimumBound.year ||
-                (year === minimumBound.year && month < minimumBound.month)
-            ) {
-                year = minimumBound.year;
-                month = minimumBound.month;
-            } else if (
-                year > maximumBound.year ||
-                (year === maximumBound.year && month > maximumBound.month)
-            ) {
-                year = maximumBound.year;
-                month = maximumBound.month;
-            }
-            setVisibleYear(year);
-            setVisibleMonth(month);
+            const clamped = clampMonthToBounds(year, month, minimumBound, maximumBound);
+            windowAnchorRef.current = {
+                system,
+                date: { year: clamped.year, month: clamped.month, day: 1 },
+            };
+            setVisibleWindow({
+                system,
+                year: clamped.year,
+                month: clamped.month,
+            });
         },
-        [minimumBound, maximumBound],
+        [system, minimumBound, maximumBound],
     );
 
     useEffect(() => {

@@ -174,13 +174,18 @@ const usePickerDateField = <Model,>(
         model.parseIso(value ?? defaultValue),
     );
     const resetBaseline = selected;
-    const [inputText, setInputText] = useState<string>(() =>
-        model.format(
+    const [inputState, setInputState] = useState<{
+        system: DisplaySystem;
+        text: string;
+    }>(() => ({
+        system: mode === "nepali" ? "bs" : "ad",
+        text: model.format(
             model.parseIso(value ?? defaultValue),
             mode === "nepali" ? "bs" : "ad",
             language,
         ),
-    );
+    }));
+    const inputText = inputState.text;
     const [expanded, setExpanded] = useState(false);
     const [warning, setWarning] = useState<string | null>(null);
 
@@ -195,9 +200,10 @@ const usePickerDateField = <Model,>(
     }, [value]);
 
     useEffect(() => {
-        setInputText(
-            modelRef.current.format(selected, displaySystem, language),
-        );
+        setInputState({
+            system: displaySystem,
+            text: modelRef.current.format(selected, displaySystem, language),
+        });
     }, [selected, displaySystem, language]);
 
     useEffect(() => {
@@ -295,7 +301,10 @@ const usePickerDateField = <Model,>(
     const commitTypedValue = useCallback((): "committed" | "reset" => {
         const trimmedText = inputText.trim();
         if (trimmedText === "") {
-            if (!model.equals(selected, model.empty)) {
+            const isBlankByDisplay =
+                !!model.getDate(selected) &&
+                model.format(selected, displaySystem, language) === "";
+            if (!model.equals(selected, model.empty) && !isBlankByDisplay) {
                 setSelected(model.empty);
                 emit(model.empty);
             }
@@ -311,7 +320,10 @@ const usePickerDateField = <Model,>(
             }
             return "committed";
         }
-        setInputText(model.format(resetBaseline, displaySystem, language));
+        setInputState({
+            system: displaySystem,
+            text: model.format(resetBaseline, displaySystem, language),
+        });
         return "reset";
     }, [
         inputText,
@@ -326,10 +338,10 @@ const usePickerDateField = <Model,>(
 
     const handleInputChange = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
-            setInputText(event.target.value);
+            setInputState({ system: displaySystem, text: event.target.value });
             showCalendar();
         },
-        [showCalendar],
+        [displaySystem, showCalendar],
     );
 
     const handleKeyDown = useCallback(
@@ -347,8 +359,11 @@ const usePickerDateField = <Model,>(
     );
 
     const typedViewParts = useMemo(
-        () => parseCalendarViewParts(inputText, displaySystem),
-        [inputText, displaySystem],
+        () =>
+            inputState.system === displaySystem
+                ? parseCalendarViewParts(inputState.text, displaySystem)
+                : undefined,
+        [inputState, displaySystem],
     );
 
     const errorText = useMemo(() => {

@@ -31,6 +31,11 @@ interface DateTimeModel {
     time: string;
 }
 
+interface DateTimeChangePayload {
+    name?: string;
+    value: string | null;
+}
+
 const parseTimeToMinutes = (time: string): number | null => {
     const match = /^(\d{1,2}):(\d{2})$/.exec(time.trim());
     if (!match) {
@@ -223,14 +228,20 @@ const DateTimePickerInput: React.FC<DateTimePickerInputProps> = (props) => {
     );
 
     const timeInputRef = useRef<HTMLInputElement>(null);
+    const deferCommitEmitRef = useRef(false);
+    const deferredCommitPayloadRef = useRef<DateTimeChangePayload | null>(null);
 
     // A datetime is only meaningful once both date and time exist; suppress the intermediate date-only value.
     const handleChange = useCallback(
-        (payload: { name?: string; value: string | null }) => {
+        (payload: DateTimeChangePayload) => {
             if (
                 payload.value !== null &&
                 !payload.value.includes(ISO_DATETIME_SEPARATOR)
             ) {
+                return;
+            }
+            if (deferCommitEmitRef.current) {
+                deferredCommitPayloadRef.current = payload;
                 return;
             }
             onChange?.(payload);
@@ -271,37 +282,60 @@ const DateTimePickerInput: React.FC<DateTimePickerInputProps> = (props) => {
         completesOnDateChange: false,
     });
 
-    const { Wrapper, wrapperProps, setSelected, emit, hideCalendar } = field;
+    const {
+        Wrapper,
+        wrapperProps,
+        setSelected,
+        emit,
+        hideCalendar,
+        commitTypedValue,
+    } = field;
     const selectedDate = field.selectedDate;
     const timeText = field.selected.time;
 
     const useNepaliDigits =
         field.displaySystem === "bs" && isNepaliLanguage(language);
 
+    // The date input can still hold typed text; commit it first so entering a time never discards it.
+    const applyTime = useCallback(
+        (time: string): DateTimeModel | null => {
+            deferredCommitPayloadRef.current = null;
+            deferCommitEmitRef.current = true;
+            let committed: DateTimeModel;
+            try {
+                committed = commitTypedValue().model;
+            } finally {
+                deferCommitEmitRef.current = false;
+            }
+            if (
+                time &&
+                committed.date &&
+                !isWithinBounds(committed.date, time)
+            ) {
+                const deferredPayload = deferredCommitPayloadRef.current;
+                if (deferredPayload) {
+                    onChange?.(deferredPayload);
+                }
+                return null;
+            }
+            const next: DateTimeModel = { date: committed.date, time };
+            setSelected(next);
+            emit(next);
+            return next;
+        },
+        [commitTypedValue, isWithinBounds, setSelected, emit, onChange],
+    );
+
     const handleTimeChange = useCallback(
         (target: HTMLInputElement) => {
-            const raw = target.value;
-            if (raw === "") {
-                const next: DateTimeModel = { date: selectedDate, time: "" };
-                setSelected(next);
-                emit(next);
-                return;
-            }
-            const normalized = normalizeTime(raw) || raw;
-            if (!selectedDate || isWithinBounds(selectedDate, normalized)) {
-                const next: DateTimeModel = {
-                    date: selectedDate,
-                    time: normalized,
-                };
-                setSelected(next);
-                emit(next);
-                return;
-            }
-            if (timeInputRef.current) {
+            const rawTime = target.value;
+            const normalizedTime =
+                rawTime === "" ? "" : normalizeTime(rawTime) || rawTime;
+            if (!applyTime(normalizedTime) && timeInputRef.current) {
                 timeInputRef.current.value = timeText;
             }
         },
-        [selectedDate, timeText, isWithinBounds, setSelected, emit],
+        [applyTime, timeText],
     );
 
     const timeOptions = useMemo<TimeOption[]>(() => {
@@ -327,19 +361,11 @@ const DateTimePickerInput: React.FC<DateTimePickerInputProps> = (props) => {
 
     const handleTimeOptionSelect = useCallback(
         (option: TimeOption) => {
-            if (!selectedDate || isWithinBounds(selectedDate, option.time)) {
-                const next: DateTimeModel = {
-                    date: selectedDate,
-                    time: option.time,
-                };
-                setSelected(next);
-                emit(next);
-                if (selectedDate) {
-                    hideCalendar();
-                }
+            if (applyTime(option.time)?.date) {
+                hideCalendar();
             }
         },
-        [selectedDate, isWithinBounds, setSelected, emit, hideCalendar],
+        [applyTime, hideCalendar],
     );
 
     const onMinimumBoundaryDate =

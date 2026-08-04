@@ -159,6 +159,123 @@ describe('DateTimePickerInput customization hooks', () => {
     });
 });
 
+describe('DateTimePickerInput uncommitted typed date', () => {
+    const onChange = vi.fn();
+
+    beforeEach(() => {
+        onChange.mockClear();
+    });
+
+    it('keeps a typed date that has not been committed when a time is typed', () => {
+        const { container } = render(
+            <DateTimePickerInput timeMode="native" onChange={onChange} />,
+        );
+
+        const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.focus(dateInput);
+        fireEvent.change(dateInput, { target: { value: '2024-01-15' } });
+
+        fireEvent.change(container.querySelector('.date-time-field') as HTMLInputElement, {
+            target: { value: '10:30' },
+        });
+
+        expect(onChange).not.toHaveBeenCalledWith({ name: undefined, value: null });
+        expect(onChange).toHaveBeenLastCalledWith({ name: undefined, value: '2024-01-15T10:30' });
+        expect(container.querySelector('.date-time-field')).toHaveValue('10:30');
+        expect(dateInput).toHaveValue('2024-01-15 10:30');
+    });
+
+    it('keeps a typed date that has not been committed when a time option is picked', () => {
+        const { container } = render(<DateTimePickerInput onChange={onChange} />);
+
+        const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.focus(dateInput);
+        fireEvent.change(dateInput, { target: { value: '2024-01-15' } });
+
+        fireEvent.click(screen.getByText('10:30'));
+
+        expect(onChange).not.toHaveBeenCalledWith({ name: undefined, value: null });
+        expect(onChange).toHaveBeenLastCalledWith({ name: undefined, value: '2024-01-15T10:30' });
+        expect(dateInput).toHaveValue('2024-01-15 10:30');
+    });
+
+    it('reverts an unparseable typed date to the committed value when a time is typed', () => {
+        const { container } = render(
+            <DateTimePickerInput timeMode="native" value="2024-01-15T10:00" onChange={onChange} />,
+        );
+
+        const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.focus(dateInput);
+        fireEvent.change(dateInput, { target: { value: '2024-01' } });
+
+        fireEvent.change(container.querySelector('.date-time-field') as HTMLInputElement, {
+            target: { value: '11:30' },
+        });
+
+        expect(onChange).not.toHaveBeenCalledWith({ name: undefined, value: null });
+        expect(onChange).toHaveBeenLastCalledWith({ name: undefined, value: '2024-01-15T11:30' });
+    });
+});
+
+describe('DateTimePickerInput single emit per time entry', () => {
+    const onChange = vi.fn();
+
+    beforeEach(() => {
+        onChange.mockClear();
+    });
+
+    it('emits null once when the date text is erased before a time option is picked', () => {
+        const { container } = render(
+            <DateTimePickerInput value="2024-01-15T10:00" onChange={onChange} />,
+        );
+
+        const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.focus(dateInput);
+        fireEvent.change(dateInput, { target: { value: '' } });
+
+        fireEvent.click(screen.getByText('11:30'));
+
+        expect(onChange).toHaveBeenCalledTimes(1);
+        expect(onChange).toHaveBeenCalledWith({ name: undefined, value: null });
+    });
+
+    it('does not surface the typed time when a different time option is picked', () => {
+        const { container } = render(<DateTimePickerInput onChange={onChange} />);
+
+        const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.focus(dateInput);
+        fireEvent.change(dateInput, { target: { value: '2024-01-15 10:30' } });
+
+        fireEvent.click(screen.getByText('11:30'));
+
+        expect(onChange).not.toHaveBeenCalledWith({ name: undefined, value: '2024-01-15T10:30' });
+        expect(onChange).toHaveBeenCalledTimes(1);
+        expect(onChange).toHaveBeenCalledWith({ name: undefined, value: '2024-01-15T11:30' });
+    });
+
+    it('still emits the committed typed value when the entered time is out of bounds', () => {
+        const { container } = render(
+            <DateTimePickerInput
+                timeMode="native"
+                value="2024-01-15T10:00"
+                minimumDate="2024-01-15T10:00"
+                onChange={onChange}
+            />,
+        );
+
+        const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.focus(dateInput);
+        fireEvent.change(dateInput, { target: { value: '2024-01-15 10:30' } });
+
+        fireEvent.change(container.querySelector('.date-time-field') as HTMLInputElement, {
+            target: { value: '09:30' },
+        });
+
+        expect(onChange).toHaveBeenCalledTimes(1);
+        expect(onChange).toHaveBeenCalledWith({ name: undefined, value: '2024-01-15T10:30' });
+    });
+});
+
 describe('DateTimePickerInput blank commit with no date', () => {
     const onChange = vi.fn();
 

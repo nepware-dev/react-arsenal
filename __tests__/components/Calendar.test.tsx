@@ -5,6 +5,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Calendar, { type CalendarProps } from '../../components/Calendar';
 import I18nProvider from '../../components/I18n';
 import styles from '../../components/Calendar/styles.module.scss';
+import {
+    MAXIMUM_BIKRAM_SAMBAT_YEAR,
+    MINIMUM_BIKRAM_SAMBAT_YEAR,
+    convertBikramSambatToGregorian,
+    convertGregorianToBikramSambat,
+    getBikramSambatMonthLabel,
+    getGregorianMonthLabel,
+    jsDateToGregorian,
+} from '../../utils/date';
 
 describe('Calendar (nepali system)', () => {
     const onChange = vi.fn();
@@ -346,5 +355,368 @@ describe('Calendar (design props)', () => {
             expect(container.querySelectorAll('.my-disabled-day')).toHaveLength(9);
             expect(container.querySelectorAll('.my-outside-day')).toHaveLength(11);
         });
+    });
+});
+
+describe('Calendar (AD/BS system toggle)', () => {
+    const onChange = vi.fn();
+
+    beforeEach(() => {
+        onChange.mockClear();
+    });
+
+    it('converts the visible window from AD to BS when no date is selected', () => {
+        const adWindow = { year: 2026, month: 8, day: 1 };
+        const bsWindow = convertGregorianToBikramSambat(
+            new Date(adWindow.year, adWindow.month - 1, adWindow.day),
+        );
+
+        const { rerender, container } = render(
+            <Calendar system="gregorian" value={null} viewDate={adWindow} onChange={onChange} />,
+        );
+        expect(screen.getByText(getGregorianMonthLabel(adWindow.month))).toBeInTheDocument();
+        expect(screen.getByText(String(adWindow.year))).toBeInTheDocument();
+
+        rerender(<Calendar system="nepali" value={null} onChange={onChange} />);
+
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getBikramSambatMonthLabel(bsWindow.month),
+        );
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+            String(bsWindow.year),
+        );
+    });
+
+    it('returns to the original AD window after an AD -> BS -> AD round trip', () => {
+        const adWindow = { year: 2026, month: 8, day: 1 };
+        const bsWindow = convertGregorianToBikramSambat(
+            new Date(adWindow.year, adWindow.month - 1, adWindow.day),
+        );
+
+        const { rerender, container } = render(
+            <Calendar system="gregorian" value={null} viewDate={adWindow} onChange={onChange} />,
+        );
+
+        rerender(<Calendar system="nepali" value={null} onChange={onChange} />);
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getBikramSambatMonthLabel(bsWindow.month),
+        );
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+            String(bsWindow.year),
+        );
+
+        rerender(<Calendar system="gregorian" value={null} onChange={onChange} />);
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getGregorianMonthLabel(adWindow.month),
+        );
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+            String(adWindow.year),
+        );
+    });
+
+    it('keeps the visible window stable across repeated AD/BS toggles', () => {
+        const adWindow = { year: 2026, month: 8, day: 1 };
+        const bsWindow = convertGregorianToBikramSambat(
+            new Date(adWindow.year, adWindow.month - 1, adWindow.day),
+        );
+
+        const { rerender, container } = render(
+            <Calendar system="gregorian" value={null} viewDate={adWindow} onChange={onChange} />,
+        );
+
+        for (let round = 0; round < 4; round += 1) {
+            rerender(<Calendar system="nepali" value={null} onChange={onChange} />);
+            expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+                getBikramSambatMonthLabel(bsWindow.month),
+            );
+            expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+                String(bsWindow.year),
+            );
+
+            rerender(<Calendar system="gregorian" value={null} onChange={onChange} />);
+            expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+                getGregorianMonthLabel(adWindow.month),
+            );
+            expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+                String(adWindow.year),
+            );
+        }
+    });
+
+    it('returns to the original BS window after a BS -> AD -> BS round trip', () => {
+        const bsWindow = { year: 2083, month: 4, day: 1 };
+        const adWindow = jsDateToGregorian(convertBikramSambatToGregorian(bsWindow));
+
+        const { rerender, container } = render(
+            <Calendar system="nepali" value={null} viewDate={bsWindow} onChange={onChange} />,
+        );
+
+        rerender(<Calendar system="gregorian" value={null} onChange={onChange} />);
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+            String(adWindow.year),
+        );
+
+        rerender(<Calendar system="nepali" value={null} onChange={onChange} />);
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getBikramSambatMonthLabel(bsWindow.month),
+        );
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+            String(bsWindow.year),
+        );
+    });
+
+    it('converts the visible window from BS to AD when no date is selected', () => {
+        const bsWindow = { year: 2083, month: 4, day: 1 };
+        const adWindow = jsDateToGregorian(convertBikramSambatToGregorian(bsWindow));
+
+        const { rerender, container } = render(
+            <Calendar system="nepali" value={null} viewDate={bsWindow} onChange={onChange} />,
+        );
+        expect(screen.getByText(getBikramSambatMonthLabel(bsWindow.month))).toBeInTheDocument();
+        expect(screen.getByText(String(bsWindow.year))).toBeInTheDocument();
+
+        rerender(<Calendar system="gregorian" value={null} onChange={onChange} />);
+
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getGregorianMonthLabel(adWindow.month),
+        );
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+            String(adWindow.year),
+        );
+    });
+
+    it('clamps to the BS minimum year instead of throwing when the AD window is below it', () => {
+        const adWindow = { year: 1905, month: 6, day: 1 };
+
+        const { rerender, container } = render(
+            <Calendar system="gregorian" value={null} viewDate={adWindow} onChange={onChange} />,
+        );
+        expect(screen.getByText(String(adWindow.year))).toBeInTheDocument();
+
+        expect(() => {
+            rerender(<Calendar system="nepali" value={null} onChange={onChange} />);
+        }).not.toThrow();
+
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+            String(MINIMUM_BIKRAM_SAMBAT_YEAR),
+        );
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getBikramSambatMonthLabel(1),
+        );
+    });
+
+    it('clamps to the BS maximum year instead of throwing when the AD window is above it', () => {
+        const adWindow = { year: 2090, month: 3, day: 1 };
+
+        const { rerender, container } = render(
+            <Calendar system="gregorian" value={null} viewDate={adWindow} onChange={onChange} />,
+        );
+        expect(screen.getByText(String(adWindow.year))).toBeInTheDocument();
+
+        expect(() => {
+            rerender(<Calendar system="nepali" value={null} onChange={onChange} />);
+        }).not.toThrow();
+
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+            String(MAXIMUM_BIKRAM_SAMBAT_YEAR),
+        );
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getBikramSambatMonthLabel(12),
+        );
+    });
+
+    it('still tracks a selected date across an AD/BS toggle', () => {
+        const adDate = { year: 2026, month: 8, day: 15 };
+        const bsDate = convertGregorianToBikramSambat(
+            new Date(adDate.year, adDate.month - 1, adDate.day),
+        );
+
+        const { rerender, container } = render(
+            <Calendar system="gregorian" value={adDate} onChange={onChange} />,
+        );
+        expect(container.querySelector('.calendar-day-selected')).toHaveTextContent(
+            String(adDate.day),
+        );
+
+        rerender(<Calendar system="nepali" value={bsDate} onChange={onChange} />);
+
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getBikramSambatMonthLabel(bsDate.month),
+        );
+        expect(container.querySelector('.calendar-day-selected')).toHaveTextContent(
+            String(bsDate.day),
+        );
+    });
+});
+
+// BS covers AD 1918-04-13 through AD 2044-04-12; AD dates outside that span have no BS counterpart.
+describe('Calendar (AD/BS toggle with a selection outside the BS range)', () => {
+    const onChange = vi.fn();
+
+    beforeEach(() => {
+        onChange.mockClear();
+    });
+
+    it('clamps the window to the BS maximum and leaves the AD value untouched', () => {
+        const adDate = { year: 2050, month: 6, day: 15 };
+
+        const { rerender, container } = render(
+            <Calendar system="gregorian" value={adDate} onChange={onChange} />,
+        );
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent('2050');
+        expect(container.querySelector('.calendar-day-selected')).toHaveTextContent('15');
+
+        // The consumer has no BS date to hand over, so the BS leg opens with nothing selected.
+        expect(() => {
+            rerender(<Calendar system="nepali" value={null} onChange={onChange} />);
+        }).not.toThrow();
+
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+            String(MAXIMUM_BIKRAM_SAMBAT_YEAR),
+        );
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getBikramSambatMonthLabel(12),
+        );
+        // An unrepresentable date must not ghost onto a day of the clamped window.
+        expect(container.querySelector('.calendar-day-selected')).toBeNull();
+
+        rerender(<Calendar system="gregorian" value={adDate} onChange={onChange} />);
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getGregorianMonthLabel(adDate.month),
+        );
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent('2050');
+        expect(container.querySelector('.calendar-day-selected')).toHaveTextContent('15');
+        expect(adDate).toEqual({ year: 2050, month: 6, day: 15 });
+        expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('clamps the window to the BS minimum and leaves the AD value untouched', () => {
+        // 1910 falls outside the BS year range, so the same object reads as no selection in BS.
+        const adDate = { year: 1910, month: 3, day: 1 };
+
+        const { rerender, container } = render(
+            <Calendar system="gregorian" value={adDate} onChange={onChange} />,
+        );
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent('1910');
+        expect(container.querySelector('.calendar-day-selected')).toHaveTextContent('1');
+
+        expect(() => {
+            rerender(<Calendar system="nepali" value={adDate} onChange={onChange} />);
+        }).not.toThrow();
+
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+            String(MINIMUM_BIKRAM_SAMBAT_YEAR),
+        );
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getBikramSambatMonthLabel(1),
+        );
+        expect(container.querySelector('.calendar-day-selected')).toBeNull();
+
+        rerender(<Calendar system="gregorian" value={adDate} onChange={onChange} />);
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getGregorianMonthLabel(adDate.month),
+        );
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent('1910');
+        expect(container.querySelector('.calendar-day-selected')).toHaveTextContent('1');
+        expect(adDate).toEqual({ year: 1910, month: 3, day: 1 });
+        expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('keeps the value and the AD window exact across repeated clamped toggles', () => {
+        const adDate = { year: 2050, month: 6, day: 15 };
+
+        const { rerender, container } = render(
+            <Calendar system="gregorian" value={adDate} onChange={onChange} />,
+        );
+
+        for (let round = 0; round < 4; round += 1) {
+            rerender(<Calendar system="nepali" value={null} onChange={onChange} />);
+            expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+                String(MAXIMUM_BIKRAM_SAMBAT_YEAR),
+            );
+            expect(container.querySelector('.calendar-day-selected')).toBeNull();
+
+            rerender(<Calendar system="gregorian" value={adDate} onChange={onChange} />);
+            expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+                getGregorianMonthLabel(adDate.month),
+            );
+            expect(container.querySelector('.calendar-title-year')).toHaveTextContent('2050');
+            expect(container.querySelector('.calendar-day-selected')).toHaveTextContent('15');
+        }
+
+        expect(adDate).toEqual({ year: 2050, month: 6, day: 15 });
+        expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('returns to the exact AD window after repeated clamped toggles at either bound', () => {
+        const bounds = [
+            { adWindow: { year: 2090, month: 3, day: 1 }, bsYear: MAXIMUM_BIKRAM_SAMBAT_YEAR, bsMonth: 12 },
+            { adWindow: { year: 1905, month: 6, day: 1 }, bsYear: MINIMUM_BIKRAM_SAMBAT_YEAR, bsMonth: 1 },
+        ];
+
+        bounds.forEach(({ adWindow, bsYear, bsMonth }) => {
+            const { rerender, container, unmount } = render(
+                <Calendar system="gregorian" value={null} viewDate={adWindow} onChange={onChange} />,
+            );
+
+            for (let round = 0; round < 4; round += 1) {
+                rerender(<Calendar system="nepali" value={null} onChange={onChange} />);
+                expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+                    String(bsYear),
+                );
+                expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+                    getBikramSambatMonthLabel(bsMonth),
+                );
+
+                // The clamp lands on the window only; the anchor still holds the chosen AD month.
+                rerender(<Calendar system="gregorian" value={null} onChange={onChange} />);
+                expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+                    getGregorianMonthLabel(adWindow.month),
+                );
+                expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+                    String(adWindow.year),
+                );
+            }
+
+            unmount();
+        });
+
+        expect(onChange).not.toHaveBeenCalled();
+    });
+});
+
+describe('Calendar (AD/BS toggle with a viewDate held across the system change)', () => {
+    const onChange = vi.fn();
+
+    beforeEach(() => {
+        onChange.mockClear();
+    });
+
+    // Only the round trip is pinned: an untagged viewDate held across the change still steers the BS leg.
+    it('returns to the exact AD window across repeated toggles', () => {
+        const viewDate = { year: 2090, month: 3 };
+
+        const { rerender, container } = render(
+            <Calendar system="gregorian" value={null} viewDate={viewDate} onChange={onChange} />,
+        );
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent('2090');
+
+        for (let round = 0; round < 3; round += 1) {
+            expect(() => {
+                rerender(
+                    <Calendar system="nepali" value={null} viewDate={viewDate} onChange={onChange} />,
+                );
+            }).not.toThrow();
+
+            rerender(
+                <Calendar system="gregorian" value={null} viewDate={viewDate} onChange={onChange} />,
+            );
+            expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+                getGregorianMonthLabel(3),
+            );
+            expect(container.querySelector('.calendar-title-year')).toHaveTextContent('2090');
+        }
+
+        expect(onChange).not.toHaveBeenCalled();
     });
 });

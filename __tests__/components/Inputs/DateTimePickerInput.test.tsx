@@ -158,3 +158,30 @@ describe('DateTimePickerInput customization hooks', () => {
         expect(screen.getByTestId('day-19')).toHaveAttribute('data-disabled', 'false');
     });
 });
+
+describe('DateTimePickerInput blank commit with no date', () => {
+    const onChange = vi.fn();
+
+    beforeEach(() => {
+        onChange.mockClear();
+    });
+
+    it('resets and emits null when the date input blurs with a time but no date', () => {
+        const { container } = render(
+            <DateTimePickerInput timeMode="native" onChange={onChange} />,
+        );
+
+        const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.focus(dateInput);
+        fireEvent.change(container.querySelector('.date-time-field') as HTMLInputElement, {
+            target: { value: '10:30' },
+        });
+        expect(container.querySelector('.date-time-field')).toHaveValue('10:30');
+
+        onChange.mockClear();
+        fireEvent.blur(dateInput);
+
+        expect(onChange).toHaveBeenCalledWith({ name: undefined, value: null });
+        expect(container.querySelector('.date-time-field')).toHaveValue('');
+    });
+});

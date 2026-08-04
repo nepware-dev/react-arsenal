@@ -56,6 +56,11 @@ export interface PickerDateFieldModel<Model> {
     isComplete?: (model: Model) => boolean;
 }
 
+export interface CommitTypedValueResult<Model> {
+    status: "committed" | "reset";
+    model: Model;
+}
+
 interface UsePickerDateFieldConfig<Model> {
     name?: string;
     value?: string | null;
@@ -113,7 +118,8 @@ export interface PickerDateField<Model> {
     handleInputFocus: () => void;
     handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-    commitTypedValue: () => "committed" | "reset";
+    /** Commits typed text. Use the returned model, not `selected`, which is stale until re-render. */
+    commitTypedValue: () => CommitTypedValueResult<Model>;
     handleClearIconClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
     emit: (model: Model) => void;
     systemToggle: React.ReactNode;
@@ -298,7 +304,7 @@ const usePickerDateField = <Model,>(
         [model, completesOnDateChange, hideCalendar, emit],
     );
 
-    const commitTypedValue = useCallback((): "committed" | "reset" => {
+    const commitTypedValue = useCallback((): CommitTypedValueResult<Model> => {
         const trimmedText = inputText.trim();
         if (trimmedText === "") {
             const isBlankByDisplay =
@@ -307,8 +313,9 @@ const usePickerDateField = <Model,>(
             if (!model.equals(selected, model.empty) && !isBlankByDisplay) {
                 setSelected(model.empty);
                 emit(model.empty);
+                return { status: "committed", model: model.empty };
             }
-            return "committed";
+            return { status: "committed", model: selected };
         }
         const parsed = model.parseTyped(trimmedText, displaySystem);
         const parsedDate = parsed ? model.getDate(parsed) : null;
@@ -318,13 +325,13 @@ const usePickerDateField = <Model,>(
                 setSelected(parsed);
                 emit(parsed);
             }
-            return "committed";
+            return { status: "committed", model: parsed };
         }
         setInputState({
             system: displaySystem,
             text: model.format(resetBaseline, displaySystem, language),
         });
-        return "reset";
+        return { status: "reset", model: resetBaseline };
     }, [
         inputText,
         displaySystem,
@@ -348,7 +355,7 @@ const usePickerDateField = <Model,>(
         (event: React.KeyboardEvent<HTMLInputElement>) => {
             if (event.key === "Enter") {
                 event.preventDefault();
-                if (commitTypedValue() === "committed") {
+                if (commitTypedValue().status === "committed") {
                     hideCalendar();
                 }
             } else if (event.key === "Escape" || event.key === "Tab") {

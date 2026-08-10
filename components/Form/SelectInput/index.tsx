@@ -63,6 +63,7 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
         renderDisplayLabel,
         onOptionsEndReach,
         onEndReachedThreshold,
+        container,
     } = props;
 
     const [selectState, setSelectState] = useState<SelectState<T>>({
@@ -386,6 +387,7 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
                     anchorOrigin={optionsDirection === 'up' ? 'top right' : anchorOrigin}
                     transformOrigin={optionsDirection === 'up' ? 'bottom right' : transformOrigin}
                     onClose={hideOption}
+                    container={container}
                 >
                     <div className={cs(styles.selectOptionsWrapper, optionsWrapperClassName)}>
                         <Options

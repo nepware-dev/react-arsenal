@@ -45,10 +45,21 @@ export interface PopupProps<T extends HTMLElement | null> {
      */
     closeOnEscape?: boolean;
     /**
-     * DOM node the popup is portalled into
-     * Defaults to document.body
+     * The DOM node the popup is portalled into.
+     *
+     * Target resolution order:
+     * 1. `container`
+     * 2. Closest overflow ancestor (if `useOverflowAncestor` is true)
+     * 3. `document.body`
      */
-    container?: Element | DocumentFragment;
+    container?: HTMLElement;
+     /**
+     * When true and no container prop is provided, the closest scrollable
+     * overflow ancestor of the anchor element as the portal target.
+     * Note: If a container is explicitly provided, this prop is ignored
+     * @default false
+     */
+    useOverflowAncestor?: boolean;
     /**
      * Disable focus capture
      */

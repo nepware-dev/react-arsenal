@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import type { KeyExtractor, ListProps, ListRenderItem } from '../../List';
-import type { OriginPosition } from '../../Popup';
+import type { OriginPosition, PopupProps } from '../../Popup';
 import { type IsDisabledExtractor } from '../SelectInput/types';
 
 export type { KeyExtractor, ListRenderItem };
@@ -64,4 +64,5 @@ export interface MultiSelectInputProps<T, V extends React.ReactNode> {
     showRequired?: boolean;
     onOptionsEndReach?: () => void;
     onEndReachedThreshold?: number;
+    container?: PopupProps<HTMLElement>['container'];
 }

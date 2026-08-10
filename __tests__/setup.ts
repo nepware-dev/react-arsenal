@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // jsdom does not implement layout so provide a deterministic, non-zero rect.
 // Guarded so the setup is a no-op in the node environment (e.g. request tests).
@@ -16,4 +17,17 @@ if (typeof Element !== 'undefined') {
             toJSON: () => ({}),
         };
     };
+}
+
+// jsdom does not implement ResizeObserver.
+// Guarded so the setup is a no-op in the node environment (e.g. request tests).
+if (typeof globalThis.ResizeObserver === 'undefined') {
+    const ResizeObserverMock = vi.fn(function () {
+        return {
+            observe: vi.fn(),
+            unobserve: vi.fn(),
+            disconnect: vi.fn(),
+        };
+    });
+    vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 }

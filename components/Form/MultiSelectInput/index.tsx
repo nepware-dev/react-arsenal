@@ -47,6 +47,7 @@ const MultiSelect = <T, V extends ReactNode>({
     showRequired,
     onOptionsEndReach,
     onEndReachedThreshold,
+    container,
 }: MultiSelectInputProps<T, V>) => {
     const [expanded, setExpanded] = useState(false);
     const [searchValue, setSearchValue] = useState('');
@@ -215,6 +216,7 @@ const MultiSelect = <T, V extends ReactNode>({
                     anchorOrigin={anchorOrigin}
                     transformOrigin={transformOrigin}
                     onClose={handleToggleExpand}
+                    container={container}
                 >
                     {searchable && (
                         <div className={styles.searchContainer}>

@@ -37,6 +37,23 @@ That target also doubles as the boundary the popup is kept inside of (see
 below) — pass `container` explicitly when the popup should stay clipped to a
 scrollable panel rather than the whole viewport.
 
+### Focus and enclosing focus traps
+
+Because the popup portals out of its React parent's DOM, it also lands outside the
+focus trap of any enclosing `Modal`. A trap that cannot see the popup pulls focus
+back to the modal's first tabbable element as soon as anything inside the popup is
+focused, which reads as focus jumping out of the popup for no visible reason.
+
+`Popup` avoids that by registering its own wrapper with every enclosing trap as a
+`react-focus-lock` shard, so focus inside the popup counts as focus inside those
+traps. That happens automatically and covers nested popups too, whether or not the
+popup owns a trap of its own via `disableFocusLock`.
+
+Anything else that portals content out of a `Modal` needs the same treatment: use
+`useFocusShard` from `hooks/useFocusShards` to register the portalled node, and
+`useFocusShardHost` when the component owns a trap that portalled descendants
+should register with.
+
 ### Keeping the popup on screen
 
 Position isn't just the static `anchorOrigin`/`transformOrigin` calculation —

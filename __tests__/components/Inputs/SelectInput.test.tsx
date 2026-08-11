@@ -140,6 +140,95 @@ describe('SelectInput', () => {
         });
     });
 
+    describe('opening on focus', () => {
+        const getWrapper = (container: HTMLElement) =>
+            container.querySelector(`.${styles.selectContainer}`) as HTMLElement;
+
+        it('opens when the user presses the select', async () => {
+            const { container } = renderSelect();
+            const wrapper = getWrapper(container);
+
+            await act(async () => {
+                fireEvent.mouseDown(wrapper);
+                wrapper.focus();
+            });
+
+            expect(screen.getByTestId('popup')).toBeInTheDocument();
+        });
+
+        it('opens when the user tabs into the select', async () => {
+            const { container } = renderSelect();
+            const wrapper = getWrapper(container);
+
+            await act(async () => {
+                fireEvent.keyDown(document.body, { key: 'Tab' });
+                wrapper.focus();
+            });
+
+            expect(screen.getByTestId('popup')).toBeInTheDocument();
+        });
+
+        it('stays closed when focus arrives without a user gesture', async () => {
+            const { container } = render(
+                <>
+                    <button type="button" data-testid="other-control">
+                        Other
+                    </button>
+                    <SelectInput
+                        options={OPTIONS}
+                        keyExtractor={keyExtractor}
+                        valueExtractor={valueExtractor}
+                        onChange={onChange}
+                    />
+                </>,
+            );
+            const wrapper = getWrapper(container);
+
+            await act(async () => {
+                screen.getByTestId('other-control').focus();
+            });
+            // A focus trap reclaiming focus looks like this: a real relatedTarget, no pointer or key press behind it.
+            await act(async () => {
+                wrapper.focus();
+            });
+
+            expect(screen.queryByTestId('popup')).not.toBeInTheDocument();
+        });
+
+        it('stays closed when a key press that landed elsewhere is followed by programmatic focus', async () => {
+            const { container } = render(
+                <>
+                    <button type="button" data-testid="other-control">
+                        Other
+                    </button>
+                    <SelectInput
+                        options={OPTIONS}
+                        keyExtractor={keyExtractor}
+                        valueExtractor={valueExtractor}
+                        onChange={onChange}
+                    />
+                </>,
+            );
+            const wrapper = getWrapper(container);
+
+            // Tabbing onto something that is not a select leaves that key press unclaimed.
+            await act(async () => {
+                fireEvent.keyDown(document.body, { key: 'Tab' });
+                screen.getByTestId('other-control').focus();
+            });
+            await act(async () => {
+                await new Promise((resolve) => setTimeout(resolve, 0));
+            });
+
+            // A focus trap redirecting focus later must not inherit that key press.
+            await act(async () => {
+                wrapper.focus();
+            });
+
+            expect(screen.queryByTestId('popup')).not.toBeInTheDocument();
+        });
+    });
+
     describe('clear functionality', () => {
         it('manages clear visibility and triggers onChange with null', () => {
             const { container } = renderSelect({ value: OPTIONS[0], name: 'mySelect' });

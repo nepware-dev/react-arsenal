@@ -6,6 +6,7 @@ import type { ModalProps } from './types';
 import Portal from '../Portal';
 import withVisibleCheck from '../WithVisibleCheck';
 import cs from '../../cs';
+import { FocusShardContext, useFocusShardHost } from '../../hooks/useFocusShards';
 
 const Modal: React.FC<ModalProps> = (props) => {
     const {
@@ -19,6 +20,8 @@ const Modal: React.FC<ModalProps> = (props) => {
     } = props;
 
     const wrapperRef = useRef<HTMLDivElement>(null);
+
+    const { shards: focusShards, registry: focusShardRegistry } = useFocusShardHost();
 
     const className = cs(styles.modal, classNameFromProps, 'modal');
     const overlayClassName = cs(styles.overlay, overlayClassNameFromProps, 'overlay');
@@ -67,13 +70,15 @@ const Modal: React.FC<ModalProps> = (props) => {
 
     return (
         <Portal>
-            <FocusLock disabled={disableFocusLock}>
-                <div className={overlayClassName} data-testid="modal-overlay">
-                    <div ref={wrapperRef} className={className}>
-                        {children}
+            <FocusShardContext.Provider value={focusShardRegistry}>
+                <FocusLock disabled={disableFocusLock} shards={focusShards}>
+                    <div className={overlayClassName} data-testid="modal-overlay">
+                        <div ref={wrapperRef} className={className}>
+                            {children}
+                        </div>
                     </div>
-                </div>
-            </FocusLock>
+                </FocusLock>
+            </FocusShardContext.Provider>
         </Portal>
     );
 };

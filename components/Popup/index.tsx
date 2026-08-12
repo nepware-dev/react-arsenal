@@ -14,6 +14,7 @@ import {
 import Portal from '../Portal';
 import withVisibleCheck from '../WithVisibleCheck';
 import cs from '../../cs';
+import { FocusShardContext, useFocusShard, useFocusShardHost } from '../../hooks/useFocusShards';
 import useRect from '../../hooks/useRect';
 import { isNullOrUndefined, isResizeObserverAvailable } from '../../utils';
 
@@ -52,6 +53,10 @@ function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
     const [wrapperStyle, setWrapperStyle] = useState<React.CSSProperties>();
+    const [wrapperNode, setWrapperNode] = useState<HTMLDivElement | null>(null);
+
+    const { shards: focusShards, registry: focusShardRegistry } = useFocusShardHost();
+    useFocusShard(wrapperNode);
 
     const anchorRect = useRect(anchor.current);
     const viewportRect = useRect(viewportElement);
@@ -165,6 +170,7 @@ function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
 
     const handleWrapperRef = useCallback((node: HTMLDivElement | null) => {
         wrapperRef.current = node;
+        setWrapperNode(node);
 
         resizeObserverRef.current?.disconnect();
         resizeObserverRef.current = null;
@@ -210,13 +216,15 @@ function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
     return (
         <Portal container={portalContainer}>
             <PopupNestingContext.Provider value={nestingContextValue}>
-                <FocusLock disabled={disableFocusLock} returnFocus>
-                    {wrapperStyle && (
-                        <div ref={handleWrapperRef} className={className} style={wrapperStyle}>
-                            {children}
-                        </div>
-                    )}
-                </FocusLock>
+                <FocusShardContext.Provider value={focusShardRegistry}>
+                    <FocusLock disabled={disableFocusLock} returnFocus shards={focusShards}>
+                        {wrapperStyle && (
+                            <div ref={handleWrapperRef} className={className} style={wrapperStyle}>
+                                {children}
+                            </div>
+                        )}
+                    </FocusLock>
+                </FocusShardContext.Provider>
             </PopupNestingContext.Provider>
         </Portal>
     );

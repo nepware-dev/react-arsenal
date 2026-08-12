@@ -14,15 +14,33 @@ vi.mock('../../components/Portal', () => ({
     default: ({ children }: { children: React.ReactNode }) => <div data-testid='portal'>{children}</div>,
 }));
 
+type FocusLockNode = HTMLElement & { shards?: HTMLElement[] };
+
 vi.mock('react-focus-lock', () => ({
-    default: ({ children, disabled }: { children: React.ReactNode; disabled?: boolean }) => (
-        <div data-testid='focus-lock' data-disabled={disabled}>
+    default: ({
+        children,
+        disabled,
+        shards,
+    }: {
+        children: React.ReactNode;
+        disabled?: boolean;
+        shards?: HTMLElement[];
+    }) => (
+        <div
+            data-testid='focus-lock'
+            data-disabled={disabled}
+            ref={(node: FocusLockNode | null) => {
+                if (node) node.shards = shards;
+            }}
+        >
             {children}
         </div>
     ),
 }));
 
 const mockUseRect = useRect as Mock;
+
+const getShards = (lock: HTMLElement) => (lock as FocusLockNode).shards ?? [];
 
 const defaultAnchorRect = {
     top: 100,
@@ -298,6 +316,56 @@ describe('Popup', () => {
 
             const focusLock = screen.getByTestId('focus-lock');
             expect(focusLock).toHaveAttribute('data-disabled', 'true');
+        });
+    });
+
+    describe('Focus lock shards', () => {
+        const NestedPopups = ({ nested = true }: { nested?: boolean }) => {
+            const anchorRef = useRef<HTMLButtonElement>(null);
+            const nestedAnchorRef = useRef<HTMLButtonElement>(null);
+
+            return (
+                <>
+                    <button ref={anchorRef} data-testid='anchor-button'>
+                        Anchor
+                    </button>
+                    <Popup anchor={anchorRef} onClose={mockOnClose} disableFocusLock>
+                        <div data-testid='popup-content'>
+                            <button ref={nestedAnchorRef} data-testid='nested-anchor'>
+                                Nested anchor
+                            </button>
+                            {nested && (
+                                <Popup anchor={nestedAnchorRef} onClose={mockOnClose}>
+                                    <div data-testid='nested-content'>Nested Content</div>
+                                </Popup>
+                            )}
+                        </div>
+                    </Popup>
+                </>
+            );
+        };
+
+        it('starts with no shards when nothing is portalled inside the popup', () => {
+            render(<TestComponent />);
+
+            expect(getShards(screen.getByTestId('focus-lock'))).toHaveLength(0);
+        });
+
+        it('registers a nested popup as a shard of the popup that owns it', () => {
+            render(<NestedPopups />);
+
+            const [outerLock] = screen.getAllByTestId('focus-lock');
+            const nestedWrapper = screen.getByTestId('nested-content').parentElement;
+
+            expect(getShards(outerLock)).toEqual([nestedWrapper]);
+        });
+
+        it('drops the shard again when the nested popup unmounts', () => {
+            const { rerender } = render(<NestedPopups />);
+
+            rerender(<NestedPopups nested={false} />);
+
+            expect(getShards(screen.getByTestId('focus-lock'))).toHaveLength(0);
         });
     });
 

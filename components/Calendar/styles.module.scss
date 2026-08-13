@@ -98,10 +98,19 @@
             padding: 0.4em 0;
             border: none;
             background: none;
-            cursor: default;
             text-align: center;
             color: var(--calendar-outside-text-color, var(--color-text-light));
             opacity: 0.65;
+            cursor: pointer;
+
+            &:hover:not(:disabled) {
+                background-color: var(--calendar-highlight-background, var(--color-list-highlight));
+            }
+
+            &:disabled {
+                color: var(--calendar-muted-text-color, var(--color-text-light));
+                cursor: default;
+            }
         }
     }
 }

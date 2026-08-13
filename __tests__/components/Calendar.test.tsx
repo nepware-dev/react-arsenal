@@ -237,21 +237,62 @@ describe('Calendar (design props)', () => {
             expect(container.querySelector('.calendar-outside-day')).not.toBeInTheDocument();
         });
 
-        it('keeps outside days non-interactive and hidden from assistive technology', () => {
-            const { container } = renderCalendar();
+        it('keeps outside days interactive', () => {
+            const { container } = renderCalendar({ system: 'gregorian', value: { year: 2026, month: 8, day: 13 } });
 
-            const firstOutsideDay = container.querySelector(
-                `.${styles.outsideDay}`,
-            ) as HTMLElement;
+            const outsideDays = container.querySelectorAll(`.${styles.outsideDay}`);
+            const firstOutsideDay = outsideDays[0] as HTMLElement;
 
-            // A disabled button rather than a div, so it matches the in-month cell metrics.
             expect(firstOutsideDay.tagName).toBe('BUTTON');
-            expect(firstOutsideDay).toBeDisabled();
-            expect(firstOutsideDay).toHaveAttribute('tabindex', '-1');
-            expect(firstOutsideDay).toHaveAttribute('aria-hidden', 'true');
+            expect(firstOutsideDay).not.toBeDisabled();
+            expect(firstOutsideDay).not.toHaveAttribute('tabindex', '-1');
+            expect(firstOutsideDay).not.toHaveAttribute('aria-hidden', 'true');
 
             fireEvent.click(firstOutsideDay);
-            expect(onChange).not.toHaveBeenCalled();
+            // First outside day for month August 2026 is July 26, 2026
+            expect(onChange).toHaveBeenCalledWith({
+                year: 2026,
+                month: 7,
+                day: 26
+            });
+
+            const lastOutsideDay = outsideDays[outsideDays.length - 1];
+
+            expect(lastOutsideDay.tagName).toBe('BUTTON');
+            expect(lastOutsideDay).not.toBeDisabled();
+            expect(lastOutsideDay).not.toHaveAttribute('tabindex', '-1');
+            expect(lastOutsideDay).not.toHaveAttribute('aria-hidden', 'true');
+
+            fireEvent.click(lastOutsideDay);
+            // Last outside day for month August 2026 is September 5, 2026
+            expect(onChange).toHaveBeenCalledWith({
+                year: 2026,
+                month: 9,
+                day: 5
+            });
+        });
+
+        it('disables outside days and makes them non-interactive if they are disabled but keeps them interactive if they are not disabled', () => {
+            const { container } = render(
+                <Calendar system="gregorian" value={{ year: 2026, month: 8, day: 13 }} maximumDate={{ year: 2026, month: 8, day: 31 }} />
+            );
+            const outsideDays = container.querySelectorAll(`.${styles.outsideDay}`);
+            // August 2026 should render with 6 days from July and 5 days from September
+            expect(outsideDays).toHaveLength(11);
+            const julyDays = Array.from(outsideDays).slice(0, 6);
+            const septemberDays = Array.from(outsideDays).slice(-5);
+
+            const lastJulyDay = julyDays[julyDays.length - 1];
+            expect(lastJulyDay.tagName).toBe('BUTTON');
+            expect(lastJulyDay).not.toBeDisabled();
+            expect(lastJulyDay).not.toHaveAttribute('tabindex', '-1');
+            expect(lastJulyDay).not.toHaveAttribute('aria-hidden', 'true');
+
+            const firstSeptemberDay = septemberDays[0];
+            expect(firstSeptemberDay.tagName).toBe('BUTTON');
+            expect(firstSeptemberDay).toBeDisabled();
+            expect(firstSeptemberDay).toHaveAttribute('tabindex', '-1');
+            expect(firstSeptemberDay).toHaveAttribute('aria-hidden', 'true');
         });
 
         it('pads the final week with blank cells past the maximum year', () => {

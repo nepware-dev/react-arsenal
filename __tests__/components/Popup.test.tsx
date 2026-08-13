@@ -60,6 +60,8 @@ const defaultBoundingRect = {
     height: 2000,
 } as DOMRect;
 
+const WRAPPER_PADDING = 20;
+
 describe('Popup', () => {
     const mockOnClose = vi.fn();
 
@@ -625,7 +627,13 @@ describe('Popup', () => {
             } as DOMRect;
         };
 
-        const TestComponentWithViewport = ({ onClose = mockOnClose, setScroll = false, ...props }: any) => {
+        const TestComponentWithViewport = ({
+            onClose = mockOnClose,
+            setScroll = false,
+            style = {},
+            containerStyle = {},
+            ...props
+        }: any) => {
             const anchorRef = useRef<HTMLButtonElement>(null);
             const containerRef = useRef<HTMLDivElement>(null);
 
@@ -665,19 +673,21 @@ describe('Popup', () => {
             useEffect(() => setIsAnchorReady(true), []);
 
             return (
-                <div
-                    ref={viewportContainerRefCallback}
-                    data-testid='viewport-container'
-                    style={{ overflow: 'auto', position: 'relative' }}
-                >
-                    <button ref={anchorRef} data-testid='anchor-button'>
-                        Anchor
-                    </button>
-                    {isAnchorReady && (
-                        <Popup container={containerRef.current} anchor={anchorRef} onClose={onClose} {...props}>
-                            <div data-testid='popup-content'>Popup Content</div>
-                        </Popup>
-                    )}
+                <div style={containerStyle} data-testid='viewport-wrapper'>
+                    <div
+                        ref={viewportContainerRefCallback}
+                        data-testid='viewport-container'
+                        style={{ overflow: 'auto', position: 'relative', ...style }}
+                    >
+                        <button ref={anchorRef} data-testid='anchor-button'>
+                            Anchor
+                        </button>
+                        {isAnchorReady && (
+                            <Popup container={containerRef.current} anchor={anchorRef} onClose={onClose} {...props}>
+                                <div data-testid='popup-content'>Popup Content</div>
+                            </Popup>
+                        )}
+                    </div>
                 </div>
             );
         };
@@ -697,6 +707,20 @@ describe('Popup', () => {
                     return mockContainerRect;
                 }
 
+                if (testId === 'viewport-wrapper') {
+                    return {
+                        top: mockContainerRect.top - WRAPPER_PADDING,
+                        left: mockContainerRect.left - WRAPPER_PADDING,
+                        right: mockContainerRect.right + WRAPPER_PADDING,
+                        bottom: mockContainerRect.bottom + WRAPPER_PADDING,
+                        width: mockContainerRect.width + 2 * WRAPPER_PADDING,
+                        height: mockContainerRect.height + 2 * WRAPPER_PADDING,
+                        x: mockContainerRect.left - WRAPPER_PADDING,
+                        y: mockContainerRect.top - WRAPPER_PADDING,
+                        toJSON: () => ({}),
+                    }
+                }
+
                 return {
                     top: 100,
                     left: 100,
@@ -710,25 +734,46 @@ describe('Popup', () => {
                 } as DOMRect;
             };
 
-            Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
-                configurable: true,
-                get(this: HTMLElement) {
-                    return this.dataset.testid === 'viewport-container' ? mockContainerClientSize.width : 0;
-                },
-            });
-            Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
-                configurable: true,
-                get(this: HTMLElement) {
-                    return this.dataset.testid === 'viewport-container' ? mockContainerClientSize.height : 0;
-                },
-            });
+            function mockClientDimension(dimension: 'width' | 'height'): PropertyDescriptor {
+                return {
+                    configurable: true,
+                    get(this: HTMLElement) {
+                        switch (this.dataset.testid) {
+                            case 'viewport-container':
+                                return mockContainerClientSize[dimension];
+                            case 'viewport-wrapper':
+                                return mockContainerClientSize[dimension] + 2 * WRAPPER_PADDING;
+                            default:
+                                return 0;
+                        }
+                    },
+                };
+            }
+
+            Object.defineProperty(HTMLElement.prototype, 'clientWidth', mockClientDimension('width'));
+            Object.defineProperty(HTMLElement.prototype, 'clientHeight', mockClientDimension('height'));
 
             mockUseRect.mockImplementation((node: HTMLElement | null) => {
                 if (node === document.body) {
                     return mockBoundingRect;
                 }
+
                 if (node instanceof HTMLElement && node.dataset.testid === 'viewport-container') {
                     return mockContainerRect;
+                }
+
+                if (node instanceof HTMLElement && node.dataset.testid === 'viewport-wrapper') {
+                    return {
+                        top: mockContainerRect.top - WRAPPER_PADDING,
+                        left: mockContainerRect.left - WRAPPER_PADDING,
+                        right: mockContainerRect.right + WRAPPER_PADDING,
+                        bottom: mockContainerRect.bottom + WRAPPER_PADDING,
+                        width: mockContainerRect.width + 2 * WRAPPER_PADDING,
+                        height: mockContainerRect.height + 2 * WRAPPER_PADDING,
+                        x: mockContainerRect.left - WRAPPER_PADDING,
+                        y: mockContainerRect.top - WRAPPER_PADDING,
+                        toJSON: () => ({}),
+                    };
                 }
                 return mockAnchorRect;
             });
@@ -754,6 +799,44 @@ describe('Popup', () => {
                 transform: 'translate(0, 0)',
             });
         });
+
+        it.each([
+            ['backdropFilter', 'blur(4px)'],
+            ['rotate', '45deg'],
+            ['scale', '1.5'],
+            ['translate', '10px'],
+            ['willChange', 'transform'],
+            ['contain', 'layout'],
+        ])(
+            'treats a static container with %s set as a containing block, same as position: relative',
+            (property, value) => {
+                setAnchorRect({
+                    top: 150,
+                    left: 150,
+                    right: 190,
+                    bottom: 190,
+                    width: 40,
+                    height: 40,
+                } as DOMRect);
+
+                render(
+                    <TestComponentWithViewport
+                        anchorOrigin='bottom left'
+                        transformOrigin='top left'
+                        style={{ position: 'static' }}
+                        containerStyle={{[property]: value, padding: WRAPPER_PADDING}}
+                    />,
+                );
+
+                const popup = screen.getByTestId('popup-content').parentElement;
+
+                expect(popup).toHaveStyle({
+                    top: '210px',
+                    left: '170px',
+                    transform: 'translate(0, 0)',
+                });
+            },
+        );
 
         it('flips the anchor/transform origin so the popup stays inside the viewport ancestor', () => {
             const style = document.createElement('style');

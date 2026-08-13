@@ -56,16 +56,26 @@ export function getClosestOverflowAncestor(element?: HTMLElement | null) {
     return getClosestOverflowAncestor(element?.parentElement);
 }
 
-function isPositionedAncestor(element: Element): boolean {
-    const { position, transform, filter, perspective } = getComputedStyle(element);
+const willChangeRe = /(?:^|[,\s])(filter|backdrop-filter|transform|perspective|rotate|scale|translate)(?:$|[,\s])/;
+const containRe = /(?:^|\s)(layout|paint|strict|content)(?:$|\s)/;
+
+const isNotNone = (value: string) => !!value && value !== 'none';
+
+function isContainingBlock(elementOrCss: Element): boolean {
+    const css = getComputedStyle(elementOrCss);
+
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
     return (
-        position === 'relative' ||
-        position === 'absolute' ||
-        position === 'fixed' ||
-        position === 'sticky' ||
-        transform !== 'none' ||
-        filter !== 'none' ||
-        perspective !== 'none'
+        css.position !== 'static' ||
+        isNotNone(css.filter) ||
+        isNotNone(css.backdropFilter) ||
+        isNotNone(css.transform) ||
+        isNotNone(css.perspective) ||
+        isNotNone(css.rotate) ||
+        isNotNone(css.scale) ||
+        isNotNone(css.translate) ||
+        willChangeRe.test(css.willChange || '') ||
+        containRe.test(css.contain || '')
     );
 }
 
@@ -74,7 +84,7 @@ function getClosestPositionedAncestor(element?: HTMLElement | null) {
         return null;
     }
 
-    const isPositionedElement = isPositionedAncestor(element);
+    const isPositionedElement = isContainingBlock(element);
 
     if (isPositionedElement) {
         return element;

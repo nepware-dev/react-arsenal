@@ -467,6 +467,13 @@ const Calendar: React.FC<CalendarProps> = (props) => {
         [onChange, visibleYear, visibleMonth, isDayDisabled],
     );
 
+    const handleOutsideDayClick = useCallback((item: CalendarDate) => {
+        if (isDayDisabled(item)) {
+            return;
+        }
+        onChange?.(item);
+    }, [isDayDisabled, onChange]);
+
     const formatNumberLabel = useCallback(
         (numberValue: number) => dateSystem.numberLabel(numberValue, language),
         [dateSystem, language],
@@ -544,6 +551,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                     dateSystem={dateSystem}
                     isDayDisabled={isDayDisabled}
                     onDayClick={handleDayClick}
+                    onOutsideDayClick={handleOutsideDayClick}
                     formatNumberLabel={formatNumberLabel}
                     renderDay={renderDay}
                 />
@@ -557,6 +565,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
             today,
             isDayDisabled,
             handleDayClick,
+            handleOutsideDayClick,
             formatNumberLabel,
             dateSystem,
             renderDay,
@@ -740,6 +749,7 @@ function DayCellItem(
         value: CalendarProps["value"];
         isDayDisabled: (date: CalendarDate) => boolean;
         onDayClick: (day: number) => void;
+        onOutsideDayClick: (item: CalendarDate) => void;
         formatNumberLabel: (arg: number) => string;
         renderDay?: (date: CalendarDate, info: CalendarDayInfo) => React.ReactNode;
     },
@@ -754,6 +764,7 @@ function DayCellItem(
         value,
         isDayDisabled,
         onDayClick,
+        onOutsideDayClick,
         formatNumberLabel,
         renderDay,
     } = props;
@@ -761,8 +772,10 @@ function DayCellItem(
     const handleDayClick = useCallback(() => {
         if (item.type === "day") {
             onDayClick(item.day);
+        } else if (item.type === "outside") {
+            onOutsideDayClick({ day: item.day, month: item.month, year: item.year });
         }
-    }, [item, onDayClick]);
+    }, [item, onDayClick, onOutsideDayClick]);
 
     if (item.type === "empty") {
         return (
@@ -795,7 +808,6 @@ function DayCellItem(
         ? renderDay(date, dayInfo)
         : formatNumberLabel(item.day);
 
-    // A disabled button, not a div, so the cell shares the in-month day's font metrics.
     if (item.type === "outside") {
         return (
             <button
@@ -805,9 +817,10 @@ function DayCellItem(
                     "calendar-outside-day",
                     classNames?.outsideDay,
                 )}
-                disabled
-                tabIndex={-1}
-                aria-hidden="true"
+                disabled={disabled}
+                aria-hidden={disabled ? 'true' : undefined}
+                tabIndex={disabled ? -1 : undefined}
+                onClick={handleDayClick}
             >
                 {label}
             </button>

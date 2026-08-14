@@ -492,11 +492,26 @@ const Calendar: React.FC<CalendarProps> = (props) => {
     }, [minimumBound.year, maximumBound.year, formatNumberLabel]);
 
     const monthOptions = useMemo<NavigationOption[]>(() => {
-        return Array.from({ length: 12 }, (_, index) => ({
-            value: index + 1,
-            label: dateSystem.monthLabel(index + 1, language),
-        }));
-    }, [dateSystem, language]);
+        const lowerMonth =
+            visibleYear === minimumBound.year ? minimumBound.month : 1;
+        const upperMonth =
+            visibleYear === maximumBound.year ? maximumBound.month : 12;
+        return Array.from(
+            { length: upperMonth - lowerMonth + 1 },
+            (_, index) => ({
+                value: lowerMonth + index,
+                label: dateSystem.monthLabel(lowerMonth + index, language),
+            }),
+        );
+    }, [
+        visibleYear,
+        minimumBound.year,
+        minimumBound.month,
+        maximumBound.year,
+        maximumBound.month,
+        dateSystem,
+        language,
+    ]);
 
     const handleYearSelect = useCallback(
         ({ option }: { option: NavigationOption | null }) => {

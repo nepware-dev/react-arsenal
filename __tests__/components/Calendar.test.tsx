@@ -1,10 +1,11 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import Calendar, { type CalendarProps } from '../../components/Calendar';
 import I18nProvider from '../../components/I18n';
 import styles from '../../components/Calendar/styles.module.scss';
+import optionStyles from '../../components/Form/SelectInput/Options/styles.module.scss';
 import {
     MAXIMUM_BIKRAM_SAMBAT_YEAR,
     MINIMUM_BIKRAM_SAMBAT_YEAR,
@@ -723,6 +724,112 @@ describe('Calendar (AD/BS toggle with a selection outside the BS range)', () => 
         });
 
         expect(onChange).not.toHaveBeenCalled();
+    });
+});
+
+describe('Calendar (month dropdown respects min/max bounds)', () => {
+    const onChange = vi.fn();
+
+    beforeEach(() => {
+        onChange.mockClear();
+    });
+
+    // Opens a header select by focusing its search input, mirroring the existing SelectInput test pattern.
+    const openHeaderSelectOptionLabels = (container: HTMLElement, index: number) => {
+        const select = container.querySelectorAll(`.${styles.headerSelect}`)[index];
+        const search = select.querySelector('input') as HTMLInputElement;
+
+        act(() => {
+            fireEvent.mouseDown(search);
+            search.focus();
+        });
+
+        return Array.from(document.querySelectorAll(`.${optionStyles.option}`)).map(
+            (option) => option.textContent,
+        );
+    };
+
+    const openMonthOptionLabels = (container: HTMLElement) =>
+        openHeaderSelectOptionLabels(container, 0);
+
+    it('offers only the bounded month when min and max fall in the same month', () => {
+        const { container } = render(
+            <Calendar
+                system="gregorian"
+                value={{ year: 2026, month: 8, day: 10 }}
+                minimumDate={{ year: 2026, month: 8, day: 1 }}
+                maximumDate={{ year: 2026, month: 8, day: 31 }}
+                enableMonthDropdown
+                enableYearDropdown
+                onChange={onChange}
+            />,
+        );
+
+        expect(openMonthOptionLabels(container)).toEqual(['August']);
+        expect(openHeaderSelectOptionLabels(container, 1)).toEqual(['2026']);
+    });
+
+    it('offers only the bounded months within a same-year span', () => {
+        const { container } = render(
+            <Calendar
+                system="gregorian"
+                value={{ year: 2026, month: 6, day: 10 }}
+                minimumDate={{ year: 2026, month: 3, day: 1 }}
+                maximumDate={{ year: 2026, month: 9, day: 30 }}
+                enableMonthDropdown
+                onChange={onChange}
+            />,
+        );
+
+        expect(openMonthOptionLabels(container)).toEqual([
+            'March', 'April', 'May', 'June', 'July', 'August', 'September',
+        ]);
+    });
+
+    it('bounds the month options per visible year across a cross-year span', () => {
+        const { container } = render(
+            <Calendar
+                system="gregorian"
+                value={{ year: 2025, month: 12, day: 10 }}
+                minimumDate={{ year: 2025, month: 11, day: 1 }}
+                maximumDate={{ year: 2026, month: 2, day: 28 }}
+                enableMonthDropdown
+                enableYearDropdown
+                onChange={onChange}
+            />,
+        );
+
+        expect(openMonthOptionLabels(container)).toEqual(['November', 'December']);
+
+        const yearOptions = openHeaderSelectOptionLabels(container, 1);
+        expect(yearOptions).toEqual(['2025', '2026']);
+        const yearOption = Array.from(document.querySelectorAll(`.${optionStyles.option}`)).find(
+            (option) => option.textContent === '2026',
+        ) as HTMLElement;
+        fireEvent.click(yearOption);
+
+        // December has no counterpart in 2026, so the clamp lands on the maximum bound: February.
+        expect(screen.getByText('February')).toBeInTheDocument();
+        expect(openMonthOptionLabels(container)).toEqual(['January', 'February']);
+    });
+
+    it('offers all twelve months for an interior year within a multi-year span', () => {
+        const { container } = render(
+            <Calendar
+                system="gregorian"
+                value={{ year: 2026, month: 6, day: 10 }}
+                minimumDate={{ year: 2025, month: 5, day: 1 }}
+                maximumDate={{ year: 2027, month: 3, day: 31 }}
+                enableMonthDropdown
+                enableYearDropdown
+                onChange={onChange}
+            />,
+        );
+
+        expect(openMonthOptionLabels(container)).toEqual([
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December',
+        ]);
     });
 });
 

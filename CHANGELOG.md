@@ -1,3 +1,22 @@
+# [1.3.0](https://github.com/nepware-dev/react-arsenal/compare/v1.2.0...v1.3.0) (2026-08-14)
+
+
+### Bug Fixes
+
+* **calendar:** bound month dropdown options by min/max date ([4ec770c](https://github.com/nepware-dev/react-arsenal/commit/4ec770c414e4ceab56d6b66e05e4e856eab479e0))
+* **calendar:** handle outside day click if not disabled ([e1c59be](https://github.com/nepware-dev/react-arsenal/commit/e1c59be859b4a3b67371a17553754b54d8c1aa4c))
+* **datepicker:** convert visible window on AD/BS toggle ([94beaaf](https://github.com/nepware-dev/react-arsenal/commit/94beaafa3af223d4173815f5982cddfdc09fd926))
+* **datetimepicker:** keep typed date when a time is entered ([a7f32d7](https://github.com/nepware-dev/react-arsenal/commit/a7f32d7a6fd56ead878df055ff1875bcbe80ca4e))
+* **popup:** correctly identify containing block ancestor ([f8f84d4](https://github.com/nepware-dev/react-arsenal/commit/f8f84d4f543df906a136a78620424fd86d6dda63))
+* **popup:** keep focus inside popups that open outside a modal ([02f9b27](https://github.com/nepware-dev/react-arsenal/commit/02f9b276762548afb70f284358323d5160cee36f))
+* **popup:** keep nested popups open and restore picker focus on close ([ec544d9](https://github.com/nepware-dev/react-arsenal/commit/ec544d9728a733e9f1b860a76b41ec18f1180597))
+
+
+### Features
+
+* **calendar:** add opt-in week start, outside days, and styling props ([33e87dd](https://github.com/nepware-dev/react-arsenal/commit/33e87dd980475dea3aa8dfe017a03fe5ef972c0f))
+* **popup:** update position dynamically based on viewport ([1ebb21e](https://github.com/nepware-dev/react-arsenal/commit/1ebb21e93ab43d3c5f8faa4522618bef2bd58c22))
+
 # [1.2.0](https://github.com/nepware-dev/react-arsenal/compare/v1.1.0...v1.2.0) (2026-07-28)
 
 

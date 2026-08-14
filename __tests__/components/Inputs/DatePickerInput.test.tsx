@@ -3,6 +3,12 @@ import '@testing-library/jest-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import DatePickerInput from '../../../components/Form/DatePickerInput';
+import {
+    MAXIMUM_BIKRAM_SAMBAT_YEAR,
+    MINIMUM_BIKRAM_SAMBAT_YEAR,
+    getBikramSambatMonthLabel,
+    getGregorianMonthLabel,
+} from '../../../utils/date';
 
 vi.mock('../../../components/Popup', () => ({
     default: ({ children, isVisible }: { children: React.ReactNode; isVisible: boolean }) => {
@@ -264,5 +270,221 @@ describe('DatePickerInput customization hooks', () => {
         expect(screen.getByTestId('day-15')).toHaveAttribute('data-selected', 'true');
         expect(screen.getByTestId('day-20')).toHaveAttribute('data-disabled', 'true');
         expect(screen.getByTestId('day-19')).toHaveAttribute('data-disabled', 'false');
+    });
+
+    it('shows the default calendar layout when no calendarProps are passed', () => {
+        const { container } = render(
+            <DatePickerInput value="2024-01-15" onChange={onChange} />,
+        );
+
+        fireEvent.focus(container.querySelector('input') as HTMLInputElement);
+
+        expect(container.querySelectorAll('.calendar-nav-button')).toHaveLength(4);
+        // Outside days render by default; a consumer opts out with `showOutsideDays: false`.
+        expect(container.querySelector('.calendar-outside-day')).toBeInTheDocument();
+        expect(container.querySelectorAll('.calendar-weekday')[0]).toHaveTextContent('Sun');
+    });
+
+    it('hides adjacent-month days when calendarProps opts out of showOutsideDays', () => {
+        const { container } = render(
+            <DatePickerInput
+                value="2024-01-15"
+                calendarProps={{ showOutsideDays: false }}
+                onChange={onChange}
+            />,
+        );
+
+        fireEvent.focus(container.querySelector('input') as HTMLInputElement);
+
+        expect(container.querySelector('.calendar-outside-day')).not.toBeInTheDocument();
+    });
+
+    it('forwards the calendar design props through calendarProps', () => {
+        const { container } = render(
+            <DatePickerInput
+                value="2024-01-15"
+                calendarProps={{
+                    weekStartsOn: 1,
+                    showOutsideDays: true,
+                    hideYearNavigation: true,
+                    classNames: { outsideDay: 'my-outside-day' },
+                }}
+                onChange={onChange}
+            />,
+        );
+
+        fireEvent.focus(container.querySelector('input') as HTMLInputElement);
+
+        expect(container.querySelectorAll('.calendar-nav-button')).toHaveLength(2);
+        expect(container.querySelectorAll('.calendar-weekday')[0]).toHaveTextContent('Mon');
+        expect(container.querySelectorAll('.my-outside-day').length).toBeGreaterThan(0);
+    });
+});
+
+// BS spans AD 1918-04-13 to AD 2044-04-12; an AD selection outside it has no BS spelling.
+describe('DatePickerInput AD/BS toggle with a selection outside the BS range', () => {
+    const onChange = vi.fn();
+
+    beforeEach(() => {
+        onChange.mockClear();
+    });
+
+    const openToggleOptions = (container: HTMLElement) => {
+        fireEvent.focus(container.querySelector('input') as HTMLInputElement);
+        const [adOption, bsOption] = Array.from(
+            container.querySelectorAll('.date-system-toggle-option'),
+        ) as HTMLButtonElement[];
+        return { adOption, bsOption };
+    };
+
+    const windowOf = (container: HTMLElement) => ({
+        month: container.querySelector('.calendar-title-month')?.textContent,
+        year: container.querySelector('.calendar-title-year')?.textContent,
+    });
+
+    it('clamps the window to the BS maximum and keeps the AD value through a round trip', () => {
+        const { container } = render(
+            <DatePickerInput mode="toggle" value="2050-06-15" onChange={onChange} />,
+        );
+        const { adOption, bsOption } = openToggleOptions(container);
+
+        expect(windowOf(container)).toEqual({
+            month: getGregorianMonthLabel(6),
+            year: '2050',
+        });
+
+        expect(() => fireEvent.click(bsOption)).not.toThrow();
+
+        expect(windowOf(container)).toEqual({
+            month: getBikramSambatMonthLabel(12),
+            year: String(MAXIMUM_BIKRAM_SAMBAT_YEAR),
+        });
+        // The date has no BS spelling, so the field reads blank and no day may ghost as selected.
+        expect(container.querySelector('input')).toHaveValue('');
+        expect(container.querySelector('.calendar-day-selected')).toBeNull();
+
+        fireEvent.click(adOption);
+
+        expect(windowOf(container)).toEqual({
+            month: getGregorianMonthLabel(6),
+            year: '2050',
+        });
+        expect(container.querySelector('input')).toHaveValue('2050-06-15');
+        expect(container.querySelector('.calendar-day-selected')).toHaveTextContent('15');
+        expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('clamps the window to the BS minimum and keeps the AD value through a round trip', () => {
+        const { container } = render(
+            <DatePickerInput mode="toggle" value="1910-03-01" onChange={onChange} />,
+        );
+        const { adOption, bsOption } = openToggleOptions(container);
+
+        expect(() => fireEvent.click(bsOption)).not.toThrow();
+
+        expect(windowOf(container)).toEqual({
+            month: getBikramSambatMonthLabel(1),
+            year: String(MINIMUM_BIKRAM_SAMBAT_YEAR),
+        });
+        expect(container.querySelector('input')).toHaveValue('');
+        expect(container.querySelector('.calendar-day-selected')).toBeNull();
+
+        fireEvent.click(adOption);
+
+        expect(windowOf(container)).toEqual({
+            month: getGregorianMonthLabel(3),
+            year: '1910',
+        });
+        expect(container.querySelector('input')).toHaveValue('1910-03-01');
+        expect(container.querySelector('.calendar-day-selected')).toHaveTextContent('1');
+        expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('does not commit the unspellable blank as a clear on blur', () => {
+        const { container } = render(
+            <DatePickerInput mode="toggle" value="2050-06-15" onChange={onChange} />,
+        );
+        const { adOption, bsOption } = openToggleOptions(container);
+        fireEvent.click(bsOption);
+
+        const input = container.querySelector('input') as HTMLInputElement;
+        fireEvent.blur(input);
+
+        expect(onChange).not.toHaveBeenCalled();
+
+        fireEvent.focus(input);
+        fireEvent.click(adOption);
+        expect(container.querySelector('input')).toHaveValue('2050-06-15');
+    });
+
+    it('does not commit the unspellable blank as a clear on Enter', () => {
+        const { container } = render(
+            <DatePickerInput mode="toggle" value="2050-06-15" onChange={onChange} />,
+        );
+        const { bsOption } = openToggleOptions(container);
+        fireEvent.click(bsOption);
+
+        fireEvent.keyDown(container.querySelector('input') as HTMLInputElement, {
+            key: 'Enter',
+        });
+
+        expect(onChange).not.toHaveBeenCalled();
+        expect(container.querySelector('input')).toHaveValue('');
+    });
+
+    it('keeps the value and both windows exact across repeated toggles', () => {
+        const { container } = render(
+            <DatePickerInput mode="toggle" value="2050-06-15" onChange={onChange} />,
+        );
+        const { adOption, bsOption } = openToggleOptions(container);
+
+        for (let round = 0; round < 4; round += 1) {
+            fireEvent.click(bsOption);
+            expect(windowOf(container)).toEqual({
+                month: getBikramSambatMonthLabel(12),
+                year: String(MAXIMUM_BIKRAM_SAMBAT_YEAR),
+            });
+            expect(container.querySelector('.calendar-day-selected')).toBeNull();
+
+            fireEvent.click(adOption);
+            expect(windowOf(container)).toEqual({
+                month: getGregorianMonthLabel(6),
+                year: '2050',
+            });
+            expect(container.querySelector('input')).toHaveValue('2050-06-15');
+        }
+
+        expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('returns to the exact typed AD window across repeated clamped toggles with no selection', () => {
+        const { container } = render(<DatePickerInput mode="toggle" onChange={onChange} />);
+        const { adOption, bsOption } = openToggleOptions(container);
+
+        // A year past the BS range moves the window without selecting anything.
+        fireEvent.change(container.querySelector('input') as HTMLInputElement, {
+            target: { value: '2090-03' },
+        });
+        expect(windowOf(container)).toEqual({
+            month: getGregorianMonthLabel(3),
+            year: '2090',
+        });
+
+        for (let round = 0; round < 3; round += 1) {
+            fireEvent.click(bsOption);
+            expect(windowOf(container)).toEqual({
+                month: getBikramSambatMonthLabel(12),
+                year: String(MAXIMUM_BIKRAM_SAMBAT_YEAR),
+            });
+
+            // The clamp lands on the window only; the anchor still holds the chosen AD month.
+            fireEvent.click(adOption);
+            expect(windowOf(container)).toEqual({
+                month: getGregorianMonthLabel(3),
+                year: '2090',
+            });
+        }
+
+        expect(onChange).not.toHaveBeenCalled();
     });
 });

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import type { KeyExtractor, ListProps } from '../../../components/List';
-import type { OriginPosition } from '../../../components/Popup';
+import type { OriginPosition, PopupProps } from '../../../components/Popup';
 
 export type { KeyExtractor };
 
@@ -81,4 +81,5 @@ export interface SelectInputProps<T, V extends ReactNode> {
     onOptionsEndReach?: () => void;
     onEndReachedThreshold?: number;
     renderDisplayLabel?: (option: T) => React.ReactNode;
+    container?: PopupProps<HTMLElement>['container'];
 }

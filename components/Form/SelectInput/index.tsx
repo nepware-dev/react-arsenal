@@ -4,6 +4,7 @@ import { FiChevronDown } from 'react-icons/fi';
 import { FaSpinner } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 
+import { consumeFocusIntent, observeFocusIntent } from './focusIntent';
 import Options from './Options';
 import styles from './styles.module.scss';
 import type { SelectInputProps } from './types';
@@ -63,6 +64,7 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
         renderDisplayLabel,
         onOptionsEndReach,
         onEndReachedThreshold,
+        container,
     } = props;
 
     const [selectState, setSelectState] = useState<SelectState<T>>({
@@ -261,9 +263,8 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
     );
 
     const handleSelectFocus = useCallback((event: React.FocusEvent<HTMLDivElement>) => {
-        // Skip focus events where relatedTarget is null — this happens when the previously
-        // focused element was removed from the DOM (e.g. FocusLock returnFocus after a Popup unmounts).
-        if (event.relatedTarget === null) {
+        // FocusLock also moves focus programmatically with a relatedTarget set, so open only on a real user gesture.
+        if (!consumeFocusIntent(wrapperRef.current)) {
             return;
         }
         if (!disabled) {
@@ -317,6 +318,8 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
             };
         });
     },[options, getFocusedItem, filterOptions, onInputChange]);
+
+    useEffect(() => observeFocusIntent(), []);
 
     useEffect(() => {
         updateSelectValue();
@@ -386,6 +389,7 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
                     anchorOrigin={optionsDirection === 'up' ? 'top right' : anchorOrigin}
                     transformOrigin={optionsDirection === 'up' ? 'bottom right' : transformOrigin}
                     onClose={hideOption}
+                    container={container}
                 >
                     <div className={cs(styles.selectOptionsWrapper, optionsWrapperClassName)}>
                         <Options

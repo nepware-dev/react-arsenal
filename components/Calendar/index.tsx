@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 
 import {
     FiChevronLeft,
@@ -14,6 +20,7 @@ import type {
     CalendarDayInfo,
     CalendarProps,
     CalendarSystem,
+    CalendarWeekday,
 } from "./types";
 import SelectInput from "../Form/SelectInput";
 import { useI18nContext } from "../I18n";
@@ -25,6 +32,7 @@ import {
     compareBikramSambatDates,
     compareGregorianDates,
     convertBikramSambatToGregorian,
+    convertGregorianToBikramSambat,
     getBikramSambatMonthLabel,
     getBikramSambatWeekdayLabel,
     getDaysInBikramSambatMonth,
@@ -36,6 +44,7 @@ import {
     isNepaliLanguage,
     isValidBikramSambatDate,
     isValidGregorianDate,
+    jsDateToGregorian,
     toNepaliDigits,
 } from "../../utils/date";
 import List, {
@@ -44,7 +53,7 @@ import List, {
     ListRenderItemProps,
 } from "../List";
 
-const WEEKDAY_INDICES = [0, 1, 2, 3, 4, 5, 6];
+const DAYS_IN_WEEK = 7;
 
 const MINIMUM_GREGORIAN_YEAR = 1900;
 const MAXIMUM_GREGORIAN_YEAR = 2100;
@@ -90,6 +99,76 @@ const VARIANT_CLASS_NAMES: Record<CalendarSystem, string> = {
     nepali: "nepali-calendar",
 };
 
+// BS's real convertible span is narrower than Gregorian's declared 1900-2100 range.
+const BIKRAM_SAMBAT_SUPPORTED_GREGORIAN_RANGE = {
+    minimum: convertBikramSambatToGregorian({
+        year: MINIMUM_BIKRAM_SAMBAT_YEAR,
+        month: 1,
+        day: 1,
+    }),
+    maximum: convertBikramSambatToGregorian({
+        year: MAXIMUM_BIKRAM_SAMBAT_YEAR,
+        month: 12,
+        day: getDaysInBikramSambatMonth(MAXIMUM_BIKRAM_SAMBAT_YEAR, 12),
+    }),
+};
+
+const convertViewDate = (
+    fromSystem: CalendarSystem,
+    toSystem: CalendarSystem,
+    date: CalendarDate,
+): CalendarDate => {
+    if (fromSystem === toSystem) {
+        return date;
+    }
+    if (fromSystem === "nepali") {
+        return jsDateToGregorian(convertBikramSambatToGregorian(date));
+    }
+    const asJsDate = gregorianToJsDate(date);
+    if (asJsDate < BIKRAM_SAMBAT_SUPPORTED_GREGORIAN_RANGE.minimum) {
+        return { year: MINIMUM_BIKRAM_SAMBAT_YEAR, month: 1, day: 1 };
+    }
+    if (asJsDate > BIKRAM_SAMBAT_SUPPORTED_GREGORIAN_RANGE.maximum) {
+        return { year: MAXIMUM_BIKRAM_SAMBAT_YEAR, month: 12, day: 1 };
+    }
+    return convertGregorianToBikramSambat(asJsDate);
+};
+
+// Clamps a year/month into [minimumBound, maximumBound], carrying month over/underflow into the year first.
+const clampMonthToBounds = (
+    year: number,
+    month: number,
+    minimumBound: CalendarDate,
+    maximumBound: CalendarDate,
+): { year: number; month: number } => {
+    if (month < 1) {
+        year -= 1;
+        month = 12;
+    } else if (month > 12) {
+        year += 1;
+        month = 1;
+    }
+    if (
+        year < minimumBound.year ||
+        (year === minimumBound.year && month < minimumBound.month)
+    ) {
+        return { year: minimumBound.year, month: minimumBound.month };
+    }
+    if (
+        year > maximumBound.year ||
+        (year === maximumBound.year && month > maximumBound.month)
+    ) {
+        return { year: maximumBound.year, month: maximumBound.month };
+    }
+    return { year, month };
+};
+
+interface VisibleWindow {
+    system: CalendarSystem;
+    year: number;
+    month: number;
+}
+
 interface NavigationOption {
     value: number;
     label: string;
@@ -99,8 +178,54 @@ const navigationOptionKeyExtractor = (option: NavigationOption) => option.value;
 const navigationOptionValueExtractor = (option: NavigationOption) =>
     option.label;
 
-const dayKeyExtractor: KeyExtractor<number | null> = (item, index) =>
-    item === null ? `empty-${index}` : String(item);
+type CalendarCell =
+    | { type: "empty" }
+    | { type: "day"; day: number }
+    | { type: "outside"; year: number; month: number; day: number };
+
+const dayKeyExtractor: KeyExtractor<CalendarCell> = (item, index) => {
+    if (item.type === "empty") {
+        return `empty-${index}`;
+    }
+    if (item.type === "outside") {
+        return `outside-${item.year}-${item.month}-${item.day}`;
+    }
+    return String(item.day);
+};
+
+interface AdjacentMonth {
+    year: number;
+    month: number;
+    daysInMonth: number;
+}
+
+const getAdjacentMonth = (
+    dateSystem: CalendarDateSystem,
+    year: number,
+    month: number,
+    offset: -1 | 1,
+): AdjacentMonth | null => {
+    let targetYear = year;
+    let targetMonth = month + offset;
+    if (targetMonth < 1) {
+        targetYear -= 1;
+        targetMonth = 12;
+    } else if (targetMonth > 12) {
+        targetYear += 1;
+        targetMonth = 1;
+    }
+    if (
+        targetYear < dateSystem.minimumYear ||
+        targetYear > dateSystem.maximumYear
+    ) {
+        return null;
+    }
+    return {
+        year: targetYear,
+        month: targetMonth,
+        daysInMonth: dateSystem.getDaysInMonth(targetYear, targetMonth),
+    };
+};
 
 const Calendar: React.FC<CalendarProps> = (props) => {
     const {
@@ -115,6 +240,9 @@ const Calendar: React.FC<CalendarProps> = (props) => {
         language: languageProp,
         enableYearDropdown = false,
         enableMonthDropdown = false,
+        weekStartsOn = 0,
+        showOutsideDays = true,
+        hideYearNavigation = false,
         isDateDisabled,
         renderDay,
     } = props;
@@ -158,42 +286,61 @@ const Calendar: React.FC<CalendarProps> = (props) => {
         return today;
     }, [dateSystem, value, today, minimumBound, maximumBound]);
 
-    const [visibleYear, setVisibleYear] = useState(initialDate.year);
-    const [visibleMonth, setVisibleMonth] = useState(initialDate.month);
+    const [visibleWindow, setVisibleWindow] = useState<VisibleWindow>(() => ({
+        system,
+        year: initialDate.year,
+        month: initialDate.month,
+    }));
+
+    const windowAnchorRef = useRef<{ system: CalendarSystem; date: CalendarDate }>({
+        system,
+        date: initialDate,
+    });
+
+    let visibleYear = visibleWindow.year;
+    let visibleMonth = visibleWindow.month;
+    if (visibleWindow.system !== system) {
+        const anchor = windowAnchorRef.current;
+        const target = dateSystem.isValid(value)
+            ? (value as CalendarDate)
+            : convertViewDate(anchor.system, system, anchor.date);
+        const clamped = clampMonthToBounds(
+            target.year,
+            target.month,
+            minimumBound,
+            maximumBound,
+        );
+        visibleYear = clamped.year;
+        visibleMonth = clamped.month;
+        setVisibleWindow({ system, year: visibleYear, month: visibleMonth });
+    }
 
     useEffect(() => {
         if (dateSystem.isValid(value)) {
-            setVisibleYear((value as CalendarDate).year);
-            setVisibleMonth((value as CalendarDate).month);
+            const selected = value as CalendarDate;
+            windowAnchorRef.current = { system, date: selected };
+            setVisibleWindow({
+                system,
+                year: selected.year,
+                month: selected.month,
+            });
         }
-    }, [dateSystem, value]);
+    }, [dateSystem, system, value]);
 
     const navigateToMonth = useCallback(
         (year: number, month: number) => {
-            if (month < 1) {
-                year -= 1;
-                month = 12;
-            } else if (month > 12) {
-                year += 1;
-                month = 1;
-            }
-            if (
-                year < minimumBound.year ||
-                (year === minimumBound.year && month < minimumBound.month)
-            ) {
-                year = minimumBound.year;
-                month = minimumBound.month;
-            } else if (
-                year > maximumBound.year ||
-                (year === maximumBound.year && month > maximumBound.month)
-            ) {
-                year = maximumBound.year;
-                month = maximumBound.month;
-            }
-            setVisibleYear(year);
-            setVisibleMonth(month);
+            const clamped = clampMonthToBounds(year, month, minimumBound, maximumBound);
+            windowAnchorRef.current = {
+                system,
+                date: { year: clamped.year, month: clamped.month, day: 1 },
+            };
+            setVisibleWindow({
+                system,
+                year: clamped.year,
+                month: clamped.month,
+            });
         },
-        [minimumBound, maximumBound],
+        [system, minimumBound, maximumBound],
     );
 
     useEffect(() => {
@@ -219,7 +366,17 @@ const Calendar: React.FC<CalendarProps> = (props) => {
     const canShowPreviousYear = visibleYear > minimumBound.year;
     const canShowNextYear = visibleYear < maximumBound.year;
 
-    const dayCells = useMemo(() => {
+    const weekdayIndices = useMemo<CalendarWeekday[]>(
+        () =>
+            Array.from(
+                { length: DAYS_IN_WEEK },
+                (_, index) =>
+                    ((weekStartsOn + index) % DAYS_IN_WEEK) as CalendarWeekday,
+            ),
+        [weekStartsOn],
+    );
+
+    const dayCells = useMemo<CalendarCell[]>(() => {
         const firstWeekdayIndex = dateSystem.firstWeekdayIndex(
             visibleYear,
             visibleMonth,
@@ -228,20 +385,66 @@ const Calendar: React.FC<CalendarProps> = (props) => {
             visibleYear,
             visibleMonth,
         );
-        const leadingCells: null[] = Array.from(
-            { length: firstWeekdayIndex },
-            () => null,
-        );
-        const dayNumbers = Array.from(
+        const leadingCount =
+            (firstWeekdayIndex - weekStartsOn + DAYS_IN_WEEK) % DAYS_IN_WEEK;
+        const monthCells: CalendarCell[] = Array.from(
             { length: daysInMonth },
-            (_, index) => index + 1,
+            (_, index) => ({ type: "day", day: index + 1 }),
         );
-        return [...leadingCells, ...dayNumbers];
-    }, [dateSystem, visibleYear, visibleMonth]);
+
+        if (!showOutsideDays) {
+            const emptyCells: CalendarCell[] = Array.from(
+                { length: leadingCount },
+                () => ({ type: "empty" }),
+            );
+            return [...emptyCells, ...monthCells];
+        }
+
+        const previousMonth = getAdjacentMonth(
+            dateSystem,
+            visibleYear,
+            visibleMonth,
+            -1,
+        );
+        const firstLeadingDay = previousMonth
+            ? previousMonth.daysInMonth - leadingCount + 1
+            : 0;
+        const leadingCells: CalendarCell[] = previousMonth
+            ? Array.from({ length: leadingCount }, (_, index) => ({
+                  type: "outside" as const,
+                  year: previousMonth.year,
+                  month: previousMonth.month,
+                  day: firstLeadingDay + index,
+              }))
+            : Array.from({ length: leadingCount }, () => ({
+                  type: "empty" as const,
+              }));
+
+        const nextMonth = getAdjacentMonth(
+            dateSystem,
+            visibleYear,
+            visibleMonth,
+            1,
+        );
+        const trailingCount =
+            (DAYS_IN_WEEK - ((leadingCount + daysInMonth) % DAYS_IN_WEEK)) %
+            DAYS_IN_WEEK;
+        const trailingCells: CalendarCell[] = nextMonth
+            ? Array.from({ length: trailingCount }, (_, index) => ({
+                  type: "outside" as const,
+                  year: nextMonth.year,
+                  month: nextMonth.month,
+                  day: index + 1,
+              }))
+            : Array.from({ length: trailingCount }, () => ({
+                  type: "empty" as const,
+              }));
+
+        return [...leadingCells, ...monthCells, ...trailingCells];
+    }, [dateSystem, visibleYear, visibleMonth, weekStartsOn, showOutsideDays]);
 
     const isDayDisabled = useCallback(
-        (day: number) => {
-            const date = { year: visibleYear, month: visibleMonth, day };
+        (date: CalendarDate) => {
             if (
                 dateSystem.compare(date, minimumBound) < 0 ||
                 dateSystem.compare(date, maximumBound) > 0
@@ -250,25 +453,26 @@ const Calendar: React.FC<CalendarProps> = (props) => {
             }
             return isDateDisabled ? isDateDisabled(date) : false;
         },
-        [
-            dateSystem,
-            visibleYear,
-            visibleMonth,
-            minimumBound,
-            maximumBound,
-            isDateDisabled,
-        ],
+        [dateSystem, minimumBound, maximumBound, isDateDisabled],
     );
 
     const handleDayClick = useCallback(
         (day: number) => {
-            if (isDayDisabled(day)) {
+            const date = { year: visibleYear, month: visibleMonth, day };
+            if (isDayDisabled(date)) {
                 return;
             }
-            onChange?.({ year: visibleYear, month: visibleMonth, day });
+            onChange?.(date);
         },
         [onChange, visibleYear, visibleMonth, isDayDisabled],
     );
+
+    const handleOutsideDayClick = useCallback((item: CalendarDate) => {
+        if (isDayDisabled(item)) {
+            return;
+        }
+        onChange?.(item);
+    }, [isDayDisabled, onChange]);
 
     const formatNumberLabel = useCallback(
         (numberValue: number) => dateSystem.numberLabel(numberValue, language),
@@ -288,11 +492,26 @@ const Calendar: React.FC<CalendarProps> = (props) => {
     }, [minimumBound.year, maximumBound.year, formatNumberLabel]);
 
     const monthOptions = useMemo<NavigationOption[]>(() => {
-        return Array.from({ length: 12 }, (_, index) => ({
-            value: index + 1,
-            label: dateSystem.monthLabel(index + 1, language),
-        }));
-    }, [dateSystem, language]);
+        const lowerMonth =
+            visibleYear === minimumBound.year ? minimumBound.month : 1;
+        const upperMonth =
+            visibleYear === maximumBound.year ? maximumBound.month : 12;
+        return Array.from(
+            { length: upperMonth - lowerMonth + 1 },
+            (_, index) => ({
+                value: lowerMonth + index,
+                label: dateSystem.monthLabel(lowerMonth + index, language),
+            }),
+        );
+    }, [
+        visibleYear,
+        minimumBound.year,
+        minimumBound.month,
+        maximumBound.year,
+        maximumBound.month,
+        dateSystem,
+        language,
+    ]);
 
     const handleYearSelect = useCallback(
         ({ option }: { option: NavigationOption | null }) => {
@@ -334,7 +553,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
         [navigateToMonth, visibleMonth, visibleYear],
     );
 
-    const renderDayCell: ListRenderItem<number | null> = useCallback(
+    const renderDayCell: ListRenderItem<CalendarCell> = useCallback(
         (listProps) => {
             return (
                 <DayCellItem
@@ -347,6 +566,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                     dateSystem={dateSystem}
                     isDayDisabled={isDayDisabled}
                     onDayClick={handleDayClick}
+                    onOutsideDayClick={handleOutsideDayClick}
                     formatNumberLabel={formatNumberLabel}
                     renderDay={renderDay}
                 />
@@ -360,6 +580,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
             today,
             isDayDisabled,
             handleDayClick,
+            handleOutsideDayClick,
             formatNumberLabel,
             dateSystem,
             renderDay,
@@ -383,25 +604,29 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                     classNames?.header,
                 )}
             >
+                {!hideYearNavigation && (
+                    <button
+                        type="button"
+                        className={cs(
+                            styles.navigationButton,
+                            "calendar-nav-button",
+                            classNames?.navigationButton,
+                            classNames?.previousYearButton,
+                        )}
+                        aria-label="Previous year"
+                        disabled={!canShowPreviousYear}
+                        onClick={handleGoToPreviousYear}
+                    >
+                        <FiChevronsLeft />
+                    </button>
+                )}
                 <button
                     type="button"
                     className={cs(
                         styles.navigationButton,
                         "calendar-nav-button",
                         classNames?.navigationButton,
-                    )}
-                    aria-label="Previous year"
-                    disabled={!canShowPreviousYear}
-                    onClick={handleGoToPreviousYear}
-                >
-                    <FiChevronsLeft />
-                </button>
-                <button
-                    type="button"
-                    className={cs(
-                        styles.navigationButton,
-                        "calendar-nav-button",
-                        classNames?.navigationButton,
+                        classNames?.previousMonthButton,
                     )}
                     aria-label="Previous month"
                     disabled={!canShowPreviousMonth}
@@ -474,6 +699,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                         styles.navigationButton,
                         "calendar-nav-button",
                         classNames?.navigationButton,
+                        classNames?.nextMonthButton,
                     )}
                     aria-label="Next month"
                     disabled={!canShowNextMonth}
@@ -481,19 +707,22 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                 >
                     <FiChevronRight />
                 </button>
-                <button
-                    type="button"
-                    className={cs(
-                        styles.navigationButton,
-                        "calendar-nav-button",
-                        classNames?.navigationButton,
-                    )}
-                    aria-label="Next year"
-                    disabled={!canShowNextYear}
-                    onClick={handleGoToNextYear}
-                >
-                    <FiChevronsRight />
-                </button>
+                {!hideYearNavigation && (
+                    <button
+                        type="button"
+                        className={cs(
+                            styles.navigationButton,
+                            "calendar-nav-button",
+                            classNames?.navigationButton,
+                            classNames?.nextYearButton,
+                        )}
+                        aria-label="Next year"
+                        disabled={!canShowNextYear}
+                        onClick={handleGoToNextYear}
+                    >
+                        <FiChevronsRight />
+                    </button>
+                )}
             </div>
             <div
                 className={cs(
@@ -502,7 +731,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                     classNames?.weekdays,
                 )}
             >
-                {WEEKDAY_INDICES.map((weekdayIndex) => (
+                {weekdayIndices.map((weekdayIndex) => (
                     <div
                         key={weekdayIndex}
                         className={cs(
@@ -526,15 +755,16 @@ const Calendar: React.FC<CalendarProps> = (props) => {
 };
 
 function DayCellItem(
-    props: ListRenderItemProps<number | null> & {
+    props: ListRenderItemProps<CalendarCell> & {
         classNames: CalendarProps["classNames"];
         visibleYear: number;
         visibleMonth: number;
         dateSystem: CalendarDateSystem;
         today: CalendarDate;
         value: CalendarProps["value"];
-        isDayDisabled: (day: number) => boolean;
+        isDayDisabled: (date: CalendarDate) => boolean;
         onDayClick: (day: number) => void;
+        onOutsideDayClick: (item: CalendarDate) => void;
         formatNumberLabel: (arg: number) => string;
         renderDay?: (date: CalendarDate, info: CalendarDayInfo) => React.ReactNode;
     },
@@ -549,17 +779,20 @@ function DayCellItem(
         value,
         isDayDisabled,
         onDayClick,
+        onOutsideDayClick,
         formatNumberLabel,
         renderDay,
     } = props;
 
     const handleDayClick = useCallback(() => {
-        if (item !== null) {
-            onDayClick(item);
+        if (item.type === "day") {
+            onDayClick(item.day);
+        } else if (item.type === "outside") {
+            onOutsideDayClick({ day: item.day, month: item.month, year: item.year });
         }
-    }, [item, onDayClick]);
+    }, [item, onDayClick, onOutsideDayClick]);
 
-    if (item === null) {
+    if (item.type === "empty") {
         return (
             <div
                 className={cs(
@@ -570,12 +803,45 @@ function DayCellItem(
             />
         );
     }
-    const date = { year: visibleYear, month: visibleMonth, day: item };
+
+    const date =
+        item.type === "outside"
+            ? { year: item.year, month: item.month, day: item.day }
+            : { year: visibleYear, month: visibleMonth, day: item.day };
     const isSelected =
         dateSystem.isValid(value) &&
         dateSystem.compare(date, value as CalendarDate) === 0;
     const isToday = dateSystem.compare(date, today) === 0;
-    const disabled = isDayDisabled(item);
+    const disabled = isDayDisabled(date);
+    const dayInfo: CalendarDayInfo = {
+        isSelected,
+        isDisabled: disabled,
+        isToday,
+        isOutsideMonth: item.type === "outside",
+    };
+    const label = renderDay
+        ? renderDay(date, dayInfo)
+        : formatNumberLabel(item.day);
+
+    if (item.type === "outside") {
+        return (
+            <button
+                type="button"
+                className={cs(
+                    styles.outsideDay,
+                    "calendar-outside-day",
+                    classNames?.outsideDay,
+                )}
+                disabled={disabled}
+                aria-hidden={disabled ? 'true' : undefined}
+                tabIndex={disabled ? -1 : undefined}
+                onClick={handleDayClick}
+            >
+                {label}
+            </button>
+        );
+    }
+
     return (
         <button
             type="button"
@@ -591,13 +857,12 @@ function DayCellItem(
                 isSelected && classNames?.selectedDay,
                 isToday && "calendar-day-today",
                 isToday && classNames?.today,
+                disabled && classNames?.disabledDay,
             )}
             disabled={disabled}
             onClick={handleDayClick}
         >
-            {renderDay
-                ? renderDay(date, { isSelected, isDisabled: disabled, isToday })
-                : formatNumberLabel(item)}
+            {label}
         </button>
     );
 }

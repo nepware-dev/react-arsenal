@@ -56,6 +56,11 @@ export interface PickerDateFieldModel<Model> {
     isComplete?: (model: Model) => boolean;
 }
 
+export interface CommitTypedValueResult<Model> {
+    status: "committed" | "reset";
+    model: Model;
+}
+
 interface UsePickerDateFieldConfig<Model> {
     name?: string;
     value?: string | null;
@@ -94,14 +99,27 @@ export interface PickerDateField<Model> {
     warning: string | null;
     errorText: any;
     controlRef: React.RefObject<HTMLDivElement | null>;
+    inputRef: React.RefObject<HTMLInputElement | null>;
     Wrapper: React.ElementType;
     wrapperProps: { className?: string };
     showCalendar: () => void;
+    /**
+     * Closes the calendar and returns focus to the text input.
+     * Use for user-triggered closes from within the picker (selection, Enter, Escape) so focus never
+     * falls back to the document body, where an ancestor focus lock would recapture it.
+     */
     hideCalendar: () => void;
+    /**
+     * Closes the calendar without touching focus.
+     * Use for user-triggered closes from outside the picker, where the click target owns focus.
+     */
+    dismissCalendar: () => void;
     toggleCalendar: () => void;
+    handleInputFocus: () => void;
     handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-    commitTypedValue: () => "committed" | "reset";
+    /** Commits typed text. Use the returned model, not `selected`, which is stale until re-render. */
+    commitTypedValue: () => CommitTypedValueResult<Model>;
     handleClearIconClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
     emit: (model: Model) => void;
     systemToggle: React.ReactNode;
@@ -162,17 +180,24 @@ const usePickerDateField = <Model,>(
         model.parseIso(value ?? defaultValue),
     );
     const resetBaseline = selected;
-    const [inputText, setInputText] = useState<string>(() =>
-        model.format(
+    const [inputState, setInputState] = useState<{
+        system: DisplaySystem;
+        text: string;
+    }>(() => ({
+        system: mode === "nepali" ? "bs" : "ad",
+        text: model.format(
             model.parseIso(value ?? defaultValue),
             mode === "nepali" ? "bs" : "ad",
             language,
         ),
-    );
+    }));
+    const inputText = inputState.text;
     const [expanded, setExpanded] = useState(false);
     const [warning, setWarning] = useState<string | null>(null);
 
     const controlRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const restoringFocusRef = useRef(false);
 
     useEffect(() => {
         if (value !== undefined) {
@@ -181,9 +206,10 @@ const usePickerDateField = <Model,>(
     }, [value]);
 
     useEffect(() => {
-        setInputText(
-            modelRef.current.format(selected, displaySystem, language),
-        );
+        setInputState({
+            system: displaySystem,
+            text: modelRef.current.format(selected, displaySystem, language),
+        });
     }, [selected, displaySystem, language]);
 
     useEffect(() => {
@@ -198,12 +224,40 @@ const usePickerDateField = <Model,>(
         }
     }, [showRequired, required, selected]);
 
-    const hideCalendar = useCallback(() => setExpanded(false), []);
+    const dismissCalendar = useCallback(() => setExpanded(false), []);
+
+    // Flagged so the input's own focus handler can tell this apart from a user focus and not reopen.
+    const restoreInputFocus = useCallback(() => {
+        const input = inputRef.current;
+        if (disabled || !input || document.activeElement === input) {
+            return;
+        }
+        restoringFocusRef.current = true;
+        try {
+            input.focus();
+        } finally {
+            restoringFocusRef.current = false;
+        }
+    }, [disabled]);
+
+    const hideCalendar = useCallback(() => {
+        setExpanded(false);
+        restoreInputFocus();
+    }, [restoreInputFocus]);
+
     const showCalendar = useCallback(() => {
         if (!disabled) {
             setExpanded(true);
         }
     }, [disabled]);
+
+    const handleInputFocus = useCallback(() => {
+        if (restoringFocusRef.current) {
+            return;
+        }
+        showCalendar();
+    }, [showCalendar]);
+
     const toggleCalendar = useCallback(() => {
         setExpanded((previouslyExpanded) =>
             disabled ? previouslyExpanded : !previouslyExpanded,
@@ -250,14 +304,18 @@ const usePickerDateField = <Model,>(
         [model, completesOnDateChange, hideCalendar, emit],
     );
 
-    const commitTypedValue = useCallback((): "committed" | "reset" => {
+    const commitTypedValue = useCallback((): CommitTypedValueResult<Model> => {
         const trimmedText = inputText.trim();
         if (trimmedText === "") {
-            if (!model.equals(selected, model.empty)) {
+            const isBlankByDisplay =
+                !!model.getDate(selected) &&
+                model.format(selected, displaySystem, language) === "";
+            if (!model.equals(selected, model.empty) && !isBlankByDisplay) {
                 setSelected(model.empty);
                 emit(model.empty);
+                return { status: "committed", model: model.empty };
             }
-            return "committed";
+            return { status: "committed", model: selected };
         }
         const parsed = model.parseTyped(trimmedText, displaySystem);
         const parsedDate = parsed ? model.getDate(parsed) : null;
@@ -267,10 +325,13 @@ const usePickerDateField = <Model,>(
                 setSelected(parsed);
                 emit(parsed);
             }
-            return "committed";
+            return { status: "committed", model: parsed };
         }
-        setInputText(model.format(resetBaseline, displaySystem, language));
-        return "reset";
+        setInputState({
+            system: displaySystem,
+            text: model.format(resetBaseline, displaySystem, language),
+        });
+        return { status: "reset", model: resetBaseline };
     }, [
         inputText,
         displaySystem,
@@ -284,17 +345,17 @@ const usePickerDateField = <Model,>(
 
     const handleInputChange = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
-            setInputText(event.target.value);
+            setInputState({ system: displaySystem, text: event.target.value });
             showCalendar();
         },
-        [showCalendar],
+        [displaySystem, showCalendar],
     );
 
     const handleKeyDown = useCallback(
         (event: React.KeyboardEvent<HTMLInputElement>) => {
             if (event.key === "Enter") {
                 event.preventDefault();
-                if (commitTypedValue() === "committed") {
+                if (commitTypedValue().status === "committed") {
                     hideCalendar();
                 }
             } else if (event.key === "Escape" || event.key === "Tab") {
@@ -305,8 +366,11 @@ const usePickerDateField = <Model,>(
     );
 
     const typedViewParts = useMemo(
-        () => parseCalendarViewParts(inputText, displaySystem),
-        [inputText, displaySystem],
+        () =>
+            inputState.system === displaySystem
+                ? parseCalendarViewParts(inputState.text, displaySystem)
+                : undefined,
+        [inputState, displaySystem],
     );
 
     const errorText = useMemo(() => {
@@ -477,11 +541,14 @@ const usePickerDateField = <Model,>(
         warning,
         errorText,
         controlRef,
+        inputRef,
         Wrapper,
         wrapperProps,
         showCalendar,
         hideCalendar,
+        dismissCalendar,
         toggleCalendar,
+        handleInputFocus,
         handleInputChange,
         handleKeyDown,
         commitTypedValue,

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import Popup from '../../components/Popup';
 import useRect from '../../hooks/useRect';
@@ -11,35 +11,77 @@ vi.mock('../../hooks/useRect', () => ({
 }));
 
 vi.mock('../../components/Portal', () => ({
-    default: ({ children }: { children: React.ReactNode }) => (
-        <div data-testid="portal">{children}</div>
-    ),
+    default: ({ children }: { children: React.ReactNode }) => <div data-testid='portal'>{children}</div>,
 }));
 
+type FocusLockNode = HTMLElement & { shards?: HTMLElement[] };
+
 vi.mock('react-focus-lock', () => ({
-    default: ({ children, disabled }: { children: React.ReactNode; disabled?: boolean }) => (
-        <div data-testid="focus-lock" data-disabled={disabled}>
+    default: ({
+        children,
+        disabled,
+        shards,
+    }: {
+        children: React.ReactNode;
+        disabled?: boolean;
+        shards?: HTMLElement[];
+    }) => (
+        <div
+            data-testid='focus-lock'
+            data-disabled={disabled}
+            ref={(node: FocusLockNode | null) => {
+                if (node) node.shards = shards;
+            }}
+        >
             {children}
         </div>
     ),
 }));
 
-
 const mockUseRect = useRect as Mock;
 
-describe('FunctionalPopup', () => {
+const getShards = (lock: HTMLElement) => (lock as FocusLockNode).shards ?? [];
+
+const defaultAnchorRect = {
+    top: 100,
+    left: 200,
+    right: 400,
+    bottom: 150,
+    width: 200,
+    height: 50,
+} as DOMRect;
+
+const defaultBoundingRect = {
+    top: 0,
+    left: 0,
+    right: 2000,
+    bottom: 2000,
+    width: 2000,
+    height: 2000,
+} as DOMRect;
+
+const WRAPPER_PADDING = 20;
+
+describe('Popup', () => {
     const mockOnClose = vi.fn();
+
+    let mockAnchorRect: DOMRect;
+    let mockBoundingRect: DOMRect | null;
+
+    const setAnchorRect = (rect: DOMRect | null) => {
+        mockAnchorRect = rect as DOMRect;
+    };
 
     const TestComponent = ({ onClose = mockOnClose, ...props }: any) => {
         const anchorRef = useRef<HTMLButtonElement>(null);
 
         return (
             <>
-                <button ref={anchorRef} data-testid="anchor-button">
+                <button ref={anchorRef} data-testid='anchor-button'>
                     Anchor
                 </button>
                 <Popup anchor={anchorRef} onClose={onClose} {...props}>
-                    <div data-testid="popup-content">Popup Content</div>
+                    <div data-testid='popup-content'>Popup Content</div>
                 </Popup>
             </>
         );
@@ -48,14 +90,29 @@ describe('FunctionalPopup', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        mockUseRect.mockReturnValue({
-            top: 100,
-            left: 200,
-            right: 400,
-            bottom: 150,
-            width: 200,
-            height: 50,
-        } as DOMRect);
+        mockAnchorRect = defaultAnchorRect;
+        mockBoundingRect = defaultBoundingRect;
+
+        Element.prototype.getBoundingClientRect = function (this: Element): DOMRect {
+            if (this instanceof HTMLElement && this.dataset.testid === 'anchor-button') {
+                return mockAnchorRect;
+            }
+            return {
+                top: 100,
+                left: 100,
+                right: 200,
+                bottom: 200,
+                width: 100,
+                height: 100,
+                x: 100,
+                y: 100,
+                toJSON: () => ({}),
+            } as DOMRect;
+        };
+
+        mockUseRect.mockImplementation((node: HTMLElement | null) =>
+            node === document.body ? mockBoundingRect : mockAnchorRect,
+        );
 
         Object.defineProperty(window, 'pageYOffset', { value: 0, writable: true });
         Object.defineProperty(window, 'pageXOffset', { value: 0, writable: true });
@@ -76,7 +133,7 @@ describe('FunctionalPopup', () => {
         });
 
         it('renders with custom className', () => {
-            render(<TestComponent className="custom-popup" />);
+            render(<TestComponent className='custom-popup' />);
 
             const popupContent = screen.getByTestId('popup-content');
             const popup = popupContent.parentElement;
@@ -89,9 +146,7 @@ describe('FunctionalPopup', () => {
             render(<TestComponent />);
 
             expect(screen.getByTestId('focus-lock')).toBeInTheDocument();
-            expect(
-                screen.getByTestId('popup-content').closest('[data-testid="focus-lock"]'),
-            ).toBeInTheDocument();
+            expect(screen.getByTestId('popup-content').closest('[data-testid="focus-lock"]')).toBeInTheDocument();
         });
     });
 
@@ -110,7 +165,7 @@ describe('FunctionalPopup', () => {
         });
 
         it('positions popup with top left origins', () => {
-            render(<TestComponent anchorOrigin="top left" transformOrigin="top left" />);
+            render(<TestComponent anchorOrigin='top left' transformOrigin='top left' />);
 
             const popupContent = screen.getByTestId('popup-content');
             const popup = popupContent.parentElement;
@@ -123,7 +178,7 @@ describe('FunctionalPopup', () => {
         });
 
         it('positions popup with center center origins', () => {
-            render(<TestComponent anchorOrigin="center center" transformOrigin="center center" />);
+            render(<TestComponent anchorOrigin='center center' transformOrigin='center center' />);
 
             const popupContent = screen.getByTestId('popup-content');
             const popup = popupContent.parentElement;
@@ -136,7 +191,7 @@ describe('FunctionalPopup', () => {
         });
 
         it('positions popup with top center origins', () => {
-            render(<TestComponent anchorOrigin="top center" transformOrigin="top center" />);
+            render(<TestComponent anchorOrigin='top center' transformOrigin='top center' />);
 
             const popupContent = screen.getByTestId('popup-content');
             const popup = popupContent.parentElement;
@@ -152,7 +207,7 @@ describe('FunctionalPopup', () => {
             Object.defineProperty(window, 'pageYOffset', { value: 50, writable: true });
             Object.defineProperty(window, 'pageXOffset', { value: 100, writable: true });
 
-            render(<TestComponent anchorOrigin="bottom right" transformOrigin="bottom right" />);
+            render(<TestComponent anchorOrigin='bottom right' transformOrigin='bottom right' />);
 
             const popupContent = screen.getByTestId('popup-content');
             const popup = popupContent.parentElement;
@@ -266,6 +321,56 @@ describe('FunctionalPopup', () => {
         });
     });
 
+    describe('Focus lock shards', () => {
+        const NestedPopups = ({ nested = true }: { nested?: boolean }) => {
+            const anchorRef = useRef<HTMLButtonElement>(null);
+            const nestedAnchorRef = useRef<HTMLButtonElement>(null);
+
+            return (
+                <>
+                    <button ref={anchorRef} data-testid='anchor-button'>
+                        Anchor
+                    </button>
+                    <Popup anchor={anchorRef} onClose={mockOnClose} disableFocusLock>
+                        <div data-testid='popup-content'>
+                            <button ref={nestedAnchorRef} data-testid='nested-anchor'>
+                                Nested anchor
+                            </button>
+                            {nested && (
+                                <Popup anchor={nestedAnchorRef} onClose={mockOnClose}>
+                                    <div data-testid='nested-content'>Nested Content</div>
+                                </Popup>
+                            )}
+                        </div>
+                    </Popup>
+                </>
+            );
+        };
+
+        it('starts with no shards when nothing is portalled inside the popup', () => {
+            render(<TestComponent />);
+
+            expect(getShards(screen.getByTestId('focus-lock'))).toHaveLength(0);
+        });
+
+        it('registers a nested popup as a shard of the popup that owns it', () => {
+            render(<NestedPopups />);
+
+            const [outerLock] = screen.getAllByTestId('focus-lock');
+            const nestedWrapper = screen.getByTestId('nested-content').parentElement;
+
+            expect(getShards(outerLock)).toEqual([nestedWrapper]);
+        });
+
+        it('drops the shard again when the nested popup unmounts', () => {
+            const { rerender } = render(<NestedPopups />);
+
+            rerender(<NestedPopups nested={false} />);
+
+            expect(getShards(screen.getByTestId('focus-lock'))).toHaveLength(0);
+        });
+    });
+
     describe('Event listener management', () => {
         it('adds mousedown event listener on mount', () => {
             const addEventListenerSpy = vi.spyOn(document, 'addEventListener');
@@ -312,7 +417,7 @@ describe('FunctionalPopup', () => {
             });
 
             // Update anchor rect
-            mockUseRect.mockReturnValue({
+            setAnchorRect({
                 top: 200,
                 left: 300,
                 right: 500,
@@ -331,16 +436,8 @@ describe('FunctionalPopup', () => {
             });
         });
 
-        it('does not render popup when anchor rect is null', () => {
-            mockUseRect.mockReturnValue(null);
-
-            render(<TestComponent />);
-
-            expect(screen.queryByTestId('popup-content')).not.toBeInTheDocument();
-        });
-
         it('does not render popup when anchor rect has no top property', () => {
-            mockUseRect.mockReturnValue({
+            setAnchorRect({
                 left: 200,
                 right: 400,
                 bottom: 150,
@@ -362,7 +459,7 @@ describe('FunctionalPopup', () => {
                     <>
                         <button ref={anchorRef}>Anchor</button>
                         <Popup anchor={anchorRef}>
-                            <div data-testid="popup-content">Content</div>
+                            <div data-testid='popup-content'>Content</div>
                         </Popup>
                     </>
                 );
@@ -379,12 +476,10 @@ describe('FunctionalPopup', () => {
                 const anchorRef = useRef<HTMLButtonElement>(null);
                 return (
                     <Popup anchor={anchorRef} onClose={mockOnClose}>
-                        <div data-testid="popup-content">Content</div>
+                        <div data-testid='popup-content'>Content</div>
                     </Popup>
                 );
             };
-
-            mockUseRect.mockReturnValue(null);
 
             expect(() => {
                 render(<TestWithNullAnchor />);
@@ -416,17 +511,17 @@ describe('FunctionalPopup', () => {
 
                 return (
                     <>
-                        <button ref={anchor1Ref} data-testid="anchor-1">
+                        <button ref={anchor1Ref} data-testid='anchor-1'>
                             Anchor 1
                         </button>
-                        <button ref={anchor2Ref} data-testid="anchor-2">
+                        <button ref={anchor2Ref} data-testid='anchor-2'>
                             Anchor 2
                         </button>
                         <Popup anchor={anchor1Ref} onClose={mockOnClose}>
-                            <div data-testid="popup-1">Popup 1</div>
+                            <div data-testid='popup-1'>Popup 1</div>
                         </Popup>
                         <Popup anchor={anchor2Ref} onClose={mockOnClose}>
-                            <div data-testid="popup-2">Popup 2</div>
+                            <div data-testid='popup-2'>Popup 2</div>
                         </Popup>
                     </>
                 );
@@ -443,7 +538,7 @@ describe('FunctionalPopup', () => {
 
             // Simulate rapid position updates
             for (let i = 0; i < 5; i++) {
-                mockUseRect.mockReturnValue({
+                setAnchorRect({
                     top: 100 + i * 10,
                     left: 200 + i * 10,
                     right: 400 + i * 10,
@@ -469,7 +564,7 @@ describe('FunctionalPopup', () => {
 
             expect(screen.getByTestId('popup-content')).toBeInTheDocument();
 
-            mockUseRect.mockReturnValue({
+            setAnchorRect({
                 top: 500,
                 left: 600,
                 right: 800,
@@ -486,54 +581,20 @@ describe('FunctionalPopup', () => {
 
     describe('Transform calculations', () => {
         it('correctly calculates all origin combinations', () => {
-            const origins: Array<
-                [string, string, { top: string; left: string; transform: string }]
-            > = [
-                [
-                    'top left',
-                    'top left',
-                    { top: '100px', left: '200px', transform: 'translate(0, 0)' },
-                ],
-                [
-                    'top center',
-                    'top center',
-                    { top: '100px', left: '300px', transform: 'translate(-50%, 0)' },
-                ],
-                [
-                    'top right',
-                    'top right',
-                    { top: '100px', left: '400px', transform: 'translate(-100%, 0)' },
-                ],
-                [
-                    'bottom left',
-                    'bottom left',
-                    { top: '150px', left: '200px', transform: 'translate(0, -100%)' },
-                ],
+            const origins: Array<[string, string, { top: string; left: string; transform: string }]> = [
+                ['top left', 'top left', { top: '100px', left: '200px', transform: 'translate(0, 0)' }],
+                ['top center', 'top center', { top: '100px', left: '300px', transform: 'translate(-50%, 0)' }],
+                ['top right', 'top right', { top: '100px', left: '400px', transform: 'translate(-100%, 0)' }],
+                ['bottom left', 'bottom left', { top: '150px', left: '200px', transform: 'translate(0, -100%)' }],
                 [
                     'bottom center',
                     'bottom center',
                     { top: '150px', left: '300px', transform: 'translate(-50%, -100%)' },
                 ],
-                [
-                    'bottom right',
-                    'bottom right',
-                    { top: '150px', left: '400px', transform: 'translate(-100%, -100%)' },
-                ],
-                [
-                    'center left',
-                    'center left',
-                    { top: '125px', left: '200px', transform: 'translate(0, -50%)' },
-                ],
-                [
-                    'center center',
-                    'center center',
-                    { top: '125px', left: '300px', transform: 'translate(-50%, -50%)' },
-                ],
-                [
-                    'center right',
-                    'center right',
-                    { top: '125px', left: '400px', transform: 'translate(-100%, -50%)' },
-                ],
+                ['bottom right', 'bottom right', { top: '150px', left: '400px', transform: 'translate(-100%, -100%)' }],
+                ['center left', 'center left', { top: '125px', left: '200px', transform: 'translate(0, -50%)' }],
+                ['center center', 'center center', { top: '125px', left: '300px', transform: 'translate(-50%, -50%)' }],
+                ['center right', 'center right', { top: '125px', left: '400px', transform: 'translate(-100%, -50%)' }],
             ];
 
             origins.forEach(([anchorOrigin, transformOrigin, expectedStyle]) => {
@@ -544,6 +605,403 @@ describe('FunctionalPopup', () => {
                 const popup = screen.getByTestId('popup-content').parentElement;
                 expect(popup).toHaveStyle(expectedStyle);
                 unmount();
+            });
+        });
+    });
+
+    describe('Dynamic viewport positioning', () => {
+        let mockContainerRect: DOMRect;
+        let mockContainerClientSize: { width: number; height: number };
+
+        const setContainerRect = (rect: { top: number; left: number; width: number; height: number }) => {
+            mockContainerRect = {
+                top: rect.top,
+                left: rect.left,
+                right: rect.left + rect.width,
+                bottom: rect.top + rect.height,
+                width: rect.width,
+                height: rect.height,
+                x: rect.left,
+                y: rect.top,
+                toJSON: () => ({}),
+            } as DOMRect;
+        };
+
+        const TestComponentWithViewport = ({
+            onClose = mockOnClose,
+            setScroll = false,
+            style = {},
+            containerStyle = {},
+            ...props
+        }: any) => {
+            const anchorRef = useRef<HTMLButtonElement>(null);
+            const containerRef = useRef<HTMLDivElement>(null);
+
+            const [isAnchorReady, setIsAnchorReady] = useState(false);
+            const viewportContainerRefCallback = useCallback(
+                (node: HTMLDivElement | null) => {
+                    if (!node) return;
+
+                    containerRef.current = node;
+
+                    if (!setScroll) return;
+
+                    Object.defineProperty(node, 'scrollTop', {
+                        configurable: true,
+                        value: 50,
+                        writable: true,
+                    });
+
+                    Object.defineProperty(node, 'scrollLeft', {
+                        configurable: true,
+                        value: 30,
+                        writable: true,
+                    });
+
+                    const updatedAnchorRect = {
+                        ...mockAnchorRect,
+                        top: mockAnchorRect.top - 50,
+                        bottom: mockAnchorRect.bottom - 50,
+                        left: mockAnchorRect.left - 30,
+                        right: mockAnchorRect.right - 30,
+                    };
+                    setAnchorRect(updatedAnchorRect);
+                },
+                [setScroll],
+            );
+
+            useEffect(() => setIsAnchorReady(true), []);
+
+            return (
+                <div style={containerStyle} data-testid='viewport-wrapper'>
+                    <div
+                        ref={viewportContainerRefCallback}
+                        data-testid='viewport-container'
+                        style={{ overflow: 'auto', position: 'relative', ...style }}
+                    >
+                        <button ref={anchorRef} data-testid='anchor-button'>
+                            Anchor
+                        </button>
+                        {isAnchorReady && (
+                            <Popup container={containerRef.current} anchor={anchorRef} onClose={onClose} {...props}>
+                                <div data-testid='popup-content'>Popup Content</div>
+                            </Popup>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        beforeEach(() => {
+            setContainerRect({ top: 0, left: 0, width: 300, height: 300 });
+            mockContainerClientSize = { width: 300, height: 300 };
+
+            Element.prototype.getBoundingClientRect = function (this: Element): DOMRect {
+                const testId = this instanceof HTMLElement ? this.dataset.testid : undefined;
+
+                if (testId === 'anchor-button') {
+                    return mockAnchorRect;
+                }
+
+                if (testId === 'viewport-container') {
+                    return mockContainerRect;
+                }
+
+                if (testId === 'viewport-wrapper') {
+                    return {
+                        top: mockContainerRect.top - WRAPPER_PADDING,
+                        left: mockContainerRect.left - WRAPPER_PADDING,
+                        right: mockContainerRect.right + WRAPPER_PADDING,
+                        bottom: mockContainerRect.bottom + WRAPPER_PADDING,
+                        width: mockContainerRect.width + 2 * WRAPPER_PADDING,
+                        height: mockContainerRect.height + 2 * WRAPPER_PADDING,
+                        x: mockContainerRect.left - WRAPPER_PADDING,
+                        y: mockContainerRect.top - WRAPPER_PADDING,
+                        toJSON: () => ({}),
+                    }
+                }
+
+                return {
+                    top: 100,
+                    left: 100,
+                    right: 200,
+                    bottom: 200,
+                    width: 100,
+                    height: 100,
+                    x: 100,
+                    y: 100,
+                    toJSON: () => ({}),
+                } as DOMRect;
+            };
+
+            function mockClientDimension(dimension: 'width' | 'height'): PropertyDescriptor {
+                return {
+                    configurable: true,
+                    get(this: HTMLElement) {
+                        switch (this.dataset.testid) {
+                            case 'viewport-container':
+                                return mockContainerClientSize[dimension];
+                            case 'viewport-wrapper':
+                                return mockContainerClientSize[dimension] + 2 * WRAPPER_PADDING;
+                            default:
+                                return 0;
+                        }
+                    },
+                };
+            }
+
+            Object.defineProperty(HTMLElement.prototype, 'clientWidth', mockClientDimension('width'));
+            Object.defineProperty(HTMLElement.prototype, 'clientHeight', mockClientDimension('height'));
+
+            mockUseRect.mockImplementation((node: HTMLElement | null) => {
+                if (node === document.body) {
+                    return mockBoundingRect;
+                }
+
+                if (node instanceof HTMLElement && node.dataset.testid === 'viewport-container') {
+                    return mockContainerRect;
+                }
+
+                if (node instanceof HTMLElement && node.dataset.testid === 'viewport-wrapper') {
+                    return {
+                        top: mockContainerRect.top - WRAPPER_PADDING,
+                        left: mockContainerRect.left - WRAPPER_PADDING,
+                        right: mockContainerRect.right + WRAPPER_PADDING,
+                        bottom: mockContainerRect.bottom + WRAPPER_PADDING,
+                        width: mockContainerRect.width + 2 * WRAPPER_PADDING,
+                        height: mockContainerRect.height + 2 * WRAPPER_PADDING,
+                        x: mockContainerRect.left - WRAPPER_PADDING,
+                        y: mockContainerRect.top - WRAPPER_PADDING,
+                        toJSON: () => ({}),
+                    };
+                }
+                return mockAnchorRect;
+            });
+        });
+
+        it('keeps the original origin when the popup fits inside a scrollable viewport ancestor', () => {
+            setAnchorRect({
+                top: 150,
+                left: 150,
+                right: 190,
+                bottom: 190,
+                width: 40,
+                height: 40,
+            } as DOMRect);
+
+            render(<TestComponentWithViewport anchorOrigin='bottom left' transformOrigin='top left' />);
+
+            const popup = screen.getByTestId('popup-content').parentElement;
+
+            expect(popup).toHaveStyle({
+                top: '190px',
+                left: '150px',
+                transform: 'translate(0, 0)',
+            });
+        });
+
+        it.each([
+            ['backdropFilter', 'blur(4px)'],
+            ['rotate', '45deg'],
+            ['scale', '1.5'],
+            ['translate', '10px'],
+            ['willChange', 'transform'],
+            ['contain', 'layout'],
+        ])(
+            'treats a static container with %s set as a containing block, same as position: relative',
+            (property, value) => {
+                setAnchorRect({
+                    top: 150,
+                    left: 150,
+                    right: 190,
+                    bottom: 190,
+                    width: 40,
+                    height: 40,
+                } as DOMRect);
+
+                render(
+                    <TestComponentWithViewport
+                        anchorOrigin='bottom left'
+                        transformOrigin='top left'
+                        style={{ position: 'static' }}
+                        containerStyle={{[property]: value, padding: WRAPPER_PADDING}}
+                    />,
+                );
+
+                const popup = screen.getByTestId('popup-content').parentElement;
+
+                expect(popup).toHaveStyle({
+                    top: '210px',
+                    left: '170px',
+                    transform: 'translate(0, 0)',
+                });
+            },
+        );
+
+        it('flips the anchor/transform origin so the popup stays inside the viewport ancestor', () => {
+            const style = document.createElement('style');
+            style.textContent = '.test-boundary-margin { margin: 12px; }';
+            document.head.appendChild(style);
+
+            setAnchorRect({
+                top: 200,
+                left: 10,
+                right: 60,
+                bottom: 250,
+                width: 50,
+                height: 50,
+            } as DOMRect);
+
+            render(
+                <TestComponentWithViewport
+                    className='test-boundary-margin'
+                    anchorOrigin='bottom left'
+                    transformOrigin='top left'
+                />,
+            );
+
+            const popup = screen.getByTestId('popup-content').parentElement as HTMLElement;
+
+            // Overflows bottom → flips to "top left" / "bottom left", anchoring to anchor's top edge.
+            expect(popup).toHaveStyle({
+                top: '200px',
+                left: '10px',
+                transform: 'translate(0, -100%)',
+            });
+
+            expect(popup.style.marginTop).toBe('-12px');
+
+            document.head.removeChild(style);
+        });
+
+        it('picks the flipped candidate with the lowest overflow even when it still overflows the viewport ancestor', () => {
+            setAnchorRect({
+                top: 10,
+                left: 10,
+                right: 50,
+                bottom: 50,
+                width: 40,
+                height: 40,
+            } as DOMRect);
+
+            mockContainerClientSize = { width: 50, height: 50 };
+
+            render(<TestComponentWithViewport anchorOrigin='bottom left' transformOrigin='top left'/>);
+
+            const popup = screen.getByTestId('popup-content').parentElement;
+
+            // Anchor sits in the top-left corner, so no candidate fits fully, but flipping to
+            // "top right" / "bottom right" overflows least (only past the top/left edges).
+               expect(popup).toHaveStyle({
+                top: '10px',
+                left: '50px',
+                transform: 'translate(-100%, -100%)',
+            });
+        });
+
+        it('accounts for container scroll offset when positioning the popup', () => {
+            setAnchorRect({
+                top: 100,
+                left: 150,
+                right: 190,
+                bottom: 140,
+                width: 40,
+                height: 40,
+            } as DOMRect);
+
+            render(<TestComponentWithViewport anchorOrigin='bottom left' transformOrigin='top left' setScroll />);
+
+            const popup = screen.getByTestId('popup-content').parentElement;
+
+            // scrollTop (50) & scrollLeft (30) are factored into positioning but values are viewport-relative,
+            // so anchor.bottom (140) and anchor.left (150) are used without adding scroll offset.
+            expect(popup).toHaveStyle({
+                top: '140px',
+                left: '150px',
+                transform: 'translate(0, 0)',
+            });
+        });
+
+        it('adjusts popup position after container scroll when anchor is near the bottom and overflow flip occurs', () => {
+            setAnchorRect({
+                top: 100,
+                left: 50,
+                right: 100,
+                bottom: 150,
+                width: 50,
+                height: 50,
+            } as DOMRect);
+
+            render(<TestComponentWithViewport anchorOrigin='top left' transformOrigin='bottom left' setScroll />);
+
+            const popup = screen.getByTestId('popup-content').parentElement;
+
+            // Scroll pushes popup out of view → flips to "bottom left" / "top left".
+            // top: anchor.top (100), no scroll added (viewport-relative).
+            expect(popup).toHaveStyle({
+                top: '150px',
+                left: '50px',
+                transform: 'translate(0, 0)',
+            });
+        });
+
+        it('flips anchor/transform origin horizontally when anchor is near the right edge and container is scrolled', () => {
+            setAnchorRect({
+                top: 100,
+                left: 70,
+                right: 110,
+                bottom: 140,
+                width: 40,
+                height: 40,
+            } as DOMRect);
+
+            render(<TestComponentWithViewport anchorOrigin='bottom right' transformOrigin='top right' setScroll />);
+
+            const popup = screen.getByTestId('popup-content').parentElement;
+
+            // Overflow right edge → flips to "bottom left" / "top left".
+            expect(popup).toHaveStyle({
+                top: '140px',
+                left: '70px',
+                transform: 'translate(0, 0)',
+            });
+        });
+
+        it('flips origin when window scroll pushes popup past viewport bottom', () => {
+            const defaultAnchorRect = {
+                top: 120,
+                left: 10,
+                right: 50,
+                bottom: 170,
+                width: 40,
+                height: 50,
+            } as DOMRect;
+            setAnchorRect(defaultAnchorRect);
+
+            Object.defineProperty(window, 'pageYOffset', { value: 30, writable: true });
+
+            const updatedAnchorRect = {
+                ...defaultAnchorRect,
+                top: defaultAnchorRect.top - 30,
+                bottom: defaultAnchorRect.bottom - 30,
+            };
+            const updatedUpdatedContainerRect = {
+                ...mockContainerRect,
+                top: mockContainerRect.top - 30,
+                bottom: mockContainerRect.bottom - 30,
+            };
+            setAnchorRect(updatedAnchorRect);
+            setContainerRect(updatedUpdatedContainerRect);
+
+            render(<TestComponentWithViewport anchorOrigin='top left' transformOrigin='bottom left' />);
+
+            // pageYOffset pushes popup above viewport → flips to "bottom left" / "top left".
+            // top: anchor.bottom (140), viewport-relative.
+            const popup = screen.getByTestId('popup-content').parentElement;
+            expect(popup).toHaveStyle({
+                top: '170px',
+                left: '10px',
+                transform: 'translate(0, 0)',
             });
         });
     });

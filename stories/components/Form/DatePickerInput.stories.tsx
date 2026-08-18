@@ -89,6 +89,27 @@ export const CalendarDropdownsStory: StoryFn<typeof DatePickerInput> = () => (
 
 CalendarDropdownsStory.storyName = 'Forwarded calendar dropdowns';
 
+export const CalendarDesignPropsStory: StoryFn<typeof DatePickerInput> = () => (
+    <div style={{ maxWidth: 320 }}>
+        <p style={{ marginTop: 0, fontSize: 13, color: '#666' }}>
+            The calendar design props are forwarded too: a Monday week start, adjacent-month days
+            rendered instead of blank padding, and the year steppers replaced by a year dropdown.
+        </p>
+        <DatePickerInput
+            name="designedDate"
+            calendarProps={{
+                weekStartsOn: 1,
+                showOutsideDays: true,
+                hideYearNavigation: true,
+                enableYearDropdown: true,
+            }}
+            onChange={action('changed')}
+        />
+    </div>
+);
+
+CalendarDesignPropsStory.storyName = 'Forwarded calendar design props';
+
 export const DisabledStory: StoryFn<typeof DatePickerInput> = () => (
     <div style={{ maxWidth: 320 }}>
         <DatePickerInput

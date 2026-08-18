@@ -1,0 +1,36 @@
+.note {
+    max-width: 40rem;
+    margin: 0 0 1rem;
+    color: var(--color-text-secondary, #55606d);
+}
+
+.container {
+    padding-bottom: 5rem;
+
+    .table {
+        border-collapse: collapse;
+
+        .tableData {
+            border: none;
+        }
+
+        .tableHeaderItem {
+            border: none;
+            text-align: left;
+        }
+    }
+
+    .tableControls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        justify-content: space-between;
+
+        .rowsInfo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    }
+}

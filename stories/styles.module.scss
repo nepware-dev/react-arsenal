@@ -1,0 +1,26 @@
+.buttons {
+    button {
+        margin: 5px;
+    }
+}
+
+.nested {
+    margin-left: 24px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+
+    .select {
+        margin-left: 16px;
+    }
+}
+
+.popup {
+    background: red;
+}
+
+.input {
+    margin-left: 16px;
+}

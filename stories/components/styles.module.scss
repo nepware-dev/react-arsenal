@@ -1,0 +1,64 @@
+.buttons {
+    button {
+        margin: 5px;
+    }
+}
+
+.nested {
+    margin-left: 24px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+
+    .select {
+        margin-left: 16px;
+    }
+}
+
+.popup {
+    background: red;
+}
+
+.tabItem {
+    padding: 0.25em 1em;
+    font-weight: 500;
+}
+
+.activeTabItem {
+    background-color: var(--color-background);
+    color: var(--color-primary);
+}
+
+.contentSection {
+    padding: 1em;
+}
+
+.modal {
+    border-radius: 0.5rem;
+}
+
+.modalContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 0.5rem;
+    height: 50vh;
+    width: 50vw;
+}
+
+.accordionTitle {
+    font-weight: 600;
+}
+
+.accordionBody {
+    padding: 1rem 0;
+}
+
+.pagination {
+    margin-top: 1rem;
+}

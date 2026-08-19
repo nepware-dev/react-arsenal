@@ -1,8 +1,14 @@
+import { createRef } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import List, { KeyExtractor, ListProps, ListRenderItem } from '../../components/List';
+import List, {
+    KeyExtractor,
+    ListRefHandle,
+    ListProps,
+    ListRenderItem,
+} from '../../components/List';
 
 interface TestItem {
     id: number;
@@ -309,6 +315,123 @@ describe('List', () => {
             );
 
             expect(containerRef).toHaveBeenCalledWith(container.querySelector('.the-list'));
+        });
+    });
+
+    describe('Imperative Handle', () => {
+        const scrollTo = vi.fn();
+
+        beforeEach(() => {
+            scrollTo.mockClear();
+            Element.prototype.scrollTo = scrollTo;
+        });
+
+        function setupListElement(container: HTMLElement) {
+            const listElement = container.querySelector(
+                '[data-testid="item-1"]',
+            )!.parentElement as HTMLElement;
+
+            Object.defineProperty(listElement, 'scrollTop', { value: 50, writable: true });
+            Object.defineProperty(listElement, 'scrollLeft', { value: 20, writable: true });
+            Object.defineProperty(listElement, 'clientHeight', { value: 200, writable: true });
+            Object.defineProperty(listElement, 'clientWidth', { value: 200, writable: true });
+
+            const targetItem = listElement.children[1] as HTMLElement;
+
+            Object.defineProperty(targetItem, 'offsetHeight', { value: 40, writable: true });
+            Object.defineProperty(targetItem, 'offsetWidth', { value: 100, writable: true });
+
+            return listElement;
+        }
+
+        describe('scrollToIndex', () => {
+            it('scrolls to the item at the given index', () => {
+                const ref = createRef<ListRefHandle<TestItem>>();
+                const { container } = render(
+                    <List {...defaultProps} containerRef={ref} />,
+                );
+                setupListElement(container);
+
+                ref.current?.scrollToIndex(1);
+
+                // top: itemTop (scrollTop 50) + itemHeight/2 (20) - clientHeight/2 (100) = -30
+                // left: itemLeft (scrollLeft 20) + itemWidth/2 (50) - clientWidth/2 (100) = -30
+                expect(scrollTo).toHaveBeenCalledWith({
+                    top: -30,
+                    left: -30,
+                    behavior: 'smooth',
+                });
+            });
+
+            it('applies offsetTop, offsetLeft, and scrollBehavior options', () => {
+                const ref = createRef<ListRefHandle<TestItem>>();
+                const { container } = render(
+                    <List {...defaultProps} containerRef={ref} />,
+                );
+                setupListElement(container);
+
+                ref.current?.scrollToIndex(1, {
+                    offsetTop: 10,
+                    offsetLeft: 5,
+                    scrollBehavior: 'auto',
+                });
+
+                // same base as the previous test (-30/-30) shifted by offsetTop (10) and offsetLeft (5)
+                expect(scrollTo).toHaveBeenCalledWith({
+                    top: -20,
+                    left: -25,
+                    behavior: 'auto',
+                });
+            });
+
+            it('warns and does not scroll for an out-of-bounds index', () => {
+                const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+                const ref = createRef<ListRefHandle<TestItem>>();
+                render(<List {...defaultProps} containerRef={ref} />);
+
+                ref.current?.scrollToIndex(mockData.length);
+
+                expect(warnSpy).toHaveBeenCalledWith(
+                    expect.stringContaining('is out of bounds'),
+                );
+                expect(scrollTo).not.toHaveBeenCalled();
+
+                warnSpy.mockRestore();
+            });
+        });
+
+        describe('scrollToItem', () => {
+            it('resolves the key to an index and scrolls to it', () => {
+                const ref = createRef<ListRefHandle<TestItem>>();
+                const { container } = render(
+                    <List {...defaultProps} containerRef={ref} />,
+                );
+                setupListElement(container);
+
+                ref.current?.scrollToItem(mockData[1].id);
+
+                // resolves to index 1, same computation as the scrollToIndex case above
+                expect(scrollTo).toHaveBeenCalledWith({
+                    top: -30,
+                    left: -30,
+                    behavior: 'smooth',
+                });
+            });
+
+            it('warns and does not scroll when no item matches the key', () => {
+                const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+                const ref = createRef<ListRefHandle<TestItem>>();
+                render(<List {...defaultProps} containerRef={ref} />);
+
+                ref.current?.scrollToItem('missing-key');
+
+                expect(warnSpy).toHaveBeenCalledWith(
+                    expect.stringContaining('No item found with key'),
+                );
+                expect(scrollTo).not.toHaveBeenCalled();
+
+                warnSpy.mockRestore();
+            });
         });
     });
 

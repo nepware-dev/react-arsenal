@@ -10,6 +10,7 @@ import styles from './styles.module.scss';
 import type { SelectInputProps } from './types';
 import Input from '../Input';
 import Localize from '../../I18n/Localize';
+import type { ListRefHandle } from '../../List';
 import Popup from '../../Popup';
 import cs from '../../../cs';
 import { isArray } from '../../../utils';
@@ -321,10 +322,11 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
     },[options, getFocusedItem, filterOptions, onInputChange]);
 
     const scrollSelectedOptionIntoView = useCallback(
-        (container: HTMLDivElement | null) => {
+        (container: ListRefHandle<T> | null) => {
             if (!scrollToSelectedOnOpen) return;
 
             const selectedItem = selectState.selectedItem;
+
             if (!container || !selectedItem) return;
 
             const index = selectState.options.findIndex(
@@ -332,17 +334,17 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
                     option === selectedItem
                     || keyExtractor(option, optionIndex) === keyExtractor(selectedItem, optionIndex),
             );
-            if (index < 0) return;
 
-            const optionElement = container.children[index] as HTMLElement | undefined;
-            optionElement?.scrollIntoView?.({ block: 'center' });
+            container.scrollToIndex(index, {
+                scrollBehavior: 'instant'
+            })
         },
         [scrollToSelectedOnOpen, selectState.selectedItem, selectState.options, keyExtractor],
     );
 
     // Callback ref, not an effect: Popup mounts children only after its own layout-effect anchor measurement.
     const handleOptionsListRef = useCallback(
-        (node: HTMLDivElement | null) => scrollSelectedOptionIntoView(node),
+        (node: ListRefHandle<T> | null) => scrollSelectedOptionIntoView(node),
         [scrollSelectedOptionIntoView],
     );
 

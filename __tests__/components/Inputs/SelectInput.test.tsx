@@ -27,12 +27,12 @@ const valueExtractor = (item: OptionType) => item.label;
 
 describe('SelectInput', () => {
     const onChange = vi.fn();
-    const scrollIntoView = vi.fn();
+    const scrollTo = vi.fn();
 
     beforeEach(() => {
         onChange.mockClear();
-        scrollIntoView.mockClear();
-        Element.prototype.scrollIntoView = scrollIntoView;
+        scrollTo.mockClear();
+        Element.prototype.scrollTo = scrollTo;
     });
 
     const renderSelect = (props: Partial<SelectInputProps<OptionType, string>> = {}) =>
@@ -242,7 +242,7 @@ describe('SelectInput', () => {
             });
             expect(await screen.findByText('Option A')).toBeInTheDocument();
 
-            expect(scrollIntoView).not.toHaveBeenCalled();
+            expect(scrollTo).not.toHaveBeenCalled();
         });
 
         it('centers the selected option in view when opted in', async () => {
@@ -255,7 +255,7 @@ describe('SelectInput', () => {
             const popup = await screen.findByTestId('popup');
             expect(within(popup).getByText('Option C')).toBeInTheDocument();
 
-            expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center' });
+            expect(scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' });
         });
 
         it('does not scroll when opted in but nothing is selected', async () => {
@@ -267,7 +267,7 @@ describe('SelectInput', () => {
             });
             expect(await screen.findByText('Option A')).toBeInTheDocument();
 
-            expect(scrollIntoView).not.toHaveBeenCalled();
+            expect(scrollTo).not.toHaveBeenCalled();
         });
 
         it('scrolls to the selected option when keyExtractor falls back to its index argument', async () => {
@@ -300,7 +300,7 @@ describe('SelectInput', () => {
             const popup = await screen.findByTestId('popup');
             expect(within(popup).getByText('Option C')).toBeInTheDocument();
 
-            expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center' });
+            expect(scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' });
         });
     });
 

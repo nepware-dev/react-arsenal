@@ -731,12 +731,12 @@ describe('Calendar (AD/BS toggle with a selection outside the BS range)', () => 
 
 describe('Calendar (month dropdown respects min/max bounds)', () => {
     const onChange = vi.fn();
-    const scrollIntoView = vi.fn();
+    const scrollTo = vi.fn();
 
     beforeEach(() => {
         onChange.mockClear();
-        scrollIntoView.mockClear();
-        Element.prototype.scrollIntoView = scrollIntoView;
+        scrollTo.mockClear();
+        Element.prototype.scrollTo = scrollTo;
     });
 
     // Opens a header select by focusing its search input, mirroring the existing SelectInput test pattern.
@@ -850,7 +850,7 @@ describe('Calendar (month dropdown respects min/max bounds)', () => {
         // Default bounds span a century-plus range, so scrolling from the top would be the reopened bug.
         openHeaderSelectOptionLabels(container, 0);
 
-        expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center' });
+        expect(scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' });
     });
 
     it('does not scroll the month dropdown, which already fits within the visible list', () => {
@@ -865,7 +865,7 @@ describe('Calendar (month dropdown respects min/max bounds)', () => {
 
         openHeaderSelectOptionLabels(container, 0);
 
-        expect(scrollIntoView).not.toHaveBeenCalled();
+        expect(scrollTo).not.toHaveBeenCalled();
     });
 });
 

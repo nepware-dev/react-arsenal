@@ -659,6 +659,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                                 "calendar-header-select",
                                 classNames?.headerSelect,
                             )}
+                            controlClassName={styles.headerSelectControl}
                             options={monthOptions}
                             value={selectedMonthOption}
                             clearable={false}
@@ -684,6 +685,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                                 "calendar-header-select",
                                 classNames?.headerSelect,
                             )}
+                            controlClassName={styles.headerSelectControl}
                             searchable
                             options={yearOptions}
                             value={selectedYearOption}

@@ -44,6 +44,13 @@
             .headerSelect {
                 font-weight: 400;
             }
+
+            .headerSelectControl {
+                >:first-child {
+                    min-width: 2.75rem;
+                    min-height: 1.25rem;
+                }
+            }
         }
     }
 

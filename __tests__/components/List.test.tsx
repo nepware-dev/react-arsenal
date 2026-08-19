@@ -301,6 +301,17 @@ describe('List', () => {
         });
     });
 
+    describe('containerRef', () => {
+        it('receives the rendered container node via the plain containerRef prop', () => {
+            const containerRef = vi.fn();
+            const { container } = render(
+                <List {...defaultProps} containerRef={containerRef} className="the-list" />,
+            );
+
+            expect(containerRef).toHaveBeenCalledWith(container.querySelector('.the-list'));
+        });
+    });
+
     describe('Edge Cases', () => {
         it('should handle single item', () => {
             const singleItemData = [mockData[0]];

@@ -110,6 +110,26 @@ export const CalendarDesignPropsStory: StoryFn<typeof DatePickerInput> = () => (
 
 CalendarDesignPropsStory.storyName = 'Forwarded calendar design props';
 
+export const YearDropdownScrollToSelectedStory: StoryFn<typeof DatePickerInput> = () => (
+    <div style={{ maxWidth: 320 }}>
+        <p style={{ marginTop: 0, fontSize: 13, color: '#666' }}>
+            The year dropdown opts into scrollToSelectedOnOpen internally, so
+            opening it with a date already selected lands scrolled to that year
+            instead of the top of the list (1901).
+        </p>
+        <DatePickerInput
+            name="yearScrollDate"
+            defaultValue="1998-06-15"
+            calendarProps={{
+                enableYearDropdown: true,
+            }}
+            onChange={action('changed')}
+        />
+    </div>
+);
+
+YearDropdownScrollToSelectedStory.storyName = 'Year dropdown opens at selected year';
+
 export const DisabledStory: StoryFn<typeof DatePickerInput> = () => (
     <div style={{ maxWidth: 320 }}>
         <DatePickerInput

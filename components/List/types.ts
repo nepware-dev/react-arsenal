@@ -7,6 +7,8 @@ export type ListRenderItem<T> = (props: ListRenderItemProps<T>) => React.ReactNo
 
 export interface ListProps<T> {
     ref?: React.Ref<HTMLDivElement>;
+    /** Container ref delivered as a plain prop, since `ref` on a function component is dropped by React under 18. */
+    containerRef?: React.Ref<HTMLDivElement>;
     className?: string;
     style?: React.CSSProperties;
     classNameItem?: string;

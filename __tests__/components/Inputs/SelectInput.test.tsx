@@ -1,4 +1,4 @@
-import { act, render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -27,9 +27,12 @@ const valueExtractor = (item: OptionType) => item.label;
 
 describe('SelectInput', () => {
     const onChange = vi.fn();
+    const scrollIntoView = vi.fn();
 
     beforeEach(() => {
         onChange.mockClear();
+        scrollIntoView.mockClear();
+        Element.prototype.scrollIntoView = scrollIntoView;
     });
 
     const renderSelect = (props: Partial<SelectInputProps<OptionType, string>> = {}) =>
@@ -226,6 +229,78 @@ describe('SelectInput', () => {
             });
 
             expect(screen.queryByTestId('popup')).not.toBeInTheDocument();
+        });
+    });
+
+    describe('scroll to selected option on open', () => {
+        it('does not scroll when scrollToSelectedOnOpen is not set', async () => {
+            const { container } = renderSelect({ value: OPTIONS[2] });
+            const wrapper = container.querySelector(`.${styles.selectContainer}`) as HTMLElement;
+
+            await act(async () => {
+                fireEvent.click(wrapper);
+            });
+            expect(await screen.findByText('Option A')).toBeInTheDocument();
+
+            expect(scrollIntoView).not.toHaveBeenCalled();
+        });
+
+        it('centers the selected option in view when opted in', async () => {
+            const { container } = renderSelect({ value: OPTIONS[2], scrollToSelectedOnOpen: true });
+            const wrapper = container.querySelector(`.${styles.selectContainer}`) as HTMLElement;
+
+            await act(async () => {
+                fireEvent.click(wrapper);
+            });
+            const popup = await screen.findByTestId('popup');
+            expect(within(popup).getByText('Option C')).toBeInTheDocument();
+
+            expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center' });
+        });
+
+        it('does not scroll when opted in but nothing is selected', async () => {
+            const { container } = renderSelect({ scrollToSelectedOnOpen: true });
+            const wrapper = container.querySelector(`.${styles.selectContainer}`) as HTMLElement;
+
+            await act(async () => {
+                fireEvent.click(wrapper);
+            });
+            expect(await screen.findByText('Option A')).toBeInTheDocument();
+
+            expect(scrollIntoView).not.toHaveBeenCalled();
+        });
+
+        it('scrolls to the selected option when keyExtractor falls back to its index argument', async () => {
+            interface NoIdOption {
+                label: string;
+            }
+            const noIdOptions: NoIdOption[] = [
+                { label: 'Option A' },
+                { label: 'Option B' },
+                { label: 'Option C' },
+            ];
+            const indexKeyExtractor = (_item: NoIdOption, index: number) => index;
+            const noIdValueExtractor = (opt: NoIdOption) => opt.label;
+
+            const { container } = render(
+                <SelectInput
+                    options={noIdOptions}
+                    keyExtractor={indexKeyExtractor}
+                    valueExtractor={noIdValueExtractor}
+                    onChange={onChange}
+                    value={noIdOptions[2]}
+                    scrollToSelectedOnOpen
+                />,
+            );
+            const wrapper = container.querySelector(`.${styles.selectContainer}`) as HTMLElement;
+
+            await act(async () => {
+                fireEvent.click(wrapper);
+            });
+            const popup = await screen.findByTestId('popup');
+            expect(within(popup).getByText('Option C')).toBeInTheDocument();
+
+            expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center' });
         });
     });
 

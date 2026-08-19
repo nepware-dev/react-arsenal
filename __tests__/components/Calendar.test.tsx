@@ -731,9 +731,12 @@ describe('Calendar (AD/BS toggle with a selection outside the BS range)', () => 
 
 describe('Calendar (month dropdown respects min/max bounds)', () => {
     const onChange = vi.fn();
+    const scrollIntoView = vi.fn();
 
     beforeEach(() => {
         onChange.mockClear();
+        scrollIntoView.mockClear();
+        Element.prototype.scrollIntoView = scrollIntoView;
     });
 
     // Opens a header select by focusing its search input, mirroring the existing SelectInput test pattern.
@@ -832,6 +835,37 @@ describe('Calendar (month dropdown respects min/max bounds)', () => {
             'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December',
         ]);
+    });
+
+    it('opens the year dropdown scrolled to the selected year instead of the earliest option', () => {
+        const { container } = render(
+            <Calendar
+                system="gregorian"
+                value={{ year: 2026, month: 8, day: 10 }}
+                enableYearDropdown
+                onChange={onChange}
+            />,
+        );
+
+        // Default bounds span a century-plus range, so scrolling from the top would be the reopened bug.
+        openHeaderSelectOptionLabels(container, 0);
+
+        expect(scrollIntoView).toHaveBeenCalledWith({ block: 'center' });
+    });
+
+    it('does not scroll the month dropdown, which already fits within the visible list', () => {
+        const { container } = render(
+            <Calendar
+                system="gregorian"
+                value={{ year: 2026, month: 8, day: 10 }}
+                enableMonthDropdown
+                onChange={onChange}
+            />,
+        );
+
+        openHeaderSelectOptionLabels(container, 0);
+
+        expect(scrollIntoView).not.toHaveBeenCalled();
     });
 });
 

@@ -688,6 +688,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                             options={yearOptions}
                             value={selectedYearOption}
                             clearable={false}
+                            scrollToSelectedOnOpen
                             keyExtractor={navigationOptionKeyExtractor}
                             valueExtractor={navigationOptionValueExtractor}
                             onChange={handleYearSelect}

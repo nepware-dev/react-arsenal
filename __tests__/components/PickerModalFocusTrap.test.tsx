@@ -74,6 +74,7 @@ describe('Picker calendar inside a modal', () => {
 
         const dateInput = document.querySelector('.date-input') as HTMLInputElement;
         act(() => {
+            fireEvent.mouseDown(dateInput);
             dateInput.focus();
         });
         expect(document.querySelector('.date-popup')).toBeInTheDocument();
@@ -100,6 +101,7 @@ describe('Picker calendar inside a modal', () => {
 
         const dateTimeInput = document.querySelector('.date-time-input') as HTMLInputElement;
         act(() => {
+            fireEvent.mouseDown(dateTimeInput);
             dateTimeInput.focus();
         });
         expect(document.querySelector('.date-time-popup')).toBeInTheDocument();
@@ -124,6 +126,7 @@ describe('Picker calendar inside a modal', () => {
 
         const dateInput = document.querySelector('.date-input') as HTMLInputElement;
         act(() => {
+            fireEvent.mouseDown(dateInput);
             dateInput.focus();
         });
 
@@ -144,6 +147,7 @@ describe('Picker calendar inside a modal', () => {
 
         const dateInput = document.querySelector('.date-input') as HTMLInputElement;
         act(() => {
+            fireEvent.mouseDown(dateInput);
             dateInput.focus();
         });
         expect(document.querySelector('.date-popup')).toBeInTheDocument();

@@ -19,6 +19,7 @@ const List = <T,>(props: ListProps<T>) => {
         contentContainerClassName,
         style,
         ref: _ref,
+        containerRef,
         component: Component = "div",
         loading = false,
         LoadingComponent: _LoadingComponent,
@@ -32,7 +33,7 @@ const List = <T,>(props: ListProps<T>) => {
 
     const innerRef = useRef<HTMLDivElement>(null);
 
-    const ref = _ref || innerRef;
+    const ref = containerRef || _ref || innerRef;
 
     const handleItemScroll = useMemo(
         () =>

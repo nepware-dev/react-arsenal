@@ -23,6 +23,7 @@ describe('DateTimePickerInput styling API', () => {
             <DateTimePickerInput value="2024-01-15T10:00" onChange={onChange} />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
         fireEvent.click(screen.getByText('10:30'));
 
@@ -37,6 +38,7 @@ describe('DateTimePickerInput styling API', () => {
         expect(container.querySelector('.date-time-control')).toBeInTheDocument();
         expect(container.querySelector('.date-time-input')).toBeInTheDocument();
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
 
         const portal = screen.getByTestId('portal');
@@ -63,6 +65,7 @@ describe('DateTimePickerInput styling API', () => {
         expect(container.querySelector('.my-control')).toBeInTheDocument();
         expect(container.querySelector('.my-input')).toBeInTheDocument();
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
 
         const portal = screen.getByTestId('portal');
@@ -112,6 +115,7 @@ describe('DateTimePickerInput customization hooks', () => {
             />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
 
         expect(screen.getByText('20')).toBeDisabled();
@@ -127,6 +131,7 @@ describe('DateTimePickerInput customization hooks', () => {
             />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
         fireEvent.click(screen.getByText('20'));
 
@@ -151,6 +156,7 @@ describe('DateTimePickerInput customization hooks', () => {
             />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
 
         expect(screen.getByTestId('day-15')).toHaveAttribute('data-selected', 'true');
@@ -172,6 +178,7 @@ describe('DateTimePickerInput uncommitted typed date', () => {
         );
 
         const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.mouseDown(dateInput);
         fireEvent.focus(dateInput);
         fireEvent.change(dateInput, { target: { value: '2024-01-15' } });
 
@@ -189,6 +196,7 @@ describe('DateTimePickerInput uncommitted typed date', () => {
         const { container } = render(<DateTimePickerInput onChange={onChange} />);
 
         const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.mouseDown(dateInput);
         fireEvent.focus(dateInput);
         fireEvent.change(dateInput, { target: { value: '2024-01-15' } });
 
@@ -205,6 +213,7 @@ describe('DateTimePickerInput uncommitted typed date', () => {
         );
 
         const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.mouseDown(dateInput);
         fireEvent.focus(dateInput);
         fireEvent.change(dateInput, { target: { value: '2024-01' } });
 
@@ -230,6 +239,7 @@ describe('DateTimePickerInput single emit per time entry', () => {
         );
 
         const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.mouseDown(dateInput);
         fireEvent.focus(dateInput);
         fireEvent.change(dateInput, { target: { value: '' } });
 
@@ -243,6 +253,7 @@ describe('DateTimePickerInput single emit per time entry', () => {
         const { container } = render(<DateTimePickerInput onChange={onChange} />);
 
         const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.mouseDown(dateInput);
         fireEvent.focus(dateInput);
         fireEvent.change(dateInput, { target: { value: '2024-01-15 10:30' } });
 
@@ -264,6 +275,7 @@ describe('DateTimePickerInput single emit per time entry', () => {
         );
 
         const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.mouseDown(dateInput);
         fireEvent.focus(dateInput);
         fireEvent.change(dateInput, { target: { value: '2024-01-15 10:30' } });
 
@@ -289,6 +301,7 @@ describe('DateTimePickerInput blank commit with no date', () => {
         );
 
         const dateInput = container.querySelector('input') as HTMLInputElement;
+        fireEvent.mouseDown(dateInput);
         fireEvent.focus(dateInput);
         fireEvent.change(container.querySelector('.date-time-field') as HTMLInputElement, {
             target: { value: '10:30' },

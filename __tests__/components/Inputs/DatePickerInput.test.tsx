@@ -29,6 +29,7 @@ describe('DatePickerInput iso value contract', () => {
             <DatePickerInput value="2024-01-15" onChange={onChange} />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
         fireEvent.click(screen.getByText('20'));
 
@@ -40,6 +41,7 @@ describe('DatePickerInput iso value contract', () => {
             <DatePickerInput name="birthday" value="2024-01-15" onChange={onChange} />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
         fireEvent.click(screen.getByText('20'));
 
@@ -95,6 +97,7 @@ describe('DatePickerInput class names', () => {
         expect(container.querySelector('.date-clear')).toBeInTheDocument();
         expect(container.querySelector('.date-calendar-toggle')).toBeInTheDocument();
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
 
         const portal = screen.getByTestId('portal');
@@ -150,6 +153,7 @@ describe('DatePickerInput bounds behavior', () => {
             />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
 
         expect(screen.getByText('9')).toBeDisabled();
@@ -168,6 +172,7 @@ describe('DatePickerInput bounds behavior', () => {
             />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
         fireEvent.click(screen.getByText('9'));
 
@@ -209,6 +214,7 @@ describe('DatePickerInput customization hooks', () => {
             />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
 
         expect(screen.getByText('20')).toBeDisabled();
@@ -224,6 +230,7 @@ describe('DatePickerInput customization hooks', () => {
             />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
         fireEvent.click(screen.getByText('20'));
 
@@ -265,6 +272,7 @@ describe('DatePickerInput customization hooks', () => {
             />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
 
         expect(screen.getByTestId('day-15')).toHaveAttribute('data-selected', 'true');
@@ -277,6 +285,7 @@ describe('DatePickerInput customization hooks', () => {
             <DatePickerInput value="2024-01-15" onChange={onChange} />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
 
         expect(container.querySelectorAll('.calendar-nav-button')).toHaveLength(4);
@@ -294,6 +303,7 @@ describe('DatePickerInput customization hooks', () => {
             />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
 
         expect(container.querySelector('.calendar-outside-day')).not.toBeInTheDocument();
@@ -313,6 +323,7 @@ describe('DatePickerInput customization hooks', () => {
             />,
         );
 
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
 
         expect(container.querySelectorAll('.calendar-nav-button')).toHaveLength(2);
@@ -330,6 +341,7 @@ describe('DatePickerInput AD/BS toggle with a selection outside the BS range', (
     });
 
     const openToggleOptions = (container: HTMLElement) => {
+        fireEvent.mouseDown(container.querySelector('input') as HTMLInputElement);
         fireEvent.focus(container.querySelector('input') as HTMLInputElement);
         const [adOption, bsOption] = Array.from(
             container.querySelectorAll('.date-system-toggle-option'),
@@ -412,6 +424,7 @@ describe('DatePickerInput AD/BS toggle with a selection outside the BS range', (
 
         expect(onChange).not.toHaveBeenCalled();
 
+        fireEvent.mouseDown(input);
         fireEvent.focus(input);
         fireEvent.click(adOption);
         expect(container.querySelector('input')).toHaveValue('2050-06-15');

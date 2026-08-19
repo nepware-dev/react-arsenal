@@ -62,3 +62,89 @@
 .pagination {
     margin-top: 1rem;
 }
+
+.designedCalendar {
+    padding: 16px;
+    border: 1px solid #d9def0;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f5f7ff 100%);
+    box-shadow: 0 8px 24px rgba(53, 66, 130, 0.12);
+    font-family: system-ui, sans-serif;
+
+    .designedCalendarHeader {
+        padding-bottom: 12px;
+        border-bottom: 1px dashed #d9def0;
+
+        .designedCalendarNavigationButton {
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            background-color: #eef1ff;
+            color: #3f4a8a;
+
+            &:hover:not(:disabled) {
+                background-color: #dfe4ff;
+            }
+        }
+
+        .designedCalendarEdgeButton {
+            background-color: transparent;
+            color: #8d95bb;
+        }
+
+        .designedCalendarTitle {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: #2c3566;
+            text-transform: uppercase;
+        }
+    }
+
+    .designedCalendarWeekdays {
+        margin-top: 12px;
+
+        .designedCalendarWeekday {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #8d95bb;
+            text-transform: uppercase;
+        }
+    }
+
+    .designedCalendarDays {
+        gap: 4px;
+
+        button.designedCalendarDay {
+            border-radius: 999px;
+            font-weight: 600;
+            color: #2c3566;
+
+            &:hover:not(:disabled) {
+                background-color: #e4e9ff;
+            }
+        }
+
+        button.designedCalendarSelectedDay {
+            background-color: #4c5bd4;
+            color: #ffffff;
+        }
+
+        button.designedCalendarToday {
+            border: 1px solid #4c5bd4;
+            background-color: #ffffff;
+        }
+
+        button.designedCalendarDisabledDay {
+            color: #c3c8de;
+            text-decoration: line-through;
+        }
+
+        button.designedCalendarOutsideDay {
+            color: #b8bfd9;
+            font-weight: 400;
+            opacity: 1;
+        }
+    }
+}

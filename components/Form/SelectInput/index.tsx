@@ -12,7 +12,7 @@ import Input from '../Input';
 import Localize from '../../I18n/Localize';
 import Popup from '../../Popup';
 import cs from '../../../cs';
-import { isArray } from '../../../utils';
+import { isArray, isNullOrUndefined } from '../../../utils';
 
 const noop = () => {};
 
@@ -325,17 +325,33 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
             if (!scrollToSelectedOnOpen) return;
 
             const selectedItem = selectState.selectedItem;
-            if (!container || !selectedItem) return;
+
+            if (!container || isNullOrUndefined(selectedItem)) return;
 
             const index = selectState.options.findIndex(
                 (option, optionIndex) =>
                     option === selectedItem
                     || keyExtractor(option, optionIndex) === keyExtractor(selectedItem, optionIndex),
             );
+
             if (index < 0) return;
 
             const optionElement = container.children[index] as HTMLElement | undefined;
-            optionElement?.scrollIntoView?.({ block: 'center' });
+
+            if (!optionElement) return;
+
+            const { offsetHeight, offsetWidth } = optionElement;
+            const containerRect = container.getBoundingClientRect();
+            const optionRect = optionElement.getBoundingClientRect();
+
+            const itemTop = optionRect.top - containerRect.top;
+            const itemLeft = optionRect.left - containerRect.left;
+
+            container.scrollTo({
+                top: itemTop + offsetHeight / 2 - container.offsetHeight / 2,
+                left: itemLeft + offsetWidth / 2 - container.offsetWidth / 2,
+                behavior: 'auto',
+            });
         },
         [scrollToSelectedOnOpen, selectState.selectedItem, selectState.options, keyExtractor],
     );

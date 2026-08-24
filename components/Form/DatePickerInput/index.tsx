@@ -171,6 +171,7 @@ const DatePickerInput: React.FC<DatePickerInputProps> = (props) => {
                         value={field.inputText}
                         placeholder={placeholder}
                         disabled={disabled}
+                        onClick={field.showCalendar}
                         onFocus={field.handleInputFocus}
                         onChange={field.handleInputChange}
                         onBlur={field.commitTypedValue}

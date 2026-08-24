@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import styles from './styles.module.scss';
 import type { DateTimePickerInputClassNames } from './types';
@@ -25,6 +25,7 @@ interface DateTimeSelectorProps {
     onTimeChange: (target: HTMLInputElement) => void;
     onTimeOptionSelect: (option: TimeOption) => void;
     classNames?: DateTimePickerInputClassNames;
+    scrollToSelectedOnOpen?: boolean;
 }
 
 const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
@@ -40,7 +41,36 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
     onTimeChange,
     onTimeOptionSelect,
     classNames,
+    scrollToSelectedOnOpen = false
 }) => {
+
+    const handleOptionsRef = useCallback((container: HTMLDivElement | null) => {
+        if (!container || !scrollToSelectedOnOpen) return;
+
+        const selectedItem = timeText;
+
+        const selectedIndex = timeOptions.findIndex((option) => option.time === selectedItem);
+        if (selectedIndex < 0) return;
+
+        const optionElement = container.children[selectedIndex] as HTMLButtonElement | undefined;
+
+        if (!optionElement) return;
+
+        const {offsetHeight, offsetWidth} = optionElement;
+        const containerRect = container.getBoundingClientRect();
+        const optionRect = optionElement.getBoundingClientRect();
+
+        const itemTop = optionRect.top - containerRect.top + container.scrollTop;
+        const itemLeft = optionRect.left - containerRect.left + container.scrollLeft;
+
+        container.scrollTo({
+            top: itemTop + offsetHeight / 2 - container.offsetHeight / 2,
+            left: itemLeft + offsetWidth / 2 - container.offsetWidth / 2,
+            behavior: 'auto',
+        })
+
+    },[scrollToSelectedOnOpen, timeOptions, timeText]);
+
     if (timeMode === 'native') {
         return (
             <div className={cs(styles.timeRow, 'date-time-row', classNames?.timeRow)}>
@@ -66,14 +96,14 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
                 <div className={cs(styles.timeColumnHeader, 'date-time-column-header', classNames?.timeColumnHeader)}>
                     <Localize>Time</Localize>
                 </div>
-                <div className={styles.timeColumnScroll}>
+                <div className={styles.timeColumnScroll} ref={handleOptionsRef}>
                     {timeOptions.map((option) => {
                         const optionDisabled = disabled || isTimeOptionDisabled(option);
                         const optionSelected = option.time === timeText;
                         return (
                             <button
                                 key={option.minutes}
-                                type="button"
+                                type='button'
                                 className={cs(
                                     styles.timeOption,
                                     'date-time-option',

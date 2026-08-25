@@ -1,0 +1,128 @@
+.timeInputContainer {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+
+    &.disabled {
+        pointer-events: none;
+
+        .timeControl {
+            background-color: var(--color-background-alt);
+
+            .timeInput {
+                color: var(--color-text-light);
+            }
+        }
+    }
+
+    .timeControl {
+        display: flex;
+        flex: 1;
+        flex-direction: row;
+        align-items: center;
+        padding: 0.5em 0.8em;
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius-small);
+
+        &:hover,
+        &.expanded {
+            border-color: var(--color-input-outline);
+        }
+
+        &.warning:not(:hover) {
+            border-color: var(--color-warning);
+        }
+
+        &.error:not(:hover) {
+            border-color: var(--color-danger);
+        }
+
+        .timeInput {
+            flex: 1;
+            min-width: 0;
+            border: none;
+            outline: none;
+            background: none;
+            color: var(--color-text);
+            font: inherit;
+
+            &::placeholder {
+                color: lightgray;
+            }
+        }
+
+        .indicator {
+            display: flex;
+            align-items: center;
+            margin-left: 0.5em;
+
+            .clear {
+                display: flex;
+                align-items: center;
+                margin: 0 0.5em;
+                padding: 0;
+                border: none;
+                background: none;
+                cursor: pointer;
+                color: inherit;
+            }
+
+            .toggle {
+                display: flex;
+                align-items: center;
+                padding: 0;
+                border: none;
+                background: none;
+                cursor: pointer;
+                color: inherit;
+            }
+        }
+    }
+}
+
+.popup {
+    .pickerPopup {
+        display: flex;
+        flex-direction: column;
+        background-color: var(--color-background);
+        border-radius: var(--border-radius-small);
+        box-shadow:
+            rgba(0, 0, 0, 0.1) 0 0 0 1px,
+            rgba(0, 0, 0, 0.1) 0 4px 11px;
+
+        .pickerBody {
+            display: flex;
+
+            &.stacked {
+                flex-direction: column;
+            }
+
+            &.listMode {
+                flex-direction: row;
+                height: 16em;
+            }
+        }
+    }
+}
+
+.timeColumn {
+    width: 6rem;
+}
+
+.timeColumn12Hour {
+    width: 7.5rem;
+}
+
+.timeOption {
+    min-width: max-content;
+}
+
+.errorText {
+    color: var(--color-danger);
+    font-size: 12px;
+}
+
+.warningText {
+    color: var(--color-warning);
+    font-size: 12px;
+}

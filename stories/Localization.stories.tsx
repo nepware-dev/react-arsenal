@@ -11,7 +11,6 @@ import DateTimeInput from '@ra/components/Form/DateTimeInput';
 
 import TimeUtils from '@ra/utils/time';
 
-import '@ra/styles/_base.scss';
 import styles from './styles.module.scss';
 
 export default {

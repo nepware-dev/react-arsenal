@@ -139,7 +139,9 @@ const List = <T,>(props: ListProps<T>) => {
         Record<string, unknown>,
     ] = useMemo(() => {
         if (Component === React.Fragment) {
-            const hasComponentProps = className || ref || style || onEndReached;
+            // Only user-supplied refs count; `ref` falls back to an internal one.
+            const hasComponentProps =
+                className || containerRef || _ref || style || onEndReached;
 
             if (hasComponentProps) {
                 console.warn(
@@ -158,7 +160,16 @@ const List = <T,>(props: ListProps<T>) => {
         };
 
         return [Component, componentProps];
-    }, [Component, className, ref, style, handleItemScroll, onEndReached]);
+    }, [
+        Component,
+        className,
+        ref,
+        containerRef,
+        _ref,
+        style,
+        handleItemScroll,
+        onEndReached,
+    ]);
 
     return (
         <ContainerComponent {...containerProps}>

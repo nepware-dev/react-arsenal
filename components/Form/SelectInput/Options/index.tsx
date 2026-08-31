@@ -15,6 +15,7 @@ function Options<T, V extends ReactNode>(props: OptionsProps<T, V>) {
         onItemFocus = noop,
         selectedItem,
         focusedItem,
+        listRef,
         ...otherProps
     } = props;
 
@@ -38,6 +39,7 @@ function Options<T, V extends ReactNode>(props: OptionsProps<T, V>) {
 
     return (
         <List
+            containerRef={listRef}
             className={className}
             data={data}
             keyExtractor={keyExtractor}

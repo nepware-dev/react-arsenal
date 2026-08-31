@@ -51,7 +51,10 @@
         "test:run": "vitest run",
         "typecheck": "tsc --noEmit",
         "build": "vite build",
-        "prepack": "vite build && clean-pkg-json --published-only=false"
+        "prepack": "vite build && clean-pkg-json --published-only=false",
+        "storybook": "storybook dev -p 9009",
+        "build-storybook": "storybook build",
+        "chromatic": "pnpm exec chromatic"
     },
     "publishConfig": {
         "access": "public"
@@ -76,6 +79,10 @@
     "devDependencies": {
         "@semantic-release/changelog": "6.0.3",
         "@semantic-release/git": "10.0.1",
+        "@storybook/addon-a11y": "^10.5.8",
+        "@storybook/addon-docs": "^10.5.8",
+        "@storybook/addon-links": "^10.5.8",
+        "@storybook/react-vite": "^10.5.8",
         "@testing-library/jest-dom": "6.9.1",
         "@testing-library/react": "16.3.2",
         "@testing-library/user-event": "14.6.1",
@@ -85,12 +92,14 @@
         "@types/react-dom": "^19.0.0",
         "@types/react-router-dom": "^5.3.3",
         "@vitejs/plugin-react": "6.0.3",
+        "chromatic": "^18.2.0",
         "clean-pkg-json": "2.0.0",
         "jsdom": "29.1.1",
         "react": "19.2.4",
         "react-dom": "19.2.4",
         "react-router-dom": "^5.0.0",
         "sass": "1.98.0",
+        "storybook": "^10.5.8",
         "tinyglobby": "0.2.17",
         "typescript": "5.9.3",
         "vite": "8.1.5",

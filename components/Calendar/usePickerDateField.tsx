@@ -16,6 +16,10 @@ import cs from "../../cs";
 import { isArray } from "../../utils";
 import type { BikramSambatDate, GregorianDate } from "../../utils/date";
 import {
+    consumeFocusIntent,
+    observeFocusIntent,
+} from "../Form/SelectInput/focusIntent";
+import {
     bikramSambatToGregorian,
     gregorianToBikramSambatSafe,
     parseCalendarViewParts,
@@ -199,6 +203,8 @@ const usePickerDateField = <Model,>(
     const inputRef = useRef<HTMLInputElement>(null);
     const restoringFocusRef = useRef(false);
 
+    useEffect(() => observeFocusIntent(), []);
+
     useEffect(() => {
         if (value !== undefined) {
             setSelected(modelRef.current.parseIso(value));
@@ -251,8 +257,12 @@ const usePickerDateField = <Model,>(
         }
     }, [disabled]);
 
+    // Focus alone is not user intent - open only for a pointer/keyboard gesture on this field.
     const handleInputFocus = useCallback(() => {
         if (restoringFocusRef.current) {
+            return;
+        }
+        if (!consumeFocusIntent(controlRef.current)) {
             return;
         }
         showCalendar();
@@ -354,15 +364,23 @@ const usePickerDateField = <Model,>(
     const handleKeyDown = useCallback(
         (event: React.KeyboardEvent<HTMLInputElement>) => {
             if (event.key === "Enter") {
+                if (!expanded) {
+                    event.preventDefault();
+                    showCalendar();
+                    return;
+                }
                 event.preventDefault();
                 if (commitTypedValue().status === "committed") {
                     hideCalendar();
                 }
             } else if (event.key === "Escape" || event.key === "Tab") {
                 hideCalendar();
+            } else if (!expanded && event.key === "ArrowDown") {
+                event.preventDefault();
+                showCalendar();
             }
         },
-        [commitTypedValue, hideCalendar],
+        [commitTypedValue, hideCalendar, expanded, showCalendar],
     );
 
     const typedViewParts = useMemo(

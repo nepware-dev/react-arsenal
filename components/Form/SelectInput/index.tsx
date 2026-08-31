@@ -12,7 +12,7 @@ import Input from '../Input';
 import Localize from '../../I18n/Localize';
 import Popup from '../../Popup';
 import cs from '../../../cs';
-import { isArray } from '../../../utils';
+import { isArray, isNullOrUndefined } from '../../../utils';
 
 const noop = () => {};
 
@@ -65,6 +65,7 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
         onOptionsEndReach,
         onEndReachedThreshold,
         container,
+        scrollToSelectedOnOpen = false,
     } = props;
 
     const [selectState, setSelectState] = useState<SelectState<T>>({
@@ -142,7 +143,7 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
 
         const targetKey = keyExtractor(targetItem, -1);
 
-        const hasTargetInOptions = options.some((opt, idx) => keyExtractor(opt, idx) === targetKey);
+        const hasTargetInOptions = options.some((option, index) => keyExtractor(option, index) === targetKey);
 
         return hasTargetInOptions ? targetItem : options[0];
     }, [value, defaultValue, keyExtractor]);
@@ -319,6 +320,48 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
         });
     },[options, getFocusedItem, filterOptions, onInputChange]);
 
+    const scrollSelectedOptionIntoView = useCallback(
+        (container: HTMLDivElement | null) => {
+            if (!scrollToSelectedOnOpen) return;
+
+            const selectedItem = selectState.selectedItem;
+
+            if (!container || isNullOrUndefined(selectedItem)) return;
+
+            const index = selectState.options.findIndex(
+                (option, optionIndex) =>
+                    option === selectedItem
+                    || keyExtractor(option, optionIndex) === keyExtractor(selectedItem, optionIndex),
+            );
+
+            if (index < 0) return;
+
+            const optionElement = container.children[index] as HTMLElement | undefined;
+
+            if (!optionElement) return;
+
+            const { offsetHeight, offsetWidth } = optionElement;
+            const containerRect = container.getBoundingClientRect();
+            const optionRect = optionElement.getBoundingClientRect();
+
+            const itemTop = optionRect.top - containerRect.top;
+            const itemLeft = optionRect.left - containerRect.left;
+
+            container.scrollTo({
+                top: itemTop + offsetHeight / 2 - container.offsetHeight / 2,
+                left: itemLeft + offsetWidth / 2 - container.offsetWidth / 2,
+                behavior: 'auto',
+            });
+        },
+        [scrollToSelectedOnOpen, selectState.selectedItem, selectState.options, keyExtractor],
+    );
+
+    // Callback ref, not an effect: Popup mounts children only after its own layout-effect anchor measurement.
+    const handleOptionsListRef = useCallback(
+        (node: HTMLDivElement | null) => scrollSelectedOptionIntoView(node),
+        [scrollSelectedOptionIntoView],
+    );
+
     useEffect(() => observeFocusIntent(), []);
 
     useEffect(() => {
@@ -393,6 +436,7 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
                 >
                     <div className={cs(styles.selectOptionsWrapper, optionsWrapperClassName)}>
                         <Options
+                            listRef={handleOptionsListRef}
                             data={selectState.options}
                             keyExtractor={keyExtractor}
                             valueExtractor={valueExtractor}

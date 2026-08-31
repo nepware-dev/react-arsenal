@@ -1,0 +1,301 @@
+.buttons {
+    button {
+        margin: 5px;
+    }
+}
+
+.nested {
+    margin-left: 24px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+
+    .select {
+        margin-left: 16px;
+    }
+}
+
+.popup {
+    background: red;
+}
+
+.tabItem {
+    padding: 0.25em 1em;
+    font-weight: 500;
+}
+
+.activeTabItem {
+    background-color: var(--color-background);
+    color: var(--color-primary);
+}
+
+.contentSection {
+    padding: 1em;
+}
+
+.modal {
+    border-radius: 0.5rem;
+}
+
+.modalContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 0.5rem;
+    height: 50vh;
+    width: 50vw;
+}
+
+.accordionTitle {
+    font-weight: 600;
+}
+
+.accordionBody {
+    padding: 1rem 0;
+}
+
+.pagination {
+    margin-top: 1rem;
+}
+
+.draggableListNote {
+    max-width: 40rem;
+    margin: 0 0 1rem;
+    color: var(--color-text-light);
+}
+
+.draggableList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 20rem;
+}
+
+.draggableListGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    max-width: 32rem;
+}
+
+.draggableListScrollArea {
+    max-width: 20rem;
+    max-height: 18rem;
+    padding: 0.5rem;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+}
+
+.draggableListEmpty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 5rem;
+    max-width: 20rem;
+    border: 1px dashed var(--color-border);
+    border-radius: 0.375rem;
+}
+
+.draggableListItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    background-color: var(--color-background-alt);
+    color: var(--color-text);
+    cursor: grab;
+
+    &:active {
+        cursor: grabbing;
+    }
+
+    .draggableListItemHandle {
+        color: var(--color-text-light);
+        line-height: 1;
+    }
+}
+
+.draggableListGroups {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 20rem;
+}
+
+.draggableListGroup {
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background-color: var(--color-background);
+    overflow: hidden;
+}
+
+.draggableListGroupTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-background-alt);
+    color: var(--color-text);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: grab;
+
+    &:active {
+        cursor: grabbing;
+    }
+}
+
+.draggableListBoard {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    max-width: 44rem;
+}
+
+.draggableListBoardColumn {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background-color: var(--color-background);
+    overflow: hidden;
+}
+
+.draggableListBoardCards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 4rem;
+    padding: 0.5rem;
+    color: var(--color-text-light);
+    font-size: 0.8125rem;
+}
+
+.draggableListGroupItems {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+}
+
+.draggableListItem:has(.draggableListSectionHeader) {
+    border-style: dashed;
+    background-color: var(--color-background);
+    cursor: default;
+
+    &:active {
+        cursor: default;
+    }
+}
+
+.draggableListSectionHeader {
+    color: var(--color-text-light);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.draggableListItemDisabled {
+    cursor: default;
+    color: var(--color-text-light);
+
+    &:active {
+        cursor: default;
+    }
+}
+
+.designedCalendar {
+    padding: 16px;
+    border: 1px solid #d9def0;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f5f7ff 100%);
+    box-shadow: 0 8px 24px rgba(53, 66, 130, 0.12);
+    font-family: system-ui, sans-serif;
+
+    .designedCalendarHeader {
+        padding-bottom: 12px;
+        border-bottom: 1px dashed #d9def0;
+
+        .designedCalendarNavigationButton {
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            background-color: #eef1ff;
+            color: #3f4a8a;
+
+            &:hover:not(:disabled) {
+                background-color: #dfe4ff;
+            }
+        }
+
+        .designedCalendarEdgeButton {
+            background-color: transparent;
+            color: #8d95bb;
+        }
+
+        .designedCalendarTitle {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: #2c3566;
+            text-transform: uppercase;
+        }
+    }
+
+    .designedCalendarWeekdays {
+        margin-top: 12px;
+
+        .designedCalendarWeekday {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #8d95bb;
+            text-transform: uppercase;
+        }
+    }
+
+    .designedCalendarDays {
+        gap: 4px;
+
+        button.designedCalendarDay {
+            border-radius: 999px;
+            font-weight: 600;
+            color: #2c3566;
+
+            &:hover:not(:disabled) {
+                background-color: #e4e9ff;
+            }
+        }
+
+        button.designedCalendarSelectedDay {
+            background-color: #4c5bd4;
+            color: #ffffff;
+        }
+
+        button.designedCalendarToday {
+            border: 1px solid #4c5bd4;
+            background-color: #ffffff;
+        }
+
+        button.designedCalendarDisabledDay {
+            color: #c3c8de;
+            text-decoration: line-through;
+        }
+
+        button.designedCalendarOutsideDay {
+            color: #b8bfd9;
+            font-weight: 400;
+            opacity: 1;
+        }
+    }
+}

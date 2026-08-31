@@ -11,7 +11,7 @@ export interface OptionProps<T> {
     disabled?: boolean;
 }
 
-export interface OptionsProps<T, V> extends Omit<ListProps<T>, 'onItemClick' | 'renderItem'> {
+export interface OptionsProps<T, V> extends Omit<ListProps<T>, 'onItemClick' | 'renderItem' | 'ref' | 'containerRef'> {
     data: T[];
     className?: string;
     classNameItem?: string;
@@ -22,4 +22,6 @@ export interface OptionsProps<T, V> extends Omit<ListProps<T>, 'onItemClick' | '
     isDisabledExtractor?: (item: T) => boolean;
     onItemClick?: ({ item }: { item: T }) => void;
     onItemFocus?: ({ item }: { item: T }) => void;
+    /** Ref forwarded to List's container as a plain prop, since `ref` on a function component is dropped by React under 18. */
+    listRef?: ListProps<T>['containerRef'];
 }

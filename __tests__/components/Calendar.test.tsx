@@ -1,4 +1,6 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import { createRoot } from 'react-dom/client';
+import { flushSync } from 'react-dom';
 import '@testing-library/jest-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
@@ -729,9 +731,12 @@ describe('Calendar (AD/BS toggle with a selection outside the BS range)', () => 
 
 describe('Calendar (month dropdown respects min/max bounds)', () => {
     const onChange = vi.fn();
+    const scrollTo = vi.fn();
 
     beforeEach(() => {
         onChange.mockClear();
+        scrollTo.mockClear();
+        Element.prototype.scrollTo = scrollTo;
     });
 
     // Opens a header select by focusing its search input, mirroring the existing SelectInput test pattern.
@@ -831,6 +836,37 @@ describe('Calendar (month dropdown respects min/max bounds)', () => {
             'July', 'August', 'September', 'October', 'November', 'December',
         ]);
     });
+
+    it('opens the year dropdown scrolled to the selected year instead of the earliest option', () => {
+        const { container } = render(
+            <Calendar
+                system="gregorian"
+                value={{ year: 2026, month: 8, day: 10 }}
+                enableYearDropdown
+                onChange={onChange}
+            />,
+        );
+
+        // Default bounds span a century-plus range, so scrolling from the top would be the reopened bug.
+        openHeaderSelectOptionLabels(container, 0);
+
+        expect(scrollTo).toHaveBeenCalledWith({ top: expect.any(Number), left: expect.any(Number), behavior: 'auto' });
+    });
+
+    it('does not scroll the month dropdown, which already fits within the visible list', () => {
+        const { container } = render(
+            <Calendar
+                system="gregorian"
+                value={{ year: 2026, month: 8, day: 10 }}
+                enableMonthDropdown
+                onChange={onChange}
+            />,
+        );
+
+        openHeaderSelectOptionLabels(container, 0);
+
+        expect(scrollTo).not.toHaveBeenCalled();
+    });
 });
 
 describe('Calendar (AD/BS toggle with a viewDate held across the system change)', () => {
@@ -840,8 +876,7 @@ describe('Calendar (AD/BS toggle with a viewDate held across the system change)'
         onChange.mockClear();
     });
 
-    // Only the round trip is pinned: an untagged viewDate held across the change still steers the BS leg.
-    it('returns to the exact AD window across repeated toggles', () => {
+    it('ignores the stale-system viewDate and shows the clamp target, then returns to the exact AD window', () => {
         const viewDate = { year: 2090, month: 3 };
 
         const { rerender, container } = render(
@@ -856,6 +891,13 @@ describe('Calendar (AD/BS toggle with a viewDate held across the system change)'
                 );
             }).not.toThrow();
 
+            expect(container.querySelector('.calendar-title-year')).toHaveTextContent(
+                String(MAXIMUM_BIKRAM_SAMBAT_YEAR),
+            );
+            expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+                getBikramSambatMonthLabel(12),
+            );
+
             rerender(
                 <Calendar system="gregorian" value={null} viewDate={viewDate} onChange={onChange} />,
             );
@@ -865,6 +907,77 @@ describe('Calendar (AD/BS toggle with a viewDate held across the system change)'
             expect(container.querySelector('.calendar-title-year')).toHaveTextContent('2090');
         }
 
+        expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('still applies a fresh viewDate supplied together with the system change', () => {
+        const { rerender, container } = render(
+            <Calendar
+                system="gregorian"
+                value={null}
+                viewDate={{ year: 2081, month: 1 }}
+                onChange={onChange}
+            />,
+        );
+
+        rerender(
+            <Calendar
+                system="nepali"
+                value={null}
+                viewDate={{ year: 2082, month: 6 }}
+                onChange={onChange}
+            />,
+        );
+
+        expect(container.querySelector('.calendar-title-year')).toHaveTextContent('2082');
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getBikramSambatMonthLabel(6),
+        );
+    });
+});
+
+describe('Calendar (windowAnchorRef precedence over value on a system switch)', () => {
+    const onChange = vi.fn();
+
+    beforeEach(() => {
+        onChange.mockClear();
+    });
+
+    it('paints the browsed-to anchor, not the selected value, on the commit before the sync effect runs', () => {
+        const adValue = { year: 2026, month: 8, day: 15 };
+        const bsValue = convertGregorianToBikramSambat(
+            new Date(adValue.year, adValue.month - 1, adValue.day),
+        );
+
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+        const root = createRoot(container);
+
+        flushSync(() => {
+            root.render(<Calendar system="gregorian" value={adValue} onChange={onChange} />);
+        });
+
+        flushSync(() => {
+            fireEvent.click(screen.getByLabelText('Next month'));
+        });
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getGregorianMonthLabel(9),
+        );
+
+        flushSync(() => {
+            root.render(<Calendar system="nepali" value={bsValue} onChange={onChange} />);
+        });
+
+        const browsedToBs = convertGregorianToBikramSambat(new Date(2026, 8, 1));
+        expect(container.querySelector('.calendar-title-month')).toHaveTextContent(
+            getBikramSambatMonthLabel(browsedToBs.month),
+        );
+        expect(container.querySelector('.calendar-title-month')).not.toHaveTextContent(
+            getBikramSambatMonthLabel(bsValue.month),
+        );
+
+        root.unmount();
+        container.remove();
         expect(onChange).not.toHaveBeenCalled();
     });
 });

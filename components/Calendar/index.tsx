@@ -301,9 +301,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
     let visibleMonth = visibleWindow.month;
     if (visibleWindow.system !== system) {
         const anchor = windowAnchorRef.current;
-        const target = dateSystem.isValid(value)
-            ? (value as CalendarDate)
-            : convertViewDate(anchor.system, system, anchor.date);
+        const target = convertViewDate(anchor.system, system, anchor.date);
         const clamped = clampMonthToBounds(
             target.year,
             target.month,
@@ -343,8 +341,21 @@ const Calendar: React.FC<CalendarProps> = (props) => {
         [system, minimumBound, maximumBound],
     );
 
+    const viewDateOriginRef = useRef<{
+        system: CalendarSystem;
+        year?: number;
+        month?: number;
+    }>({ system, year: viewDate?.year, month: viewDate?.month });
+
     useEffect(() => {
+        const origin = viewDateOriginRef.current;
+        const isUnchanged =
+            origin.year === viewDate?.year && origin.month === viewDate?.month;
+        viewDateOriginRef.current = { system, year: viewDate?.year, month: viewDate?.month };
         if (!viewDate) {
+            return;
+        }
+        if (isUnchanged && origin.system !== system) {
             return;
         }
         const targetYear =
@@ -648,6 +659,7 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                                 "calendar-header-select",
                                 classNames?.headerSelect,
                             )}
+                            controlClassName={styles.headerSelectControl}
                             options={monthOptions}
                             value={selectedMonthOption}
                             clearable={false}
@@ -673,10 +685,12 @@ const Calendar: React.FC<CalendarProps> = (props) => {
                                 "calendar-header-select",
                                 classNames?.headerSelect,
                             )}
+                            controlClassName={styles.headerSelectControl}
                             searchable
                             options={yearOptions}
                             value={selectedYearOption}
                             clearable={false}
+                            scrollToSelectedOnOpen
                             keyExtractor={navigationOptionKeyExtractor}
                             valueExtractor={navigationOptionValueExtractor}
                             onChange={handleYearSelect}

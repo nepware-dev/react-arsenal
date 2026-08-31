@@ -1,0 +1,36 @@
+name: 'Chromatic'
+
+on:
+    pull_request:
+    push:
+        branches:
+            - 'develop'
+
+jobs:
+    chromatic-deployment:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  # Chromatic needs full history to find the baseline build
+                  fetch-depth: 0
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v5
+              with:
+                  version: latest
+
+            - uses: actions/setup-node@v6
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: 'pnpm'
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Publish to Chromatic
+              uses: chromaui/action@v18
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+                  buildScriptName: build-storybook

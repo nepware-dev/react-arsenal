@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 
 import DatePickerInput from '../../../components/Form/DatePickerInput';
 import DateTimePickerInput from '../../../components/Form/DateTimePickerInput';
+import SelectInput from '../../../components/Form/SelectInput';
 import useRect from '../../../hooks/useRect';
 
 // Popup is left unmocked: both defects need the calendar and its SelectInput on real portals.
@@ -64,7 +65,9 @@ describe('Picker popup interaction', () => {
         it('keeps the calendar open when a month option is picked', () => {
             const { container } = renderWithMonthDropdown();
 
-            fireEvent.focus(container.querySelector('input') as HTMLInputElement);
+            const input = container.querySelector('input') as HTMLInputElement;
+            fireEvent.mouseDown(input);
+            fireEvent.focus(input);
             const monthSelect = openMonthOptions();
 
             const marchOption = within(
@@ -80,7 +83,9 @@ describe('Picker popup interaction', () => {
         it('still closes the calendar when the click lands outside every popup', () => {
             const { container } = renderWithMonthDropdown();
 
-            fireEvent.focus(container.querySelector('input') as HTMLInputElement);
+            const input = container.querySelector('input') as HTMLInputElement;
+            fireEvent.mouseDown(input);
+            fireEvent.focus(input);
             openMonthOptions();
             fireEvent.mouseDown(document.body);
 
@@ -95,6 +100,7 @@ describe('Picker popup interaction', () => {
             );
             const input = container.querySelector('input') as HTMLInputElement;
 
+            fireEvent.mouseDown(input);
             fireEvent.focus(input);
             expect(getDatePopup()).toBeInTheDocument();
 
@@ -120,12 +126,36 @@ describe('Picker popup interaction', () => {
             );
             const input = container.querySelector('input') as HTMLInputElement;
 
+            fireEvent.mouseDown(input);
             fireEvent.focus(input);
             expect(getDateTimePopup()).toBeInTheDocument();
 
             fireEvent.click(screen.getByText('14:00'));
 
             expect(document.activeElement).toBe(input);
+            expect(getDateTimePopup()).not.toBeInTheDocument();
+        });
+
+        it('does not reopen the date time calendar when focus returns without a gesture', () => {
+            const { container } = render(
+                <DateTimePickerInput
+                    value="2024-01-15T10:00"
+                    onChange={onChange}
+                    timeStepMinutes={60}
+                />,
+            );
+            const input = container.querySelector('input') as HTMLInputElement;
+
+            fireEvent.mouseDown(input);
+            fireEvent.focus(input);
+            fireEvent.click(screen.getByText('14:00'));
+            expect(getDateTimePopup()).not.toBeInTheDocument();
+
+            act(() => {
+                input.blur();
+                input.focus();
+            });
+
             expect(getDateTimePopup()).not.toBeInTheDocument();
         });
 
@@ -141,6 +171,7 @@ describe('Picker popup interaction', () => {
             const input = container.querySelector('input') as HTMLInputElement;
             const otherControl = screen.getByTestId('other-control');
 
+            fireEvent.mouseDown(input);
             fireEvent.focus(input);
             act(() => otherControl.focus());
             fireEvent.mouseDown(otherControl);
@@ -149,22 +180,90 @@ describe('Picker popup interaction', () => {
             expect(document.activeElement).toBe(otherControl);
         });
 
-        it('reopens the calendar when the user focuses the input again', () => {
+        it('does not reopen the calendar when focus returns to the input without a gesture', () => {
             const { container } = render(
                 <DatePickerInput value="2024-01-15" onChange={onChange} />,
             );
             const input = container.querySelector('input') as HTMLInputElement;
 
+            fireEvent.mouseDown(input);
             fireEvent.focus(input);
             fireEvent.click(screen.getByText('20'));
             expect(getDatePopup()).not.toBeInTheDocument();
 
+            // A re-render or a neighboring dropdown's dismissal handing focus back is not user intent.
             act(() => {
                 input.blur();
                 input.focus();
             });
 
+            expect(getDatePopup()).not.toBeInTheDocument();
+        });
+
+        it('reopens the calendar when the user deliberately focuses the input again', () => {
+            const { container } = render(
+                <DatePickerInput value="2024-01-15" onChange={onChange} />,
+            );
+            const input = container.querySelector('input') as HTMLInputElement;
+
+            fireEvent.mouseDown(input);
+            fireEvent.focus(input);
+            fireEvent.click(screen.getByText('20'));
+            expect(getDatePopup()).not.toBeInTheDocument();
+
+            act(() => input.blur());
+            fireEvent.mouseDown(input);
+            fireEvent.focus(input);
+
             expect(getDatePopup()).toBeInTheDocument();
+        });
+
+        it('opens the calendar on ArrowDown while the input is already focused', () => {
+            const { container } = render(
+                <DatePickerInput value="2024-01-15" onChange={onChange} />,
+            );
+            const input = container.querySelector('input') as HTMLInputElement;
+
+            fireEvent.mouseDown(input);
+            fireEvent.focus(input);
+            fireEvent.click(screen.getByText('20'));
+            expect(getDatePopup()).not.toBeInTheDocument();
+            expect(document.activeElement).toBe(input);
+
+            fireEvent.keyDown(input, { key: 'ArrowDown' });
+
+            expect(getDatePopup()).toBeInTheDocument();
+        });
+
+        it('does not reopen when a neighboring dropdown is dismissed and hands focus back', () => {
+            const { container } = render(
+                <>
+                    <DatePickerInput value="2024-01-15" onChange={onChange} />
+                    <SelectInput
+                        options={[{ id: '1', label: 'Option' }]}
+                        keyExtractor={(item) => item.id}
+                        valueExtractor={(item) => item.label}
+                        onChange={vi.fn()}
+                    />
+                </>,
+            );
+            const input = container.querySelector('input') as HTMLInputElement;
+            const selectWrapper = container.querySelector(
+                '[tabindex]',
+            ) as HTMLElement;
+
+            fireEvent.mouseDown(input);
+            fireEvent.focus(input);
+            fireEvent.click(screen.getByText('20'));
+            expect(getDatePopup()).not.toBeInTheDocument();
+
+            // Dismissing a neighboring dropdown hands focus back with no gesture on this field.
+            fireEvent.mouseDown(selectWrapper);
+            fireEvent.focusIn(selectWrapper);
+            fireEvent.keyDown(selectWrapper, { key: 'Escape' });
+            act(() => input.focus());
+
+            expect(getDatePopup()).not.toBeInTheDocument();
         });
     });
 });

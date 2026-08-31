@@ -82,4 +82,11 @@ export interface SelectInputProps<T, V extends ReactNode> {
     onEndReachedThreshold?: number;
     renderDisplayLabel?: (option: T) => React.ReactNode;
     container?: PopupProps<HTMLElement>['container'];
+    /**
+     * When true, opening the options popup scrolls the currently selected option into view
+     * (centered where the list edges allow) instead of starting at the top of the list.
+     * Opt-in only - existing consumers keep today's top-of-list open behavior.
+     * Has no effect when there is no selected value.
+     */
+    scrollToSelectedOnOpen?: boolean;
 }

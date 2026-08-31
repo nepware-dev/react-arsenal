@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -298,6 +299,45 @@ describe('List', () => {
             const { container } = render(<List {...defaultProps} />);
 
             expect(container.querySelector('.content-container')).not.toBeInTheDocument();
+        });
+    });
+
+    describe('containerRef', () => {
+        it('receives the rendered container node via the plain containerRef prop', () => {
+            const containerRef = vi.fn();
+            const { container } = render(
+                <List {...defaultProps} containerRef={containerRef} className="the-list" />,
+            );
+
+            expect(containerRef).toHaveBeenCalledWith(container.querySelector('.the-list'));
+        });
+    });
+
+    describe('Fragment component', () => {
+        it('should not warn without className, style or a user-supplied ref', () => {
+            const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+            render(<List {...defaultProps} component={React.Fragment} />);
+
+            expect(warn).not.toHaveBeenCalled();
+            warn.mockRestore();
+        });
+
+        it('should warn when className is passed', () => {
+            const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+            render(
+                <List
+                    {...defaultProps}
+                    component={React.Fragment}
+                    className='custom-list'
+                />,
+            );
+
+            expect(warn).toHaveBeenCalledWith(
+                expect.stringContaining('You cannot use className'),
+            );
+            warn.mockRestore();
         });
     });
 

@@ -53,7 +53,7 @@ export interface PopupProps<T extends HTMLElement | null> {
      * 3. `document.body`
      */
     container?: HTMLElement;
-     /**
+    /**
      * When true and no container prop is provided, the closest scrollable
      * overflow ancestor of the anchor element as the portal target.
      * Note: If a container is explicitly provided, this prop is ignored

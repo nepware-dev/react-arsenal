@@ -1,3 +1,19 @@
+# [1.4.0](https://github.com/nepware-dev/react-arsenal/compare/v1.3.0...v1.4.0) (2026-08-31)
+
+
+### Bug Fixes
+
+* **calendar:** keep the visible month valid across system switches ([ef14cae](https://github.com/nepware-dev/react-arsenal/commit/ef14cae7ca726af34338fe58ea46600cc29959c2))
+* **datetime-picker:** stop popup reopening after a value is picked ([0475610](https://github.com/nepware-dev/react-arsenal/commit/04756103c3eba0992aa55289f2562d2f75803755))
+* **select-input:** scroll to selected option without scrolling ancestors ([005160c](https://github.com/nepware-dev/react-arsenal/commit/005160c5c8741978a36efd1ad5a4babadb03e6ed))
+* **styles:** inherit the app font on buttons ([fb084ab](https://github.com/nepware-dev/react-arsenal/commit/fb084aba2c1ee7e18eed51c6fc439b862f99bd8a))
+
+
+### Features
+
+* add time only picker input ([619b88f](https://github.com/nepware-dev/react-arsenal/commit/619b88ff1c6e87a499fcd538f789f7ee6e04a277))
+* **draggable-list:** add drag and drop list component ([8ac19a9](https://github.com/nepware-dev/react-arsenal/commit/8ac19a9f718e4ab9f6c723da9977a09ce23b2bf9))
+
 # [1.3.0](https://github.com/nepware-dev/react-arsenal/compare/v1.2.0...v1.3.0) (2026-08-14)
 
 

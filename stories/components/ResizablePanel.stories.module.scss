@@ -1,0 +1,66 @@
+.group {
+    height: 320px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-small);
+}
+
+// A nested group is a plain element, so it needs a size on the cross axis like
+// any other child of a panel.
+.nestedGroup {
+    height: 100%;
+}
+
+.content {
+    padding: 12px;
+    font-size: var(--font-size-normal);
+    color: var(--color-text);
+    overflow: auto;
+    height: 100%;
+}
+
+.label {
+    font-size: var(--font-size-small);
+    color: var(--color-text-light);
+    display: block;
+    margin-bottom: 4px;
+}
+
+// Every size below comes from css alone. The group reads whatever these resolve to.
+
+.sidebar {
+    flex: 0 0 clamp(160px, 20%, 320px);
+    min-width: 120px;
+    max-width: 380px;
+    background-color: var(--color-background-alt);
+}
+
+.main {
+    flex: 1;
+    min-width: 25ch;
+}
+
+.inspector {
+    flex: 0 0 calc(20% + 40px);
+    min-width: 180px;
+    max-width: 50%;
+    background-color: var(--color-background-alt);
+}
+
+.fixed {
+    // Equal bounds make the panel unresizable. Its neighbours slide it around.
+    flex: 0 0 88px;
+    min-width: 88px;
+    max-width: 88px;
+    background-color: var(--color-cards);
+    text-align: center;
+}
+
+.top {
+    flex: 0 0 30%;
+    min-height: 48px;
+}
+
+.bottom {
+    flex: 1;
+    min-height: 80px;
+}

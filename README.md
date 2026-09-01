@@ -10,7 +10,7 @@ npm install @nepware/react-arsenal
 pnpm add @nepware/react-arsenal
 ```
 
-Peer dependencies: `react >=18`, `react-dom >=18`, and optionally `react-router-dom ^5`.
+Peer dependencies: `react >=19`, `react-dom >=19`, and optionally `react-router-dom ^5`.
 
 ## Usage
 

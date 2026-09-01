@@ -1,0 +1,93 @@
+.group {
+    display: flex;
+    overflow: hidden;
+
+    &.horizontal {
+        flex-direction: row;
+    }
+
+    &.vertical {
+        flex-direction: column;
+    }
+}
+
+.groupResizing {
+    user-select: none;
+
+    &.horizontal {
+        cursor: col-resize;
+    }
+
+    &.vertical {
+        cursor: row-resize;
+    }
+}
+
+.panel {
+    // Being a scroll container drops the automatic minimum size to zero, which is
+    // what lets a panel shrink past its content.
+    overflow: hidden;
+    // Sizes are measured as border boxes and written back as flex-basis, so the two
+    // only agree while the panel is border-box.
+    box-sizing: border-box;
+}
+
+.resizer {
+    position: relative;
+    flex: 0 0 var(--ra-resizer-size, 4px);
+    touch-action: none;
+    outline-color: var(--color-primary);
+    outline-offset: -1px;
+
+    &::after {
+        content: '';
+        position: absolute;
+        background-color: var(--color-border);
+        transition: background-color 0.15s ease;
+    }
+
+    // Hit area, on the resizer rather than the panels so their overflow cannot clip it.
+    &::before {
+        content: '';
+        position: absolute;
+        z-index: 1;
+    }
+
+    &:hover::after,
+    &:focus-visible::after,
+    &.resizing::after {
+        background-color: var(--color-primary);
+    }
+}
+
+.horizontal > .resizer {
+    cursor: col-resize;
+
+    &::after {
+        inset-block: 0;
+        left: 50%;
+        width: 1px;
+        transform: translateX(-50%);
+    }
+
+    &::before {
+        inset-block: 0;
+        inset-inline: calc(-1 * var(--ra-resizer-hit-area, 3px));
+    }
+}
+
+.vertical > .resizer {
+    cursor: row-resize;
+
+    &::after {
+        inset-inline: 0;
+        top: 50%;
+        height: 1px;
+        transform: translateY(-50%);
+    }
+
+    &::before {
+        inset-inline: 0;
+        inset-block: calc(-1 * var(--ra-resizer-hit-area, 3px));
+    }
+}

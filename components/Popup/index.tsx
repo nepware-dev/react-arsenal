@@ -3,6 +3,7 @@ import FocusLock from 'react-focus-lock';
 
 import styles from './styles.module.scss';
 import PopupNestingContext, { type PopupContainsNode, type PopupNestingContextValue } from './PopupNestingContext';
+import { preserveFocusOnPress } from './preserveFocus';
 import type { PopupProps } from './types';
 import {
     getClosestOverflowAncestor,
@@ -219,7 +220,12 @@ function Popup<T extends HTMLElement | null>(props: PopupProps<T>) {
                 <FocusShardContext.Provider value={focusShardRegistry}>
                     <FocusLock disabled={disableFocusLock} returnFocus shards={focusShards}>
                         {wrapperStyle && (
-                            <div ref={handleWrapperRef} className={className} style={wrapperStyle}>
+                            <div
+                                ref={handleWrapperRef}
+                                className={className}
+                                style={wrapperStyle}
+                                onMouseDown={preserveFocusOnPress}
+                            >
                                 {children}
                             </div>
                         )}

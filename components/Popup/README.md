@@ -49,6 +49,13 @@ focused, which reads as focus jumping out of the popup for no visible reason.
 traps. That happens automatically and covers nested popups too, whether or not the
 popup owns a trap of its own via `disableFocusLock`.
 
+A press on popup content that cannot take focus is also stopped from moving focus at
+all, since focus would otherwise land on `document.body` and an enclosing trap would
+reclaim it. Controls, draggable items and native scrollbars keep their own behaviour.
+The cost is that such content cannot be drag-selected, so mark anything meant to be
+selectable with `data-selectable` to opt it out, accepting that pressing it drops
+focus.
+
 Anything else that portals content out of a `Modal` needs the same treatment: use
 `useFocusShard` from `hooks/useFocusShards` to register the portalled node, and
 `useFocusShardHost` when the component owns a trap that portalled descendants

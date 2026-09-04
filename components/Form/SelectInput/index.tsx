@@ -255,9 +255,6 @@ function Select<T, V extends ReactNode>(props: SelectInputProps<T, V>) {
 
             hideOption();
 
-            inputRef.current?.blur();
-            wrapperRef.current?.blur();
-
             handleChangeCallback({ name, option: item });
         },
         [name, handleChangeCallback, hideOption],

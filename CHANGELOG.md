@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/nepware-dev/react-arsenal/compare/v1.4.0...v1.4.1) (2026-09-04)
+
+
+### Bug Fixes
+
+* **popup:** keep focus in place when non-focusable popup content is pressed ([35cb2d5](https://github.com/nepware-dev/react-arsenal/commit/35cb2d5d29610c63b2af641f00680a83ceaca191))
+
 # [1.4.0](https://github.com/nepware-dev/react-arsenal/compare/v1.3.0...v1.4.0) (2026-08-31)
 
 
